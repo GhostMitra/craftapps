@@ -1,29 +1,36 @@
-# CraftApps Studio 🎨⚡
+# CraftOS &mdash; Web Desktop Studio 🖥️🎨
 
-> **A high-performance, open-source creative and productivity suite powered by Rust and WebAssembly, unified under a single web portal and hosted on Firebase.**
+> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 12 applications in floating resizable windows on Firebase.**
 
 ![Rust](https://img.shields.io/badge/Language-Rust-dea584?style=flat-square&logo=rust&logoColor=white)
 ![WebAssembly](https://img.shields.io/badge/Technology-WebAssembly-654ff0?style=flat-square&logo=webassembly&logoColor=white)
 ![Firebase Hosting](https://img.shields.io/badge/Hosting-Firebase-ffca28?style=flat-square&logo=firebase&logoColor=black)
+![Desktop Environment](https://img.shields.io/badge/UI-Web%20Desktop%20OS-38bdf8?style=flat-square)
 ![Privacy](https://img.shields.io/badge/Privacy-100%25%20Client--Side-10b981?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT%20%2F%20Apache--2.0-3b82f6?style=flat-square)
 
 ---
 
 ## 🌟 Overview
 
-**CraftApps Studio** brings desktop-grade creative and office software directly into your web browser without installation, accounts, or telemetry. Every application is compiled from pure Rust into WebAssembly, running client-side with native-level performance and hardware acceleration (WebGPU / WebGL).
+**CraftOS** turns your web browser into a full-featured desktop environment with floating, draggable, and resizable application windows, a frosted-glass taskbar/dock, desktop icons, live system tray, and an application launcher.
 
-This repository features:
-- **An In-Portal On-Demand App Launcher:** Launch and run any application right inside the portal workspace.
-- **Strictly On-Demand Lazy Loading:** No heavy WASM binaries (12–56 MB) are loaded at page visit; each app is only fetched when requested.
-- **Active App Tab Switcher & Memory Release:** Run multiple apps side-by-side, switch tabs, and cleanly unload apps to reclaim browser memory.
-- **Dedicated Sub-Routing:** Access applications via in-portal routes (`/#/photocraft`) or standalone endpoints (`/photocraft/`).
-- **Firebase Hosting Integration:** Configured with trailing-slash normalization and WebAssembly headers for one-command deployment.
+Every creative application runs client-side with native-level performance and hardware acceleration (WebGPU / WebGL), compiled directly from pure Rust into WebAssembly.
 
 ---
 
-## 🚀 The CraftApps Suite
+## 🖥️ Desktop Features & Window Management
+
+- **Multi-Window Desktop:** Run multiple applications side-by-side in floating, resizable windows.
+- **Window Controls (Traffic Lights):**
+  - 🔴 **Close (✕):** Completely unmounts the application from the DOM, instantly terminating the WebAssembly instance and freeing browser RAM and GPU memory.
+  - 🟡 **Minimize (−):** Minimizes the application down to the taskbar.
+  - 🟢 **Maximize (⤢):** Expands the application to occupy the full desktop screen.
+- **Frosted-Glass Taskbar / Dock:**
+  - **Start Menu ("CraftOS"):** Search and launch any of the 12 applications with keyboard navigation.
+  - **Task Switcher:** Click running taskbar pills to focus, restore, or minimize windows.
+  - **System Tray:** Live digital clock, active memory/process monitor, wallpaper switcher, and desktop fullscreen toggle.
+- **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
+- **Desktop Personalization:** 4 built-in wallpapers (Deep Nebula, Midnight Aurora, Cyber Grid, Minimal Dark) and right-click desktop context menu.
 
 | Application | Sub-Route | Category | Equivalent Software | Core Capabilities |
 | :--- | :--- | :--- | :--- | :--- |

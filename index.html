@@ -3,778 +3,377 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>CraftApps Studio — WebAssembly Creative Suite</title>
-  <meta name="description" content="Unified launcher and web portal for 12 professional Rust & WebAssembly creative tools. Load and run on-demand directly in your browser.">
+  <title>CraftOS — WebAssembly Desktop Studio</title>
+  <meta name="description" content="A full-featured web desktop environment hosting 12 professional Rust and WebAssembly creative applications.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><path d='M8 16l6-6 10 10-6 6z' fill='white' opacity='0.9'/><circle cx='11' cy='21' r='3' fill='%2338bdf8'/></svg>">
   <style>
     :root {
-      --bg: #090a0f;
-      --bg-surface: #11141c;
-      --bg-surface-elevated: #181d2a;
-      --bg-card: rgba(19, 24, 35, 0.82);
-      --bg-card-hover: rgba(28, 35, 52, 0.95);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-hover: rgba(255, 255, 255, 0.22);
-      --text: #f1f5f9;
+      --taskbar-h: 52px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --glass-bg: rgba(18, 22, 34, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text: #f8fafc;
       --text-muted: #94a3b8;
       --text-subtle: #64748b;
-      --accent: #6366f1;
-      --accent-glow: rgba(99, 102, 241, 0.35);
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      --win-bg: #141722;
+      --win-header-bg: #1a1f2e;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      user-select: none;
     }
 
     html, body {
-      height: 100%;
       width: 100%;
-      background-color: var(--bg);
-      color: var(--text);
+      height: 100%;
+      overflow: hidden;
       font-family: var(--font);
-      overflow-x: hidden;
-    }
-
-    /* Ambient background grid */
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      background-size: 44px 44px;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      pointer-events: none;
-      z-index: 0;
+      color: var(--text);
+      background-color: #0b0d14;
     }
 
     /* ========================================================
-       PORTAL / HUB VIEW
+       DESKTOP ENVIRONMENT WORKSPACE
        ======================================================== */
-    #hubView {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      z-index: 1;
-      background-image: 
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.16), transparent),
-        radial-gradient(ellipse 60% 40% at 85% 65%, rgba(56, 189, 248, 0.07), transparent);
-    }
-
-    .container {
-      max-width: 1380px;
-      margin: 0 auto;
-      padding: 0 24px;
-      width: 100%;
-    }
-
-    header {
-      padding: 20px 0;
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(9, 10, 15, 0.88);
-    }
-
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px var(--accent-glow);
-    }
-
-    .brand-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-title span {
-      background: linear-gradient(90deg, #6366f1, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .active-badge-link {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      border-radius: 100px;
-      color: #c7d2fe;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .active-badge-link:hover {
-      background: rgba(99, 102, 241, 0.25);
-    }
-
-    .active-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      animation: pulse-dot 2s infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    .search-box {
-      position: relative;
-      width: 270px;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 9px 36px 9px 14px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      font-size: 0.9rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .search-kbd {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--bg-surface-elevated);
-      color: var(--text-subtle);
-      border: 1px solid var(--border);
-      pointer-events: none;
-    }
-
-    /* Hero */
-    .hero {
-      padding: 56px 0 32px;
-      text-align: center;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 100px;
-      font-size: 0.85rem;
-      color: #a5b4fc;
-      margin-bottom: 20px;
-    }
-
-    .hero-badge-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #38bdf8;
-      box-shadow: 0 0 8px #38bdf8;
-    }
-
-    .hero h1 {
-      font-size: clamp(2.1rem, 4.8vw, 3.5rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 16px;
-    }
-
-    .hero h1 .gradient-text {
-      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      max-width: 680px;
-      margin: 0 auto 30px;
-      color: var(--text-muted);
-      font-size: 1.12rem;
-      line-height: 1.6;
-    }
-
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      margin-bottom: 38px;
-      flex-wrap: wrap;
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.88rem;
-      color: var(--text-subtle);
-    }
-
-    .stat-item svg {
-      width: 17px;
-      height: 17px;
-      color: #38bdf8;
-    }
-
-    /* Filters */
-    .filter-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 36px;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      padding: 8px 16px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .filter-btn:hover {
-      background: var(--bg-surface-elevated);
-      color: var(--text);
-    }
-
-    .filter-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: 0 2px 10px var(--accent-glow);
-    }
-
-    /* App Grid */
-    .app-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 24px;
-      margin-bottom: 50px;
-    }
-
-    .app-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      backdrop-filter: blur(8px);
-    }
-
-    .app-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-hover);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
-    }
-
-    .app-card::before {
-      content: '';
+    #desktop {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 3px;
-      background: var(--card-accent, var(--accent));
-      opacity: 0.8;
-      transition: opacity 0.2s;
+      bottom: var(--taskbar-h);
+      overflow: hidden;
+      transition: background 0.4s ease;
     }
 
-    .app-card:hover::before {
-      opacity: 1;
-      box-shadow: 0 0 12px var(--card-accent, var(--accent));
+    /* Wallpapers */
+    .wallpaper-nebula {
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.28) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(244, 63, 94, 0.22) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(56, 189, 248, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #090a10 0%, #111422 50%, #0d0f18 100%);
     }
 
-    .card-header {
+    .wallpaper-aurora {
+      background: 
+        radial-gradient(circle at 80% 15%, rgba(16, 185, 129, 0.25) 0%, transparent 50%),
+        radial-gradient(circle at 20% 70%, rgba(14, 165, 233, 0.25) 0%, transparent 45%),
+        linear-gradient(180deg, #05131a 0%, #061c24 50%, #020b0e 100%);
+    }
+
+    .wallpaper-cyber {
+      background: 
+        linear-gradient(rgba(147, 51, 234, 0.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(147, 51, 234, 0.18) 1px, transparent 1px),
+        linear-gradient(135deg, #0f051d 0%, #1a0833 60%, #08020f 100%);
+      background-size: 40px 40px, 40px 40px, auto;
+    }
+
+    .wallpaper-minimal {
+      background: 
+        radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+        linear-gradient(180deg, #121316 0%, #1a1b1f 100%);
+    }
+
+    /* Ambient Desktop Grid Mesh */
+    .desktop-grid-mesh {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    /* Desktop Icons Grid */
+    .desktop-icons {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      bottom: 20px;
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-rows: repeat(auto-fill, 104px);
+      gap: 16px 20px;
+      z-index: 10;
+      pointer-events: auto;
+    }
+
+    .desk-icon {
+      width: 86px;
+      height: 96px;
       display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 14px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-align: center;
     }
 
-    .card-icon-wrap {
-      width: 50px;
-      height: 50px;
-      border-radius: var(--radius-sm);
+    .desk-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+    }
+
+    .desk-icon.selected {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+
+    .desk-icon-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      flex-shrink: 0;
-      color: var(--card-accent, #6366f1);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      margin-bottom: 6px;
+      color: var(--icon-accent, #6366f1);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .card-meta {
-      flex: 1;
-      min-width: 0;
+    .desk-icon:hover .desk-icon-img {
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
     }
 
-    .card-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .card-alt-badge {
-      font-size: 0.72rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-muted);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+    .desk-icon-label {
+      font-size: 0.76rem;
+      font-weight: 500;
+      color: #f1f5f9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      line-height: 1.2;
+      max-width: 82px;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .card-tagline {
-      font-size: 0.85rem;
-      color: var(--card-accent, #38bdf8);
-      font-weight: 500;
-      margin-top: 2px;
-    }
-
-    .card-desc {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-      line-height: 1.5;
-      margin-bottom: 18px;
-      flex: 1;
-    }
-
-    .card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 20px;
-    }
-
-    .tag-pill {
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      background: var(--bg-surface);
-      color: var(--text-subtle);
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: auto;
-    }
-
-    .btn-launch-here {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 16px;
-      background: var(--card-accent, var(--accent));
-      color: #fff;
-      border: none;
-      font-size: 0.92rem;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-
-    .btn-launch-here:hover {
-      filter: brightness(1.15);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    }
-
-    .btn-launch-here svg {
-      transition: transform 0.2s ease;
-    }
-
-    .btn-launch-here:hover svg {
-      transform: translateX(3px);
-    }
-
-    .btn-icon-ext {
-      width: 40px;
-      height: 40px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text-muted);
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-    }
-
-    .btn-icon-ext:hover {
-      background: var(--bg-surface-elevated);
-      color: var(--text);
-      border-color: var(--border-hover);
-    }
-
-    /* Router Banner */
-    .router-info-banner {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(56, 189, 248, 0.04) 100%);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: var(--radius-md);
-      padding: 24px;
-      margin-bottom: 50px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .banner-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
+    /* Desktop Marquee Selection Box */
+    .selection-marquee {
+      position: absolute;
       background: rgba(99, 102, 241, 0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #a5b4fc;
-      flex-shrink: 0;
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      pointer-events: none;
+      z-index: 9;
+      display: none;
     }
 
-    .banner-text {
-      flex: 1;
-      min-width: 260px;
-    }
-
-    .banner-text h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .banner-text p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    .routes-list {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .route-pill-link {
-      font-family: monospace;
-      font-size: 0.78rem;
-      padding: 3px 9px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      color: #38bdf8;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .route-pill-link:hover {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: #38bdf8;
-    }
-
-    footer {
-      margin-top: auto;
-      border-top: 1px solid var(--border);
-      padding: 28px 0;
-      color: var(--text-subtle);
-      font-size: 0.88rem;
-      background: rgba(9, 10, 15, 0.9);
-    }
-
-    .footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-
-    /* ========================================================
-       WORKSPACE / IN-PORTAL APP LAUNCHER VIEW
-       ======================================================== */
-    #workspaceView {
+    /* Global Drag Shield to keep iframe events responsive */
+    #pointerShield {
       display: none;
       position: fixed;
       inset: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #0d0e12;
-      z-index: 100;
-      flex-direction: column;
-      overflow: hidden;
+      z-index: 99999;
+      cursor: grabbing;
+    }
+    body.resizing #pointerShield, body.dragging #pointerShield {
+      display: block;
     }
 
-    /* Workspace Top Control Header */
-    .workspace-header {
-      height: 48px;
-      background: #141721;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* ========================================================
+       WINDOW MANAGEMENT SYSTEM
+       ======================================================== */
+    .app-window {
+      position: absolute;
+      background: var(--win-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 4px 16px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 380px;
+      min-height: 280px;
+      z-index: 20;
+      transition: box-shadow 0.2s ease, opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .app-window.focused {
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(99, 102, 241, 0.35);
+    }
+
+    .app-window.minimized {
+      display: none !important;
+    }
+
+    .app-window.maximized {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 0 !important;
+      border: none !important;
+    }
+
+    /* Window Titlebar */
+    .window-titlebar {
+      height: 38px;
+      background: var(--win-header-bg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 12px;
-      user-select: none;
-      z-index: 10;
-      gap: 12px;
-    }
-
-    .workspace-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .btn-back-hub {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      color: #e2e8f0;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .btn-back-hub:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-    }
-
-    /* Active App Tabs */
-    .workspace-tabs {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .workspace-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .app-tab {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      position: relative;
-    }
-
-    .app-tab:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-    }
-
-    .app-tab.active {
-      background: #1f2537;
-      border-color: rgba(99, 102, 241, 0.5);
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .app-tab-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--tab-accent, #6366f1);
-    }
-
-    .app-tab-close {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      line-height: 1;
-      color: var(--text-subtle);
-      transition: all 0.15s;
-    }
-
-    .app-tab-close:hover {
-      background: rgba(239, 68, 68, 0.25);
-      color: #ef4444;
-    }
-
-    .workspace-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      cursor: grab;
       flex-shrink: 0;
     }
 
-    .ws-action-btn {
-      padding: 6px 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
+    .app-window.focused .window-titlebar {
+      background: #1e2436;
     }
 
-    .ws-action-btn:hover {
+    .window-titlebar:active {
+      cursor: grabbing;
+    }
+
+    /* Window Traffic Lights */
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .win-btn {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: rgba(0, 0, 0, 0.6);
+      transition: transform 0.1s ease, filter 0.1s ease;
+    }
+
+    .win-btn svg {
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .window-controls:hover .win-btn svg {
+      opacity: 1;
+    }
+
+    .win-btn-close {
+      background: #ef4444;
+      border: 1px solid #dc2626;
+    }
+    .win-btn-close:hover {
+      filter: brightness(1.15);
+    }
+
+    .win-btn-minimize {
+      background: #f59e0b;
+      border: 1px solid #d97706;
+    }
+    .win-btn-minimize:hover {
+      filter: brightness(1.15);
+    }
+
+    .win-btn-maximize {
+      background: #10b981;
+      border: 1px solid #059669;
+    }
+    .win-btn-maximize:hover {
+      filter: brightness(1.15);
+    }
+
+    /* Title Info */
+    .window-title {
+      position: absolute;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      pointer-events: none;
+    }
+
+    .window-title svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .window-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .win-action-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .win-action-icon:hover {
       background: rgba(255, 255, 255, 0.1);
       color: #fff;
     }
 
-    .btn-unload-danger {
-      color: #f87171;
-      border-color: rgba(239, 68, 68, 0.2);
-    }
-
-    .btn-unload-danger:hover {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-    }
-
-    /* Iframe Container */
-    .workspace-viewport {
+    /* Window Body / Iframe */
+    .window-body {
       flex: 1;
-      width: 100%;
-      height: calc(100vh - 48px);
       position: relative;
-      background: #18191c;
+      background: #141722;
       overflow: hidden;
     }
 
-    .app-iframe {
+    .window-iframe {
       width: 100%;
       height: 100%;
       border: none;
-      display: none;
+      display: block;
       background: #18191c;
     }
 
-    .app-iframe.active {
-      display: block;
-    }
-
-    /* On-demand loading overlay */
-    .loading-overlay {
+    /* Loading state inside window */
+    .window-loader {
       position: absolute;
       inset: 0;
-      background: #11141c;
+      background: #131622;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      z-index: 20;
-      transition: opacity 0.3s ease;
+      gap: 14px;
+      z-index: 5;
+      transition: opacity 0.3s;
     }
 
-    .loading-spinner {
-      width: 44px;
-      height: 44px;
+    .window-spinner {
+      width: 38px;
+      height: 38px;
       border: 3px solid rgba(99, 102, 241, 0.2);
       border-top-color: #6366f1;
       border-radius: 50%;
@@ -785,972 +384,1077 @@
       to { transform: rotate(360deg); }
     }
 
-    .loading-title {
-      font-size: 1.15rem;
-      font-weight: 700;
+    .window-loader-text {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .window-loader-badge {
+      font-size: 0.74rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+
+    /* Resizer Handles */
+    .resizer {
+      position: absolute;
+      z-index: 10;
+    }
+    .resizer.r { right: 0; top: 0; bottom: 0; width: 6px; cursor: e-resize; }
+    .resizer.b { bottom: 0; left: 0; right: 0; height: 6px; cursor: s-resize; }
+    .resizer.br { right: 0; bottom: 0; width: 14px; height: 14px; cursor: se-resize; }
+    .resizer.l { left: 0; top: 0; bottom: 0; width: 6px; cursor: w-resize; }
+    .resizer.t { top: 0; left: 0; right: 0; height: 6px; cursor: n-resize; }
+
+    /* ========================================================
+       TASKBAR / DOCK
+       ======================================================== */
+    #taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--taskbar-h);
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      z-index: 9999;
+    }
+
+    /* Start / Menu Button */
+    .start-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .start-btn:hover, .start-btn.active {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: rgba(99, 102, 241, 0.55);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .start-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Running Apps Dock in Taskbar */
+    .taskbar-center {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      padding: 0 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .taskbar-center::-webkit-scrollbar {
+      display: none;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .task-item:hover {
+      background: rgba(255, 255, 255, 0.1);
       color: #fff;
     }
 
-    .loading-desc {
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      max-width: 420px;
-      text-align: center;
-      line-height: 1.5;
+    .task-item.active {
+      background: rgba(99, 102, 241, 0.22);
+      border-color: rgba(99, 102, 241, 0.45);
+      color: #fff;
+      font-weight: 600;
     }
 
-    .loading-pulse-badge {
-      display: inline-flex;
+    .task-item::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 3px;
+      background: var(--task-accent, #6366f1);
+      border-radius: 2px;
+    }
+
+    /* System Tray */
+    .system-tray {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .tray-pill {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.78rem;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.1);
-      padding: 4px 10px;
-      border-radius: 100px;
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      cursor: pointer;
+      transition: all 0.15s;
     }
 
-    @media (max-width: 768px) {
-      .app-grid {
-        grid-template-columns: 1fr;
-      }
-      .search-box {
-        width: 100%;
-      }
-      .header-inner {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .workspace-header {
-        height: auto;
-        padding: 8px;
-        flex-wrap: wrap;
-      }
-      .workspace-tabs {
-        width: 100%;
-        order: 3;
-        padding-top: 4px;
-      }
+    .tray-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .clock-display {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      letter-spacing: 0.02em;
+      text-align: right;
+      cursor: default;
+    }
+
+    /* ========================================================
+       START MENU / LAUNCHPAD FLYOUT
+       ======================================================== */
+    #startMenu {
+      display: none;
+      position: absolute;
+      bottom: calc(var(--taskbar-h) + 10px);
+      left: 12px;
+      width: 540px;
+      max-height: 560px;
+      background: rgba(18, 22, 34, 0.94);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+      z-index: 10000;
+      flex-direction: column;
+      overflow: hidden;
+      animation: flyout 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes flyout {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .start-search-wrap {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .start-search-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    .start-search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .start-apps-grid {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      overflow-y: auto;
+      max-height: 420px;
+    }
+
+    .start-app-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .start-app-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .start-app-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+      color: var(--icon-accent, #6366f1);
+    }
+
+    .start-app-meta h4 {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .start-app-meta p {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .start-footer {
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+    }
+
+    /* Context Menu */
+    #contextMenu {
+      display: none;
+      position: fixed;
+      background: rgba(22, 27, 40, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 190px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      z-index: 10001;
+    }
+
+    .ctx-item {
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+
+    .ctx-item:hover {
+      background: rgba(99, 102, 241, 0.3);
+      color: #fff;
+    }
+
+    .ctx-sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 4px 0;
     }
   </style>
 </head>
 <body>
-  <div class="bg-grid"></div>
+
+  <!-- Pointer Shield for butter-smooth window dragging & resizing over iframes -->
+  <div id="pointerShield"></div>
 
   <!-- ========================================================
-       1. PORTAL HUB VIEW
+       DESKTOP WORKSPACE
        ======================================================== -->
-  <div id="hubView">
-    <header>
-      <div class="container header-inner">
-        <div class="brand" onclick="switchView('hub')">
-          <div class="brand-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-              <polyline points="2 17 12 22 22 17"></polyline>
-              <polyline points="2 12 12 17 22 12"></polyline>
-            </svg>
-          </div>
-          <div class="brand-title">
-            CraftApps <span>Studio</span>
-          </div>
-        </div>
+  <div id="desktop" class="wallpaper-nebula">
+    <div class="desktop-grid-mesh"></div>
 
-        <div class="header-actions">
-          <button id="resumeActiveBtn" class="active-badge-link" onclick="switchView('workspace')">
-            <span class="active-dot"></span>
-            <span id="activeAppCount">1 App Running</span>
-          </button>
+    <!-- Selection Marquee Box -->
+    <div id="selectionMarquee" class="selection-marquee"></div>
 
-          <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search apps... (photo, cad, excel)">
-            <span class="search-kbd">/</span>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <main class="container">
-      <!-- Hero -->
-      <section class="hero">
-        <div class="hero-badge">
-          <span class="hero-badge-dot"></span>
-          Pure Rust &bull; WebAssembly &bull; On-Demand Lazy Execution
-        </div>
-        <h1>
-          <span class="gradient-text">All Your Creative Tools.</span><br>
-          Run Directly In One Portal.
-        </h1>
-        <p>
-          Desktop-grade creative tools compiled to WebAssembly. 
-          Applications are loaded <strong>strictly on-demand when launched</strong>, keeping your browser fast and memory light.
-        </p>
-
-        <div class="stats-bar">
-          <div class="stat-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            <span>12 Desktop-Grade Apps</span>
-          </div>
-          <div class="stat-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
-            <span>On-Demand Lazy Loading (0 MB idle)</span>
-          </div>
-          <div class="stat-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>100% Client-Side Private</span>
-          </div>
-          <div class="stat-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span>WebGPU / WebGL Accelerated</span>
-          </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="filter-bar" id="filterBar">
-          <button class="filter-btn active" data-category="all">All Apps (12)</button>
-          <button class="filter-btn" data-category="design">Design & Graphics (3)</button>
-          <button class="filter-btn" data-category="video-audio">Video & Audio (3)</button>
-          <button class="filter-btn" data-category="productivity">Documents & Office (5)</button>
-          <button class="filter-btn" data-category="engineering">3D & Engineering (1)</button>
-        </div>
-      </section>
-
-      <!-- App Grid -->
-      <section class="app-grid" id="appGrid">
-        <!-- 1. PhotoCraft -->
-        <article class="app-card" data-category="design" data-name="photocraft" data-keywords="photo photocraft image raster editor photoshop layers webgl webgpu" style="--card-accent: #38bdf8;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">PhotoCraft</h2>
-                <span class="card-alt-badge">Photoshop Alt</span>
-              </div>
-              <div class="card-tagline">Image Editing & Retouching</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Layered raster image editor with blend modes, adjustments, masks, and GPU-accelerated canvas processing in pure Rust.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Layers & Masks</span>
-            <span class="tag-pill">Blend Modes</span>
-            <span class="tag-pill">WebGL / WebGPU</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('photocraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/photocraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open PhotoCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 2. VectorCraft -->
-        <article class="app-card" data-category="design" data-name="vectorcraft" data-keywords="vector vectorcraft illustration svg bezier pen illustrator curves" style="--card-accent: #fb923c;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">VectorCraft</h2>
-                <span class="card-alt-badge">Illustrator Alt</span>
-              </div>
-              <div class="card-tagline">Vector Illustration & Design</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Precision vector graphics creation featuring Bézier curve tools, boolean path operations, high-fidelity typography, and SVG export.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Bézier Paths</span>
-            <span class="tag-pill">Boolean Ops</span>
-            <span class="tag-pill">SVG Vector</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('vectorcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/vectorcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open VectorCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 3. CADCraft -->
-        <article class="app-card" data-category="engineering" data-name="cadcraft" data-keywords="cad cadcraft autocad 2d 3d drafting engineering dxf snaps architecture" style="--card-accent: #ef4444;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">CADCraft</h2>
-                <span class="card-alt-badge">AutoCAD Alt</span>
-              </div>
-              <div class="card-tagline">2D & 3D Drafting & CAD</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            AutoCAD drafting workflow in pure Rust: interactive command line, object snaps, layers, dimensions, hatches, and DXF drawings.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">CLI & Snaps</span>
-            <span class="tag-pill">DXF Drawings</span>
-            <span class="tag-pill">Layer Engine</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('cadcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/cadcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open CADCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 4. DesignCraft -->
-        <article class="app-card" data-category="design" data-name="designcraft" data-keywords="design designcraft indesign publishing layout magazine typography print" style="--card-accent: #f43f5e;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">DesignCraft</h2>
-                <span class="card-alt-badge">InDesign Alt</span>
-              </div>
-              <div class="card-tagline">Page Layout & Publishing</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Desktop publishing with multi-page spreads, master page templating, linked text frames, advanced micro-typography, and prepress tools.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Multi-page Spreads</span>
-            <span class="tag-pill">Linked Frames</span>
-            <span class="tag-pill">Master Pages</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('designcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/designcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open DesignCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 5. FilmCraft -->
-        <article class="app-card" data-category="video-audio" data-name="filmcraft" data-keywords="film filmcraft video premiere pro timeline cuts clips color grading" style="--card-accent: #a78bfa;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-6 4 6 4V7z"/><line x1="6" y1="4" x2="6" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">FilmCraft</h2>
-                <span class="card-alt-badge">Premiere Pro Alt</span>
-              </div>
-              <div class="card-tagline">Non-Linear Video Editing</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Multi-track video editor with timeline scrubbing, clip cutting, transitions, color grading, and smooth frame-accurate playback.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Multi-track Timeline</span>
-            <span class="tag-pill">Color Grading</span>
-            <span class="tag-pill">Audio Sync</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('filmcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/filmcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open FilmCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 6. EffectCraft -->
-        <article class="app-card" data-category="video-audio" data-name="effectcraft" data-keywords="effect effectcraft after effects vfx motion graphics keyframes animation particles" style="--card-accent: #818cf8;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">EffectCraft</h2>
-                <span class="card-alt-badge">After Effects Alt</span>
-              </div>
-              <div class="card-tagline">Motion Graphics & Visual Effects</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Visual effects compositing, keyframe graph editors, procedural animations, audio worklets, and interactive layer effects.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Keyframing</span>
-            <span class="tag-pill">VFX Compositing</span>
-            <span class="tag-pill">Audio Worklet</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('effectcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/effectcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open EffectCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 7. SoundCraft -->
-        <article class="app-card" data-category="video-audio" data-name="soundcraft" data-keywords="sound soundcraft audio daw pro tools recording mixing waveform music" style="--card-accent: #2dd4bf;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 10v4"/><path d="M6 6v12"/><path d="M10 3v18"/><path d="M14 8v8"/><path d="M18 5v14"/><path d="M22 10v4"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">SoundCraft</h2>
-                <span class="card-alt-badge">Pro Tools Alt</span>
-              </div>
-              <div class="card-tagline">Digital Audio Workstation (DAW)</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Multi-track audio recording, waveform editing, mixing console, transport controls, and ultra-low latency WebAudio DSP audio processing.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Multi-track DAW</span>
-            <span class="tag-pill">Waveform Editing</span>
-            <span class="tag-pill">WebAudio DSP</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('soundcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/soundcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open SoundCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 8. LightCraft -->
-        <article class="app-card" data-category="design" data-name="lightcraft" data-keywords="light lightcraft lightroom raw photo develop catalog exposure" style="--card-accent: #06b6d4;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">LightCraft</h2>
-                <span class="card-alt-badge">Lightroom Alt</span>
-              </div>
-              <div class="card-tagline">Photo Catalog & RAW Development</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Non-destructive RAW photo development, color tone grading, exposure curves, library management, and private browser OPFS storage.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">RAW Processing</span>
-            <span class="tag-pill">Tone Curves</span>
-            <span class="tag-pill">OPFS Storage</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('lightcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/lightcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open LightCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 9. PdfCraft -->
-        <article class="app-card" data-category="productivity" data-name="pdfcraft" data-keywords="pdf pdfcraft acrobat document annotate reader merge forms" style="--card-accent: #e11d48;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">PdfCraft</h2>
-                <span class="card-alt-badge">Acrobat Alt</span>
-              </div>
-              <div class="card-tagline">The PDF Workbench</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Inspect, annotate, reorganize, combine, split, fill forms, and redact PDF files without ever uploading sensitive documents to a server.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">PDF Annotate</span>
-            <span class="tag-pill">Page Reordering</span>
-            <span class="tag-pill">100% Private</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('pdfcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/pdfcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open PdfCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 10. DeckCraft -->
-        <article class="app-card" data-category="productivity" data-name="deckcraft" data-keywords="deck deckcraft presentation slides powerpoint keynote pitch" style="--card-accent: #f97316;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">DeckCraft</h2>
-                <span class="card-alt-badge">PowerPoint Alt</span>
-              </div>
-              <div class="card-tagline">Presentations & Slide Shows</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Author and present slide decks with rich vector formatting, smooth transitions, speaker notes, and instant slide exports.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Slide Decks</span>
-            <span class="tag-pill">Vector Elements</span>
-            <span class="tag-pill">Presenter Mode</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('deckcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/deckcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open DeckCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 11. GridCraft -->
-        <article class="app-card" data-category="productivity" data-name="gridcraft" data-keywords="grid gridcraft spreadsheet excel sheets formulas numbers data" style="--card-accent: #10b981;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">GridCraft</h2>
-                <span class="card-alt-badge">Excel Alt</span>
-              </div>
-              <div class="card-tagline">High-Performance Spreadsheets</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Calculation engine handling large data grids, rich formula evaluation, formatting, and analysis in pure compiled WebAssembly.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Formula Engine</span>
-            <span class="tag-pill">Large Grids</span>
-            <span class="tag-pill">Data Analysis</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('gridcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/gridcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open GridCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- 12. WordCraft -->
-        <article class="app-card" data-category="productivity" data-name="wordcraft" data-keywords="word wordcraft document docx writer editor docs typography text" style="--card-accent: #3b82f6;">
-          <div class="card-header">
-            <div class="card-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10M6 14h6"/>
-              </svg>
-            </div>
-            <div class="card-meta">
-              <div class="card-title-row">
-                <h2 class="card-title">WordCraft</h2>
-                <span class="card-alt-badge">Word Alt</span>
-              </div>
-              <div class="card-tagline">Writing & Document Design</div>
-            </div>
-          </div>
-          <p class="card-desc">
-            Structured document authoring with rich text formatting, typography styles, tables, citations, and distraction-free writing.
-          </p>
-          <div class="card-tags">
-            <span class="tag-pill">Document Authoring</span>
-            <span class="tag-pill">Styles & Typography</span>
-            <span class="tag-pill">Distraction-Free</span>
-          </div>
-          <div class="card-footer">
-            <button class="btn-launch-here" onclick="launchApp('wordcraft')">
-              Launch in Portal
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="/wordcraft/" target="_blank" rel="noopener" class="btn-icon-ext" title="Open WordCraft in standalone tab">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </article>
-      </section>
-
-      <!-- Routing Info -->
-      <section class="router-info-banner">
-        <div class="banner-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+    <!-- 12 Desktop Icons -->
+    <div class="desktop-icons" id="desktopIcons">
+      <!-- 1. PhotoCraft -->
+      <div class="desk-icon" data-app="photocraft" style="--icon-accent: #38bdf8;" title="PhotoCraft: Image Editor (Double-click to open)">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
           </svg>
         </div>
-        <div class="banner-text">
-          <h3>Firebase Hosting Sub-Routes</h3>
-          <p>
-            Launch directly inside this launcher, or access any application via its dedicated sub-route:
-          </p>
-          <div class="routes-list">
-            <a href="/photocraft/" class="route-pill-link">/photocraft/</a>
-            <a href="/vectorcraft/" class="route-pill-link">/vectorcraft/</a>
-            <a href="/cadcraft/" class="route-pill-link">/cadcraft/</a>
-            <a href="/designcraft/" class="route-pill-link">/designcraft/</a>
-            <a href="/filmcraft/" class="route-pill-link">/filmcraft/</a>
-            <a href="/effectcraft/" class="route-pill-link">/effectcraft/</a>
-            <a href="/soundcraft/" class="route-pill-link">/soundcraft/</a>
-            <a href="/lightcraft/" class="route-pill-link">/lightcraft/</a>
-            <a href="/pdfcraft/" class="route-pill-link">/pdfcraft/</a>
-            <a href="/deckcraft/" class="route-pill-link">/deckcraft/</a>
-            <a href="/gridcraft/" class="route-pill-link">/gridcraft/</a>
-            <a href="/wordcraft/" class="route-pill-link">/wordcraft/</a>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <div class="container footer-inner">
-        <div>CraftApps Studio &mdash; Open-source pure Rust &amp; WebAssembly creative suite.</div>
-        <div>Launch apps in-portal or via direct router.</div>
+        <span class="desk-icon-label">PhotoCraft</span>
       </div>
-    </footer>
+
+      <!-- 2. VectorCraft -->
+      <div class="desk-icon" data-app="vectorcraft" style="--icon-accent: #fb923c;" title="VectorCraft: Vector Illustration">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="11" cy="11" r="2"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">VectorCraft</span>
+      </div>
+
+      <!-- 3. CADCraft -->
+      <div class="desk-icon" data-app="cadcraft" style="--icon-accent: #ef4444;" title="CADCraft: 2D/3D CAD Drafting">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">CADCraft</span>
+      </div>
+
+      <!-- 4. DesignCraft -->
+      <div class="desk-icon" data-app="designcraft" style="--icon-accent: #f43f5e;" title="DesignCraft: Page Layout">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">DesignCraft</span>
+      </div>
+
+      <!-- 5. FilmCraft -->
+      <div class="desk-icon" data-app="filmcraft" style="--icon-accent: #a78bfa;" title="FilmCraft: Video Editor">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-6 4 6 4V7z"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">FilmCraft</span>
+      </div>
+
+      <!-- 6. EffectCraft -->
+      <div class="desk-icon" data-app="effectcraft" style="--icon-accent: #818cf8;" title="EffectCraft: Motion Graphics & VFX">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">EffectCraft</span>
+      </div>
+
+      <!-- 7. SoundCraft -->
+      <div class="desk-icon" data-app="soundcraft" style="--icon-accent: #2dd4bf;" title="SoundCraft: Audio Workstation (DAW)">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 10v4"/><path d="M6 6v12"/><path d="M10 3v18"/><path d="M14 8v8"/><path d="M18 5v14"/><path d="M22 10v4"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">SoundCraft</span>
+      </div>
+
+      <!-- 8. LightCraft -->
+      <div class="desk-icon" data-app="lightcraft" style="--icon-accent: #06b6d4;" title="LightCraft: Photo & RAW Development">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">LightCraft</span>
+      </div>
+
+      <!-- 9. PdfCraft -->
+      <div class="desk-icon" data-app="pdfcraft" style="--icon-accent: #e11d48;" title="PdfCraft: PDF Workbench">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">PdfCraft</span>
+      </div>
+
+      <!-- 10. DeckCraft -->
+      <div class="desk-icon" data-app="deckcraft" style="--icon-accent: #f97316;" title="DeckCraft: Slide Shows & Presentations">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">DeckCraft</span>
+      </div>
+
+      <!-- 11. GridCraft -->
+      <div class="desk-icon" data-app="gridcraft" style="--icon-accent: #10b981;" title="GridCraft: Spreadsheets & Data">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">GridCraft</span>
+      </div>
+
+      <!-- 12. WordCraft -->
+      <div class="desk-icon" data-app="wordcraft" style="--icon-accent: #3b82f6;" title="WordCraft: Document Authoring">
+        <div class="desk-icon-img">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10M6 14h6"/>
+          </svg>
+        </div>
+        <span class="desk-icon-label">WordCraft</span>
+      </div>
+    </div>
   </div>
 
 
   <!-- ========================================================
-       2. WORKSPACE / IN-PORTAL LAUNCHER VIEW
+       TASKBAR / DOCK
        ======================================================== -->
-  <div id="workspaceView">
-    <div class="workspace-header">
-      <div class="workspace-left">
-        <button class="btn-back-hub" onclick="switchView('hub')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          Portal Hub
-        </button>
-
-        <div class="workspace-tabs" id="workspaceTabs">
-          <!-- Active app tabs dynamically rendered here -->
-        </div>
+  <div id="taskbar">
+    <!-- Start Button -->
+    <button class="start-btn" id="startBtn">
+      <div class="start-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
       </div>
+      <span>CraftOS</span>
+    </button>
 
-      <div class="workspace-right">
-        <button class="ws-action-btn" id="reloadAppBtn" onclick="reloadCurrentApp()" title="Reload Active App">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Reload
-        </button>
-
-        <a href="#" id="openStandaloneBtn" target="_blank" rel="noopener" class="ws-action-btn" title="Open Active App in New Window">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Pop Out
-        </a>
-
-        <button class="ws-action-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-          Fullscreen
-        </button>
-
-        <button class="ws-action-btn btn-unload-danger" onclick="closeCurrentApp()" title="Unload this app from memory">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Close App
-        </button>
-      </div>
+    <!-- Center Active Running Tasks -->
+    <div class="taskbar-center" id="taskbarCenter">
+      <!-- Active app window pills appear here -->
     </div>
 
-    <!-- Active App Viewport -->
-    <div class="workspace-viewport" id="workspaceViewport">
-      <!-- Loading Overlay (shows during on-demand wasm load) -->
-      <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner"></div>
-        <div class="loading-title" id="loadingTitle">Starting Application...</div>
-        <div class="loading-pulse-badge">Lazy Loading WebAssembly Module</div>
-        <div class="loading-desc">
-          Fetching Rust/Wasm binaries directly into browser RAM. First launch may take a few seconds; subsequent boots are cached.
-        </div>
+    <!-- Right System Tray -->
+    <div class="system-tray">
+      <div class="tray-pill" id="ramTray" title="Active Applications (Click to close all & free RAM)">
+        <span id="ramDot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+        <span id="ramLabel">0 Running</span>
       </div>
 
-      <!-- Iframes for active apps are mounted dynamically here ON DEMAND only -->
+      <div class="tray-pill" id="wallpaperBtn" title="Switch Desktop Wallpaper">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+      </div>
+
+      <div class="tray-pill" id="fsBtn" title="Toggle Fullscreen Desktop">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </div>
+
+      <div class="clock-display" id="clockDisplay">
+        12:00 PM
+      </div>
     </div>
   </div>
 
 
   <!-- ========================================================
-       3. CLIENT JAVASCRIPT: ON-DEMAND LAUNCHER & ROUTER
+       START MENU FLYOUT
+       ======================================================== -->
+  <div id="startMenu">
+    <div class="start-search-wrap">
+      <input type="text" id="startSearchInput" class="start-search-input" placeholder="Type to search apps (photo, cad, doc, excel)...">
+    </div>
+
+    <div class="start-apps-grid" id="startAppsGrid">
+      <!-- Generated dynamically from APPS_META -->
+    </div>
+
+    <div class="start-footer">
+      <span>CraftOS v2.0 &bull; Pure Rust WebAssembly</span>
+      <span style="cursor: pointer; color: #38bdf8;" onclick="minimizeAllWindows()">Show Desktop</span>
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       CONTEXT MENU
+       ======================================================== -->
+  <div id="contextMenu">
+    <div class="ctx-item" onclick="openStartMenu()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+      App Launcher
+    </div>
+    <div class="ctx-item" onclick="cycleWallpaper()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+      Next Wallpaper
+    </div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item" onclick="minimizeAllWindows()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+      Show Desktop
+    </div>
+    <div class="ctx-item" onclick="closeAllWindows()" style="color: #f87171;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Close All (Free Memory)
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       DESKTOP LOGIC & WINDOW MANAGEMENT
        ======================================================== -->
   <script>
-    // Suite Metadata
+    // Suite App Metadata
     const APPS_META = {
-      photocraft:  { name: 'PhotoCraft',  accent: '#38bdf8', category: 'design',       desc: 'Image Editing & Retouching' },
-      vectorcraft: { name: 'VectorCraft', accent: '#fb923c', category: 'design',       desc: 'Vector Illustration & Design' },
-      cadcraft:    { name: 'CADCraft',    accent: '#ef4444', category: 'engineering',  desc: '2D/3D Drafting & CAD' },
-      designcraft: { name: 'DesignCraft', accent: '#f43f5e', category: 'design',       desc: 'Page Layout & Publishing' },
-      filmcraft:   { name: 'FilmCraft',   accent: '#a78bfa', category: 'video-audio',  desc: 'Non-Linear Video Editing' },
-      effectcraft: { name: 'EffectCraft', accent: '#818cf8', category: 'video-audio',  desc: 'Motion Graphics & VFX' },
-      soundcraft:  { name: 'SoundCraft',  accent: '#2dd4bf', category: 'video-audio',  desc: 'Digital Audio Workstation' },
-      lightcraft:  { name: 'LightCraft',  accent: '#06b6d4', category: 'design',       desc: 'Photo Catalog & RAW Dev' },
-      pdfcraft:    { name: 'PdfCraft',    accent: '#e11d48', category: 'productivity', desc: 'The PDF Workbench' },
-      deckcraft:   { name: 'DeckCraft',   accent: '#f97316', category: 'productivity', desc: 'Presentations & Slides' },
-      gridcraft:   { name: 'GridCraft',   accent: '#10b981', category: 'productivity', desc: 'Spreadsheets & Data Grid' },
-      wordcraft:   { name: 'WordCraft',   accent: '#3b82f6', category: 'productivity', desc: 'Writing & Document Design' }
+      photocraft:  { name: 'PhotoCraft',  accent: '#38bdf8', category: 'Design',       desc: 'Image Editing & Retouching' },
+      vectorcraft: { name: 'VectorCraft', accent: '#fb923c', category: 'Design',       desc: 'Vector Illustration & Design' },
+      cadcraft:    { name: 'CADCraft',    accent: '#ef4444', category: 'Engineering',  desc: '2D/3D Drafting & CAD' },
+      designcraft: { name: 'DesignCraft', accent: '#f43f5e', category: 'Design',       desc: 'Page Layout & Publishing' },
+      filmcraft:   { name: 'FilmCraft',   accent: '#a78bfa', category: 'Video',        desc: 'Non-Linear Video Editing' },
+      effectcraft: { name: 'EffectCraft', accent: '#818cf8', category: 'Video',        desc: 'Motion Graphics & VFX' },
+      soundcraft:  { name: 'SoundCraft',  accent: '#2dd4bf', category: 'Audio',        desc: 'Digital Audio Workstation (DAW)' },
+      lightcraft:  { name: 'LightCraft',  accent: '#06b6d4', category: 'Design',       desc: 'Photo Catalog & RAW Dev' },
+      pdfcraft:    { name: 'PdfCraft',    accent: '#e11d48', category: 'Documents',   desc: 'The PDF Workbench' },
+      deckcraft:   { name: 'DeckCraft',   accent: '#f97316', category: 'Documents',   desc: 'Slide Shows & Presentations' },
+      gridcraft:   { name: 'GridCraft',   accent: '#10b981', category: 'Documents',   desc: 'High-Performance Spreadsheets' },
+      wordcraft:   { name: 'WordCraft',   accent: '#3b82f6', category: 'Documents',   desc: 'Writing & Document Design' }
     };
 
-    // Active session state: { [appId]: { iframe: HTMLIFrameElement, loaded: boolean } }
-    const activeSessions = {};
-    let currentActiveApp = null;
+    // Active Windows Map: { [appId]: WindowState }
+    const activeWindows = {};
+    let highestZIndex = 30;
+    let focusedAppId = null;
 
-    // Elements
-    const hubView = document.getElementById('hubView');
-    const workspaceView = document.getElementById('workspaceView');
-    const workspaceViewport = document.getElementById('workspaceViewport');
-    const workspaceTabs = document.getElementById('workspaceTabs');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const loadingTitle = document.getElementById('loadingTitle');
-    const resumeActiveBtn = document.getElementById('resumeActiveBtn');
-    const activeAppCount = document.getElementById('activeAppCount');
-    const openStandaloneBtn = document.getElementById('openStandaloneBtn');
+    // Window Cascade Offset
+    let cascadeOffset = 0;
 
-    // ----------------------------------------------------
-    // View Switcher (Hub vs Workspace)
-    // ----------------------------------------------------
-    function switchView(view) {
-      if (view === 'workspace') {
-        if (!currentActiveApp) {
-          const keys = Object.keys(activeSessions);
-          if (keys.length > 0) {
-            activateTab(keys[0]);
-          } else {
-            return;
-          }
-        }
-        hubView.style.display = 'none';
-        workspaceView.style.display = 'flex';
-        window.location.hash = '#/' + currentActiveApp;
-      } else {
-        workspaceView.style.display = 'none';
-        hubView.style.display = 'flex';
-        window.location.hash = '#/';
-        updateResumeBadge();
-      }
+    const desktopEl = document.getElementById('desktop');
+    const taskbarCenterEl = document.getElementById('taskbarCenter');
+    const ramLabelEl = document.getElementById('ramLabel');
+    const startMenuEl = document.getElementById('startMenu');
+    const startBtnEl = document.getElementById('startBtn');
+    const contextMenuEl = document.getElementById('contextMenu');
+
+    // --------------------------------------------------------
+    // Real-Time Clock
+    // --------------------------------------------------------
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      const dateStr = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      document.getElementById('clockDisplay').innerHTML = `${timeStr}<br><span style="font-size:0.7rem; color:var(--text-subtle);">${dateStr}</span>`;
     }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    function updateResumeBadge() {
-      const activeCount = Object.keys(activeSessions).length;
-      if (activeCount > 0) {
-        resumeActiveBtn.style.display = 'inline-flex';
-        activeAppCount.textContent = activeCount === 1 
-          ? `${APPS_META[currentActiveApp]?.name || '1 App'} Running` 
-          : `${activeCount} Apps Active`;
-      } else {
-        resumeActiveBtn.style.display = 'none';
-      }
+    // --------------------------------------------------------
+    // Wallpaper Switcher
+    // --------------------------------------------------------
+    const wallpapers = ['wallpaper-nebula', 'wallpaper-aurora', 'wallpaper-cyber', 'wallpaper-minimal'];
+    let currentWallpaperIdx = 0;
+
+    function cycleWallpaper() {
+      desktopEl.classList.remove(wallpapers[currentWallpaperIdx]);
+      currentWallpaperIdx = (currentWallpaperIdx + 1) % wallpapers.length;
+      desktopEl.classList.add(wallpapers[currentWallpaperIdx]);
     }
+    document.getElementById('wallpaperBtn').addEventListener('click', cycleWallpaper);
 
-    // ----------------------------------------------------
-    // Launch App (STRICTLY ON DEMAND)
-    // ----------------------------------------------------
-    function launchApp(appId) {
-      if (!APPS_META[appId]) return;
-
-      // Switch to workspace view
-      hubView.style.display = 'none';
-      workspaceView.style.display = 'flex';
-
-      // Check if session already exists
-      if (!activeSessions[appId]) {
-        // Show loading overlay
-        loadingTitle.textContent = `Starting ${APPS_META[appId].name}...`;
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
-
-        // CREATE IFRAME STRICTLY ON DEMAND
-        const iframe = document.createElement('iframe');
-        iframe.id = `iframe-${appId}`;
-        iframe.className = 'app-iframe';
-        iframe.title = APPS_META[appId].name;
-        // Important: permission policy allows full desktop features (audio, clipboard, webgpu)
-        iframe.allow = 'clipboard-read; clipboard-write; fullscreen; autoplay; microphone; camera; display-capture';
-        iframe.src = `/${appId}/`;
-
-        iframe.onload = () => {
-          activeSessions[appId].loaded = true;
-          if (currentActiveApp === appId) {
-            loadingOverlay.style.opacity = '0';
-            setTimeout(() => {
-              if (currentActiveApp === appId) {
-                loadingOverlay.style.display = 'none';
-              }
-            }, 300);
-          }
-        };
-
-        workspaceViewport.appendChild(iframe);
-        activeSessions[appId] = { iframe, loaded: false };
-      }
-
-      activateTab(appId);
-      renderTabs();
-      updateResumeBadge();
-      window.location.hash = '#/' + appId;
-    }
-
-    // ----------------------------------------------------
-    // Tab Management
-    // ----------------------------------------------------
-    function activateTab(appId) {
-      if (!activeSessions[appId]) return;
-
-      currentActiveApp = appId;
-
-      // Hide all other iframes
-      Object.keys(activeSessions).forEach(id => {
-        const item = activeSessions[id];
-        if (id === appId) {
-          item.iframe.classList.add('active');
-        } else {
-          item.iframe.classList.remove('active');
-        }
-      });
-
-      // Show/hide loading indicator based on whether this app is already loaded
-      if (activeSessions[appId].loaded) {
-        loadingOverlay.style.display = 'none';
-      } else {
-        loadingTitle.textContent = `Loading ${APPS_META[appId].name}...`;
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
-      }
-
-      // Update Pop-Out link
-      openStandaloneBtn.href = `/${appId}/`;
-
-      renderTabs();
-    }
-
-    function renderTabs() {
-      workspaceTabs.innerHTML = '';
-      Object.keys(activeSessions).forEach(id => {
-        const meta = APPS_META[id] || { name: id, accent: '#6366f1' };
-        const isActive = id === currentActiveApp;
-
-        const tab = document.createElement('div');
-        tab.className = `app-tab ${isActive ? 'active' : ''}`;
-        tab.style.setProperty('--tab-accent', meta.accent);
-
-        const dot = document.createElement('span');
-        dot.className = 'app-tab-dot';
-
-        const title = document.createElement('span');
-        title.textContent = meta.name;
-
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'app-tab-close';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.title = 'Unload from memory';
-        closeBtn.onclick = (e) => {
-          e.stopPropagation();
-          unloadApp(id);
-        };
-
-        tab.appendChild(dot);
-        tab.appendChild(title);
-        tab.appendChild(closeBtn);
-
-        tab.onclick = () => activateTab(id);
-        workspaceTabs.appendChild(tab);
-      });
-    }
-
-    // ----------------------------------------------------
-    // Unload / Close App (Frees WASM & Memory)
-    // ----------------------------------------------------
-    function unloadApp(appId) {
-      if (!activeSessions[appId]) return;
-
-      // REMOVE IFRAME FROM DOM -> Terminates WASM instance and reclaims RAM & GPU memory
-      const iframe = activeSessions[appId].iframe;
-      if (iframe && iframe.parentNode) {
-        iframe.parentNode.removeChild(iframe);
-      }
-      delete activeSessions[appId];
-
-      const remaining = Object.keys(activeSessions);
-      if (remaining.length > 0) {
-        if (currentActiveApp === appId) {
-          activateTab(remaining[remaining.length - 1]);
-        } else {
-          renderTabs();
-        }
-      } else {
-        currentActiveApp = null;
-        switchView('hub');
-      }
-      updateResumeBadge();
-    }
-
-    function closeCurrentApp() {
-      if (currentActiveApp) {
-        unloadApp(currentActiveApp);
-      }
-    }
-
-    function reloadCurrentApp() {
-      if (currentActiveApp && activeSessions[currentActiveApp]) {
-        loadingTitle.textContent = `Reloading ${APPS_META[currentActiveApp].name}...`;
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
-        activeSessions[currentActiveApp].loaded = false;
-        activeSessions[currentActiveApp].iframe.src = `/${currentActiveApp}/?_r=${Date.now()}`;
-      }
-    }
-
-    function toggleFullscreen() {
+    // Fullscreen toggle
+    document.getElementById('fsBtn').addEventListener('click', () => {
       if (!document.fullscreenElement) {
-        workspaceView.requestFullscreen().catch(() => {});
+        document.documentElement.requestFullscreen().catch(() => {});
       } else {
         document.exitFullscreen().catch(() => {});
       }
-    }
+    });
 
-    // ----------------------------------------------------
-    // Routing & Hash Listener
-    // ----------------------------------------------------
-    function handleRouting() {
-      const hash = window.location.hash || '';
-      const match = hash.match(/^#\/([a-z0-9_-]+)/);
+    // --------------------------------------------------------
+    // Launch Application Window (STRICTLY ON DEMAND)
+    // --------------------------------------------------------
+    function openAppWindow(appId) {
+      if (!APPS_META[appId]) return;
 
-      if (match && match[1]) {
-        const appId = match[1];
-        if (APPS_META[appId]) {
-          launchApp(appId);
-          return;
-        }
-      }
+      // Close start menu
+      closeStartMenu();
 
-      // Query param fallback (?app=photocraft)
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryApp = urlParams.get('app');
-      if (queryApp && APPS_META[queryApp]) {
-        launchApp(queryApp);
+      // If already open, just focus and restore if minimized
+      if (activeWindows[appId]) {
+        restoreWindow(appId);
+        focusWindow(appId);
         return;
       }
 
-      // Default to hub view if no valid app route
-      if (!currentActiveApp) {
-        switchView('hub');
-      }
+      // Calculate initial window placement
+      const deskW = desktopEl.clientWidth;
+      const deskH = desktopEl.clientHeight;
+
+      const initW = Math.min(1060, Math.max(760, deskW - 120));
+      const initH = Math.min(700, Math.max(520, deskH - 80));
+
+      const initX = Math.max(40, Math.min(deskW - initW - 20, 70 + (cascadeOffset % 240)));
+      const initY = Math.max(20, Math.min(deskH - initH - 20, 40 + (cascadeOffset % 180)));
+      cascadeOffset += 32;
+
+      // Create Window DOM
+      const win = document.createElement('div');
+      win.className = 'app-window focused';
+      win.id = `win-${appId}`;
+      win.style.width = `${initW}px`;
+      win.style.height = `${initH}px`;
+      win.style.left = `${initX}px`;
+      win.style.top = `${initY}px`;
+      win.style.zIndex = ++highestZIndex;
+
+      const meta = APPS_META[appId];
+
+      win.innerHTML = `
+        <div class="window-titlebar" id="titlebar-${appId}">
+          <div class="window-controls">
+            <button class="win-btn win-btn-close" onclick="closeAppWindow('${appId}')" title="Close & Unload from RAM">
+              <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <button class="win-btn win-btn-minimize" onclick="minimizeWindow('${appId}')" title="Minimize">
+              <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="win-btn win-btn-maximize" onclick="toggleMaximizeWindow('${appId}')" title="Maximize">
+              <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+            </button>
+          </div>
+          <div class="window-title">
+            <span>${meta.name}</span>
+            <span style="font-size:0.7rem; font-weight:normal; color:var(--text-subtle);">&bull; ${meta.desc}</span>
+          </div>
+          <div class="window-actions-right">
+            <a href="/${appId}/" target="_blank" rel="noopener" class="win-action-icon" title="Open Standalone in New Tab">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="window-body">
+          <div class="window-loader" id="loader-${appId}">
+            <div class="window-spinner"></div>
+            <div class="window-loader-text">Initializing ${meta.name}...</div>
+            <div class="window-loader-badge">On-Demand WebAssembly Execution</div>
+          </div>
+          <!-- Resizers -->
+          <div class="resizer r"></div>
+          <div class="resizer b"></div>
+          <div class="resizer br"></div>
+          <div class="resizer l"></div>
+          <div class="resizer t"></div>
+        </div>
+      `;
+
+      // STRICTLY ON DEMAND: Create Iframe inside body
+      const bodyEl = win.querySelector('.window-body');
+      const iframe = document.createElement('iframe');
+      iframe.className = 'window-iframe';
+      iframe.title = meta.name;
+      iframe.allow = 'clipboard-read; clipboard-write; fullscreen; autoplay; microphone; camera; display-capture';
+      iframe.src = `/${appId}/`;
+
+      const loaderEl = win.querySelector(`#loader-${appId}`);
+      iframe.onload = () => {
+        loaderEl.style.opacity = '0';
+        setTimeout(() => { loaderEl.style.display = 'none'; }, 300);
+      };
+      bodyEl.appendChild(iframe);
+
+      desktopEl.appendChild(win);
+
+      // Save Window State
+      activeWindows[appId] = {
+        appId,
+        el: win,
+        iframe,
+        isMaximized: false,
+        isMinimized: false,
+        prevBounds: null
+      };
+
+      // Setup Drag & Resize Listeners
+      setupWindowDrag(win, appId);
+      setupWindowResize(win);
+
+      win.addEventListener('mousedown', () => focusWindow(appId));
+
+      focusWindow(appId);
+      updateTaskbar();
+      window.location.hash = '#/' + appId;
     }
 
-    window.addEventListener('hashchange', handleRouting);
-    window.addEventListener('DOMContentLoaded', handleRouting);
+    // --------------------------------------------------------
+    // Focus, Minimize, Maximize, Close
+    // --------------------------------------------------------
+    function focusWindow(appId) {
+      if (!activeWindows[appId]) return;
+      focusedAppId = appId;
 
-    // ----------------------------------------------------
-    // Search & Filter in Hub
-    // ----------------------------------------------------
-    const searchInput = document.getElementById('searchInput');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const cards = document.querySelectorAll('.app-card');
-
-    let currentCategory = 'all';
-    let searchQuery = '';
-
-    function filterCards() {
-      cards.forEach(card => {
-        const category = card.getAttribute('data-category');
-        const keywords = card.getAttribute('data-keywords').toLowerCase();
-        const matchesCategory = currentCategory === 'all' || category === currentCategory;
-        const matchesSearch = !searchQuery || keywords.includes(searchQuery);
-
-        if (matchesCategory && matchesSearch) {
-          card.style.display = 'flex';
+      Object.keys(activeWindows).forEach(id => {
+        const item = activeWindows[id];
+        if (id === appId) {
+          item.el.classList.add('focused');
+          item.el.style.zIndex = ++highestZIndex;
         } else {
-          card.style.display = 'none';
+          item.el.classList.remove('focused');
         }
+      });
+      updateTaskbar();
+    }
+
+    function minimizeWindow(appId) {
+      const item = activeWindows[appId];
+      if (!item) return;
+      item.isMinimized = true;
+      item.el.classList.add('minimized');
+      item.el.classList.remove('focused');
+
+      // Focus another window if available
+      const remaining = Object.keys(activeWindows).filter(id => !activeWindows[id].isMinimized);
+      if (remaining.length > 0) {
+        focusWindow(remaining[remaining.length - 1]);
+      } else {
+        focusedAppId = null;
+      }
+      updateTaskbar();
+    }
+
+    function restoreWindow(appId) {
+      const item = activeWindows[appId];
+      if (!item) return;
+      item.isMinimized = false;
+      item.el.classList.remove('minimized');
+      focusWindow(appId);
+    }
+
+    function toggleMaximizeWindow(appId) {
+      const item = activeWindows[appId];
+      if (!item) return;
+
+      if (!item.isMaximized) {
+        // Save current dimensions
+        item.prevBounds = {
+          left: item.el.style.left,
+          top: item.el.style.top,
+          width: item.el.style.width,
+          height: item.el.style.height
+        };
+        item.el.classList.add('maximized');
+        item.isMaximized = true;
+      } else {
+        item.el.classList.remove('maximized');
+        if (item.prevBounds) {
+          item.el.style.left = item.prevBounds.left;
+          item.el.style.top = item.prevBounds.top;
+          item.el.style.width = item.prevBounds.width;
+          item.el.style.height = item.prevBounds.height;
+        }
+        item.isMaximized = false;
+      }
+      focusWindow(appId);
+    }
+
+    function closeAppWindow(appId) {
+      const item = activeWindows[appId];
+      if (!item) return;
+
+      // UNLOAD IFRAME -> Reclaims RAM & GPU memory instantly!
+      if (item.iframe && item.iframe.parentNode) {
+        item.iframe.parentNode.removeChild(item.iframe);
+      }
+      if (item.el && item.el.parentNode) {
+        item.el.parentNode.removeChild(item.el);
+      }
+      delete activeWindows[appId];
+
+      const remaining = Object.keys(activeWindows).filter(id => !activeWindows[id].isMinimized);
+      if (remaining.length > 0) {
+        focusWindow(remaining[remaining.length - 1]);
+      } else {
+        focusedAppId = null;
+        window.location.hash = '#/';
+      }
+      updateTaskbar();
+    }
+
+    function closeAllWindows() {
+      Object.keys(activeWindows).forEach(id => closeAppWindow(id));
+      closeContextMenu();
+    }
+
+    function minimizeAllWindows() {
+      Object.keys(activeWindows).forEach(id => minimizeWindow(id));
+      closeStartMenu();
+      closeContextMenu();
+    }
+
+    // --------------------------------------------------------
+    // Window Dragging & Resizing with Pointer Shield
+    // --------------------------------------------------------
+    function setupWindowDrag(win, appId) {
+      const titlebar = win.querySelector('.window-titlebar');
+      let startX, startY, initLeft, initTop;
+
+      titlebar.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.window-controls') || e.target.closest('.window-actions-right')) return;
+        if (activeWindows[appId]?.isMaximized) return;
+
+        startX = e.clientX;
+        startY = e.clientY;
+        initLeft = parseInt(win.style.left, 10) || 0;
+        initTop = parseInt(win.style.top, 10) || 0;
+
+        document.body.classList.add('dragging');
+
+        function onMouseMove(e) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          win.style.left = `${Math.max(-200, initLeft + dx)}px`;
+          win.style.top = `${Math.max(0, initTop + dy)}px`;
+        }
+
+        function onMouseUp() {
+          document.body.classList.remove('dragging');
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
       });
     }
 
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = btn.getAttribute('data-category');
-        filterCards();
+    function setupWindowResize(win) {
+      const resizers = win.querySelectorAll('.resizer');
+
+      resizers.forEach(resizer => {
+        resizer.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          const startX = e.clientX;
+          const startY = e.clientY;
+          const startW = win.offsetWidth;
+          const startH = win.offsetHeight;
+          const startL = win.offsetLeft;
+          const startT = win.offsetTop;
+
+          document.body.classList.add('resizing');
+
+          function onMouseMove(e) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            if (resizer.classList.contains('r') || resizer.classList.contains('br')) {
+              win.style.width = `${Math.max(380, startW + dx)}px`;
+            }
+            if (resizer.classList.contains('b') || resizer.classList.contains('br')) {
+              win.style.height = `${Math.max(280, startH + dy)}px`;
+            }
+            if (resizer.classList.contains('l')) {
+              const newW = startW - dx;
+              if (newW > 380) {
+                win.style.width = `${newW}px`;
+                win.style.left = `${startL + dx}px`;
+              }
+            }
+            if (resizer.classList.contains('t')) {
+              const newH = startH - dy;
+              if (newH > 280) {
+                win.style.height = `${newH}px`;
+                win.style.top = `${startT + dy}px`;
+              }
+            }
+          }
+
+          function onMouseUp() {
+            document.body.classList.remove('resizing');
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+          }
+
+          window.addEventListener('mousemove', onMouseMove);
+          window.addEventListener('mouseup', onMouseUp);
+        });
+      });
+    }
+
+    // --------------------------------------------------------
+    // Taskbar Sync
+    // --------------------------------------------------------
+    function updateTaskbar() {
+      taskbarCenterEl.innerHTML = '';
+      const count = Object.keys(activeWindows).length;
+
+      ramLabelEl.textContent = count === 0 ? '0 Running' : `${count} Active`;
+      document.getElementById('ramDot').style.background = count === 0 ? '#64748b' : '#10b981';
+
+      Object.keys(activeWindows).forEach(id => {
+        const item = activeWindows[id];
+        const meta = APPS_META[id];
+        const isActive = focusedAppId === id && !item.isMinimized;
+
+        const taskEl = document.createElement('div');
+        taskEl.className = `task-item ${isActive ? 'active' : ''}`;
+        taskEl.style.setProperty('--task-accent', meta.accent);
+        taskEl.textContent = meta.name;
+
+        taskEl.onclick = () => {
+          if (item.isMinimized) {
+            restoreWindow(id);
+          } else if (focusedAppId === id) {
+            minimizeWindow(id);
+          } else {
+            focusWindow(id);
+          }
+        };
+
+        taskbarCenterEl.appendChild(taskEl);
+      });
+    }
+
+    // --------------------------------------------------------
+    // Desktop Icon Clicks (Double-Click or Single Click)
+    // --------------------------------------------------------
+    const deskIcons = document.querySelectorAll('.desk-icon');
+    let lastClickedIcon = null;
+    let lastClickTime = 0;
+
+    deskIcons.forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deskIcons.forEach(i => i.classList.remove('selected'));
+        icon.classList.add('selected');
+
+        const now = Date.now();
+        const appId = icon.getAttribute('data-app');
+
+        // Support double click or quick single click on touch
+        if (lastClickedIcon === icon && (now - lastClickTime < 350)) {
+          openAppWindow(appId);
+        }
+        lastClickedIcon = icon;
+        lastClickTime = now;
+      });
+
+      // Also open on keyboard Enter if selected
+      icon.addEventListener('dblclick', () => {
+        const appId = icon.getAttribute('data-app');
+        openAppWindow(appId);
       });
     });
 
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value.trim().toLowerCase();
-      filterCards();
+    desktopEl.addEventListener('click', (e) => {
+      if (!e.target.closest('.desk-icon') && !e.target.closest('.app-window')) {
+        deskIcons.forEach(i => i.classList.remove('selected'));
+      }
+      closeStartMenu();
+      closeContextMenu();
     });
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === '/' && document.activeElement !== searchInput && hubView.style.display !== 'none') {
-        e.preventDefault();
-        searchInput.focus();
-      } else if (e.key === 'Escape') {
-        if (document.activeElement === searchInput) {
-          searchInput.blur();
-        }
+    // --------------------------------------------------------
+    // Start Menu
+    // --------------------------------------------------------
+    function openStartMenu() {
+      startMenuEl.style.display = 'flex';
+      startBtnEl.classList.add('active');
+      document.getElementById('startSearchInput').focus();
+      renderStartApps();
+    }
+
+    function closeStartMenu() {
+      startMenuEl.style.display = 'none';
+      startBtnEl.classList.remove('active');
+    }
+
+    startBtnEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (startMenuEl.style.display === 'flex') {
+        closeStartMenu();
+      } else {
+        openStartMenu();
       }
+    });
+
+    function renderStartApps(query = '') {
+      const grid = document.getElementById('startAppsGrid');
+      grid.innerHTML = '';
+      const q = query.toLowerCase().trim();
+
+      Object.keys(APPS_META).forEach(id => {
+        const meta = APPS_META[id];
+        if (q && !meta.name.toLowerCase().includes(q) && !meta.desc.toLowerCase().includes(q) && !meta.category.toLowerCase().includes(q)) {
+          return;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'start-app-item';
+        item.style.setProperty('--icon-accent', meta.accent);
+        item.innerHTML = `
+          <div class="start-app-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+          </div>
+          <div class="start-app-meta">
+            <h4>${meta.name}</h4>
+            <p>${meta.desc}</p>
+          </div>
+        `;
+        item.onclick = () => openAppWindow(id);
+        grid.appendChild(item);
+      });
+    }
+
+    document.getElementById('startSearchInput').addEventListener('input', (e) => {
+      renderStartApps(e.target.value);
+    });
+
+    // --------------------------------------------------------
+    // Context Menu
+    // --------------------------------------------------------
+    desktopEl.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.app-window')) return;
+      e.preventDefault();
+      contextMenuEl.style.display = 'block';
+      contextMenuEl.style.left = `${Math.min(window.innerWidth - 200, e.clientX)}px`;
+      contextMenuEl.style.top = `${Math.min(window.innerHeight - 180, e.clientY)}px`;
+    });
+
+    function closeContextMenu() {
+      contextMenuEl.style.display = 'none';
+    }
+
+    // --------------------------------------------------------
+    // Hash Routing (/#/photocraft auto-opens window)
+    // --------------------------------------------------------
+    function handleRouting() {
+      const hash = window.location.hash || '';
+      const match = hash.match(/^#\/([a-z0-9_-]+)/);
+      if (match && match[1] && APPS_META[match[1]]) {
+        openAppWindow(match[1]);
+      }
+    }
+    window.addEventListener('hashchange', handleRouting);
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStartApps();
+      handleRouting();
     });
   </script>
 </body>
