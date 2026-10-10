@@ -34,9 +34,10 @@ export default {
 
     let targetPath = url.pathname;
 
-    // If request doesn't already have the app prefix, prepend it
-    if (!targetPath.startsWith(`/${targetApp}`)) {
-      targetPath = `/${targetApp}` + (targetPath === '/' ? '/' : targetPath);
+    // Check if the path is already prefixed with "/<app>/" or equals "/<app>"
+    // Note: requires trailing slash check so "/wordcraft-web-*.js" correctly becomes "/wordcraft/wordcraft-web-*.js"
+    if (targetPath !== `/${targetApp}` && !targetPath.startsWith(`/${targetApp}/`)) {
+      targetPath = `/${targetApp}` + (targetPath.startsWith('/') ? targetPath : `/${targetPath}`);
     }
 
     // Build the upstream destination URL
@@ -57,7 +58,7 @@ export default {
 
     const response = await fetch(proxyRequest);
 
-    // Return response with original headers, ensuring CORS & WASM content-types are preserved
+    // Return response preserving all headers, WASM content types, and caching
     const responseHeaders = new Headers(response.headers);
     responseHeaders.set("Access-Control-Allow-Origin", "*");
 
