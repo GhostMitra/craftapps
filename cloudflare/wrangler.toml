@@ -2,8 +2,20 @@ name = "craftapps-proxy"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
-# Automatically bind wordcraft.debarghaya.in as a Custom Domain
-# Cloudflare automatically provisions SSL and manages the DNS record
+# Automatically bind Custom Domains for all CraftApps on debarghaya.in
+# Cloudflare automatically creates DNS records and provisions SSL certificates
 routes = [
-  { pattern = "wordcraft.debarghaya.in", custom_domain = true }
+  { pattern = "wordcraft.debarghaya.in", custom_domain = true },
+  { pattern = "photocraft.debarghaya.in", custom_domain = true },
+  { pattern = "vectorcraft.debarghaya.in", custom_domain = true },
+  { pattern = "cadcraft.debarghaya.in", custom_domain = true },
+  { pattern = "designcraft.debarghaya.in", custom_domain = true },
+  { pattern = "filmcraft.debarghaya.in", custom_domain = true },
+  { pattern = "effectcraft.debarghaya.in", custom_domain = true },
+  { pattern = "soundcraft.debarghaya.in", custom_domain = true },
+  { pattern = "lightcraft.debarghaya.in", custom_domain = true },
+  { pattern = "pdfcraft.debarghaya.in", custom_domain = true },
+  { pattern = "deckcraft.debarghaya.in", custom_domain = true },
+  { pattern = "gridcraft.debarghaya.in", custom_domain = true },
+  { pattern = "craftapps.debarghaya.in", custom_domain = true }
 ]
