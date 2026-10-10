@@ -32,20 +32,21 @@ Every creative application runs client-side with native-level performance and ha
 - **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
 - **Desktop Personalization:** 4 built-in wallpapers (Deep Nebula, Midnight Aurora, Cyber Grid, Minimal Dark) and right-click desktop context menu.
 
-| Application | Sub-Route | Category | Equivalent Software | Core Capabilities |
+| Application | Custom Subdomain (Cloudflare) | Firebase Route | Equivalent | Core Capabilities |
 | :--- | :--- | :--- | :--- | :--- |
-| **PhotoCraft** | [`/photocraft/`](https://craftapps.web.app/photocraft/) | Design | **Adobe Photoshop** | Non-destructive layers, blend modes, adjustments, masks, GPU raster pipeline |
-| **VectorCraft** | [`/vectorcraft/`](https://craftapps.web.app/vectorcraft/) | Design | **Adobe Illustrator** | Precision Bézier pen tool, boolean path ops, SVG vector design |
-| **CADCraft** | [`/cadcraft/`](https://craftapps.web.app/cadcraft/) | Engineering | **Autodesk AutoCAD** | Command line, object snaps, layers, dimensions, hatches, DXF drafting |
-| **DesignCraft** | [`/designcraft/`](https://craftapps.web.app/designcraft/) | Publishing | **Adobe InDesign** | Multi-page spreads, master page templating, linked text frames |
-| **FilmCraft** | [`/filmcraft/`](https://craftapps.web.app/filmcraft/) | Video | **Adobe Premiere Pro** | Multi-track timeline, video cutting, transitions, color grading |
-| **EffectCraft** | [`/effectcraft/`](https://craftapps.web.app/effectcraft/) | VFX | **Adobe After Effects** | Keyframe animation, visual effects compositing, audio worklets |
-| **SoundCraft** | [`/soundcraft/`](https://craftapps.web.app/soundcraft/) | Audio | **Avid Pro Tools** | Digital Audio Workstation (DAW), multi-track recording & mixing, DSP |
-| **LightCraft** | [`/lightcraft/`](https://craftapps.web.app/lightcraft/) | Photography | **Adobe Lightroom** | RAW development, tone curves, exposure grading, OPFS private storage |
-| **PdfCraft** | [`/pdfcraft/`](https://craftapps.web.app/pdfcraft/) | Documents | **Adobe Acrobat** | Inspect, annotate, reorder, merge, split, form fill, and redact PDFs |
-| **DeckCraft** | [`/deckcraft/`](https://craftapps.web.app/deckcraft/) | Productivity | **MS PowerPoint** | Slide deck creator, vector shapes, animations, presenter mode |
-| **GridCraft** | [`/gridcraft/`](https://craftapps.web.app/gridcraft/) | Productivity | **Microsoft Excel** | Fast formula calculation engine, data grid, charts, local tables |
-| **WordCraft** | [`/wordcraft/`](https://craftapps.web.app/wordcraft/) | Productivity | **Microsoft Word** | Rich text document design, typography styles, tables, citations |
+| **PhotoCraft** | [`photocraft.debarghaya.in`](https://photocraft.debarghaya.in/) | [`/photocraft/`](https://craftapps.web.app/photocraft/) | **Adobe Photoshop** | Layers, blend modes, adjustments, masks, GPU raster graphics |
+| **VectorCraft** | [`vectorcraft.debarghaya.in`](https://vectorcraft.debarghaya.in/) | [`/vectorcraft/`](https://craftapps.web.app/vectorcraft/) | **Adobe Illustrator** | Bézier pen tool, boolean path ops, SVG vector design |
+| **CADCraft** | [`cadcraft.debarghaya.in`](https://cadcraft.debarghaya.in/) | [`/cadcraft/`](https://craftapps.web.app/cadcraft/) | **Autodesk AutoCAD** | Command line, object snaps, layers, dimensions, DXF drawings |
+| **DesignCraft** | [`designcraft.debarghaya.in`](https://designcraft.debarghaya.in/) | [`/designcraft/`](https://craftapps.web.app/designcraft/) | **Adobe InDesign** | Multi-page spreads, master page templating, linked text frames |
+| **FilmCraft** | [`filmcraft.debarghaya.in`](https://filmcraft.debarghaya.in/) | [`/filmcraft/`](https://craftapps.web.app/filmcraft/) | **Adobe Premiere Pro** | Multi-track timeline, video cutting, transitions, color grading |
+| **EffectCraft** | [`effectcraft.debarghaya.in`](https://effectcraft.debarghaya.in/) | [`/effectcraft/`](https://craftapps.web.app/effectcraft/) | **Adobe After Effects** | Keyframe animation, visual effects compositing, audio worklets |
+| **SoundCraft** | [`soundcraft.debarghaya.in`](https://soundcraft.debarghaya.in/) | [`/soundcraft/`](https://craftapps.web.app/soundcraft/) | **Avid Pro Tools** | Digital Audio Workstation (DAW), multi-track mixing, DSP |
+| **LightCraft** | [`lightcraft.debarghaya.in`](https://lightcraft.debarghaya.in/) | [`/lightcraft/`](https://craftapps.web.app/lightcraft/) | **Adobe Lightroom** | RAW development, tone curves, exposure grading, OPFS storage |
+| **PdfCraft** | [`pdfcraft.debarghaya.in`](https://pdfcraft.debarghaya.in/) | [`/pdfcraft/`](https://craftapps.web.app/pdfcraft/) | **Adobe Acrobat** | Inspect, annotate, reorder, merge, split, form fill, redact |
+| **DeckCraft** | [`deckcraft.debarghaya.in`](https://deckcraft.debarghaya.in/) | [`/deckcraft/`](https://craftapps.web.app/deckcraft/) | **MS PowerPoint** | Slide deck creator, vector shapes, animations, presenter mode |
+| **GridCraft** | [`gridcraft.debarghaya.in`](https://gridcraft.debarghaya.in/) | [`/gridcraft/`](https://craftapps.web.app/gridcraft/) | **Microsoft Excel** | Fast formula calculation engine, data grid, charts |
+| **WordCraft** | [`wordcraft.debarghaya.in`](https://wordcraft.debarghaya.in/) | [`/wordcraft/`](https://craftapps.web.app/wordcraft/) | **Microsoft Word** | Document design, typography styles, tables, citations |
+| **CraftOS Studio** | [`craftapps.debarghaya.in`](https://craftapps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | **Web Desktop OS** | Central multi-window desktop portal and app launcher |
 
 ---
 
