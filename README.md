@@ -136,6 +136,17 @@ Add one of the following secrets to your GitHub repository (**Settings ▸ Secre
 
 ---
 
+## 🔄 Automated Upstream Release Sync
+
+The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows/auto-update-upstream.yml) continuously monitors all 12 upstream repos (`https://github.com/storytold/*`):
+- **Runs Every 6 Hours**: Checks GitHub Releases API for any new web version tags.
+- **Auto-Download & Extraction**: Downloads the latest `<app>-web-*.zip` release artifact and extracts it into the app directory.
+- **Auto-Domain Routing**: Preserves custom subdomain routing and redirect guards (`https://<app>.debarghaya.in/`).
+- **Auto-Deploy**: Commits the new version back to the repository and immediately deploys to Firebase Hosting.
+- **Manual Trigger**: Can also be executed anytime via GitHub Actions **Run workflow** (with an optional `force` flag).
+
+---
+
 ## 🔒 Privacy & Security
 
 - **100% Client-Side:** Files you open, edit, or save remain in your browser's local memory or Origin Private File System (OPFS).

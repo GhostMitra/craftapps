@@ -25,7 +25,9 @@
       "**/LICENSE*",
       "**/NOTICE",
       "**/.cargo-*-lock",
-      "**/.htaccess"
+      "**/.htaccess",
+      "scripts/**",
+      "versions.json"
     ],
     "headers": [
       {
