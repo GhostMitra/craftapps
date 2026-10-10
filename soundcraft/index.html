@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <script>
+    if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
+      location.replace('https://soundcraft.debarghaya.in' + location.pathname.replace(/^\/soundcraft/i, '') + location.search + location.hash);
+    }
+  </script>
   <title>SoundCraft</title>
+  <link rel="canonical" href="https://soundcraft.debarghaya.in/">
   <link rel="icon" href="./ai.storyteller.soundcraft-4f86cc0f1d19c49f.png" integrity="sha384-gGGdqNRRqqtc1O6hUsGr2t6crDCmPT5aQ88HrS63AGKTx8mtjcAwCaMFzW6yzgT0"/>
   
 <script type="module">

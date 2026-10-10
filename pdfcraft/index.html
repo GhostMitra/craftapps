@@ -3,7 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
+        location.replace('https://pdfcraft.debarghaya.in' + location.pathname.replace(/^\/pdfcraft/i, '') + location.search + location.hash);
+      }
+    </script>
     <title>PdfCraft</title>
+    <link rel="canonical" href="https://pdfcraft.debarghaya.in/">
     
 <script type="module">
 import init, * as bindings from './pdfcraft-web-75592abd2e18a6b1.js';

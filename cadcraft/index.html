@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <script>
+    if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
+      location.replace('https://cadcraft.debarghaya.in' + location.pathname.replace(/^\/cadcraft/i, '') + location.search + location.hash);
+    }
+  </script>
   <title>CADCraft</title>
+  <link rel="canonical" href="https://cadcraft.debarghaya.in/">
   
 <script type="module">
 import init, * as bindings from './cadcraft-web-822d5e705d5bf78b.js';

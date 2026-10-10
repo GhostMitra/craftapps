@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <script>
+    if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
+      location.replace('https://designcraft.debarghaya.in' + location.pathname.replace(/^\/designcraft/i, '') + location.search + location.hash);
+    }
+  </script>
   <title>DesignCraft</title>
+  <link rel="canonical" href="https://designcraft.debarghaya.in/">
   
 <script type="module">
 import init, * as bindings from './designcraft-web-617ef84698960d99.js';

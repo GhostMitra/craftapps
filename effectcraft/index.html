@@ -3,10 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
+      location.replace('https://effectcraft.debarghaya.in' + location.pathname.replace(/^\/effectcraft/i, '') + location.search + location.hash);
+    }
+  </script>
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#1b1c1f">
   <meta name="description" content="EffectCraft: motion graphics and visual effects in the browser">
   <title>EffectCraft</title>
+  <link rel="canonical" href="https://effectcraft.debarghaya.in/">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-256.png">

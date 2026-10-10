@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <script>
+    if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
+      location.replace('https://vectorcraft.debarghaya.in' + location.pathname.replace(/^\/vectorcraft/i, '') + location.search + location.hash);
+    }
+  </script>
   <title>VectorCraft</title>
+  <link rel="canonical" href="https://vectorcraft.debarghaya.in/">
   
 <script type="module">
 import init, * as bindings from './vectorcraft-web-ee91dbec8a371305.js';
