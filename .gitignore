@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Rust & Cargo build artifacts (intermediate compiler caches)
+**/target/
+**/.fingerprint/
+**/build/
+**/deps/
+**/incremental/
+**/examples/
+*.rlib
+*.rmeta
+*.d
+*.so
+*.dll
+*.dylib
+.cargo-*-lock
+.cargo-lock
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
+*.directory
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
