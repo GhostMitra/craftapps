@@ -2,8 +2,8 @@ name = "craftapps-proxy"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
-# Route for wordcraft.debarghaya.in
-# Uncomment or configure route when deploying via Wrangler:
-# routes = [
-#   { pattern = "wordcraft.debarghaya.in/*", zone_name = "debarghaya.in" }
-# ]
+# Automatically bind wordcraft.debarghaya.in as a Custom Domain
+# Cloudflare automatically provisions SSL and manages the DNS record
+routes = [
+  { pattern = "wordcraft.debarghaya.in", custom_domain = true }
+]
