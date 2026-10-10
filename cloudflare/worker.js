@@ -9,7 +9,7 @@
  *    apps.debarghaya.in/photocraft (or /photocraft/) redirects 301 to photocraft.debarghaya.in/
  * 
  * 3. Portal Dashboard Link Rewriting:
- *    On apps.debarghaya.in or craftapps.debarghaya.in, dashboard app links
+ *    On apps.debarghaya.in, dashboard app links
  *    are rewritten to point to their respective custom subdomains.
  */
 
@@ -33,7 +33,7 @@ export default {
     const url = new URL(request.url);
     const targetOrigin = "https://craftapps.web.app";
 
-    // Extract subdomain (e.g. "photocraft", "apps", "craftapps")
+    // Extract subdomain (e.g. "photocraft", "apps")
     const hostParts = url.hostname.split('.');
     const subdomain = hostParts[0].toLowerCase();
     const rootDomain = hostParts.length >= 2 ? hostParts.slice(1).join('.') : 'debarghaya.in';
@@ -60,7 +60,7 @@ export default {
       return Response.redirect(redirectUrl, 301);
     }
 
-    // 3. Portal Root & Assets (e.g. apps.debarghaya.in/ or craftapps.debarghaya.in/)
+    // 3. Portal Root & Assets (e.g. apps.debarghaya.in/)
     const upstreamUrl = new URL(url.pathname + url.search, targetOrigin);
     const response = await proxyUpstream(request, upstreamUrl);
 

@@ -46,7 +46,7 @@ Every creative application runs client-side with native-level performance and ha
 | **DeckCraft** | [`deckcraft.debarghaya.in`](https://deckcraft.debarghaya.in/) | [`/deckcraft/`](https://craftapps.web.app/deckcraft/) | **MS PowerPoint** | Slide deck creator, vector shapes, animations, presenter mode |
 | **GridCraft** | [`gridcraft.debarghaya.in`](https://gridcraft.debarghaya.in/) | [`/gridcraft/`](https://craftapps.web.app/gridcraft/) | **Microsoft Excel** | Fast formula calculation engine, data grid, charts |
 | **WordCraft** | [`wordcraft.debarghaya.in`](https://wordcraft.debarghaya.in/) | [`/wordcraft/`](https://craftapps.web.app/wordcraft/) | **Microsoft Word** | Document design, typography styles, tables, citations |
-| **CraftOS Studio** | [`craftapps.debarghaya.in`](https://craftapps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | **Web Desktop OS** | Central multi-window desktop portal and app launcher |
+| **CraftApps Portal** | [`apps.debarghaya.in`](https://apps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | **App Launcher** | Central portal and creative application launcher |
 
 ---
 
