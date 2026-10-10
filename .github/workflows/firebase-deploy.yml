@@ -20,25 +20,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # 1. Official Google Action (Preferred: Service Account)
-      - name: Deploy via Firebase Hosting Action
-        if: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS != '' || secrets.FIREBASE_SERVICE_ACCOUNT != '' }}"
+      - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS || secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS }}
           projectId: craftapps
           channelId: live
-
-      # 2. CLI Token Fallback (if using FIREBASE_TOKEN)
-      - name: Deploy via Firebase CLI Token
-        if: "${{ (secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS == '' && secrets.FIREBASE_SERVICE_ACCOUNT == '') && secrets.FIREBASE_TOKEN != '' }}"
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: |
-          npx firebase-tools deploy --only hosting --project craftapps --token "$FIREBASE_TOKEN"
