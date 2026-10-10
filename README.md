@@ -109,6 +109,25 @@ Your live site will be accessible at:
 
 ---
 
+## 🤖 Automated CI/CD (GitHub Actions)
+
+This repository includes an automated workflow at [`.github/workflows/firebase-deploy.yml`](.github/workflows/firebase-deploy.yml) that automatically deploys to Firebase Hosting whenever you push to `main` (or trigger it manually via `workflow_dispatch`).
+
+### Setting up GitHub Secrets
+
+Add one of the following secrets to your GitHub repository (**Settings ▸ Secrets and variables ▸ Actions ▸ New repository secret**):
+
+- **Option A: Service Account (Recommended)**
+  - Secret Name: `FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS`
+  - Value: The JSON key for your Google Cloud / Firebase service account with the **Firebase Hosting Admin** role.
+  - To generate: In [Firebase Console](https://console.firebase.google.com/project/craftapps/settings/serviceaccounts/adminsdk) ▸ **Project Settings ▸ Service accounts** ▸ click **Generate new private key**.
+
+- **Option B: Firebase CLI Token**
+  - Secret Name: `FIREBASE_TOKEN`
+  - Value: Run `npx firebase-tools login:ci` locally, authenticate in your browser, and copy the generated token.
+
+---
+
 ## 🔒 Privacy & Security
 
 - **100% Client-Side:** Files you open, edit, or save remain in your browser's local memory or Origin Private File System (OPFS).
