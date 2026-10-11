@@ -8,12 +8,12 @@
       location.replace('https://photocraft.debarghaya.in' + location.pathname.replace(/^\/photocraft/i, '') + location.search + location.hash);
     }
   </script>
-  <title>PhotoCraft</title>
   <link rel="canonical" href="https://photocraft.debarghaya.in/">
+  <title>PhotoCraft</title>
   
 <script type="module">
-import init, * as bindings from './photocraft-web-d0310536049c6524.js';
-const wasm = await init({ module_or_path: './photocraft-web-d0310536049c6524_bg.wasm' });
+import init, * as bindings from './photocraft-web-effbf20fc7ec283d.js';
+const wasm = await init({ module_or_path: './photocraft-web-effbf20fc7ec283d_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -34,7 +34,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
     #photocraft_stalled { color: #8c8c8c; visibility: hidden; animation: photocraft-stalled 0s 20s forwards; }
     @keyframes photocraft-stalled { to { visibility: visible; } }
   </style>
-<link rel="modulepreload" href="./photocraft-web-d0310536049c6524.js" crossorigin="anonymous" integrity="sha384-17Ih2VXEuHHAxkhC5ToYNJuDrEXH/B+0UpI2+bQibWvRt4MLVk0uLxkN/wn0JrvF"><link rel="preload" href="./photocraft-web-d0310536049c6524_bg.wasm" crossorigin="anonymous" integrity="sha384-/mEbtEk1FnVKLN3uPgCy05wZScgf2JzT4ZMPF3WZQfx06hR8k6vORub4bdF+8WI0" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="./photocraft-web-effbf20fc7ec283d.js" crossorigin="anonymous" integrity="sha384-4YoqfWmAemp2mvF2Sir5lU27YF7ZUJcoZDXdo5CsaSGUPjtR1D0/gqq+4L5qNToX"><link rel="preload" href="./photocraft-web-effbf20fc7ec283d_bg.wasm" crossorigin="anonymous" integrity="sha384-YPfod8VZEQ8u4yYSq+OnHV8+eb/aqO81PFawSoHGzCnj2wXCB+pIuxPrH9qzBPP5" as="fetch" type="application/wasm"></head>
 <body>
   <canvas id="photocraft_canvas"></canvas>
   <div id="photocraft_loading">

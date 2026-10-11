@@ -169,6 +169,11 @@ Graphics Processor** and restart. If a graphics processor can't show the window,
 next one. To pick one when starting the app, set `WGPU_POWER_PREF=high` (or `low`), or `WGPU_ADAPTER_NAME` to part of
 its name, such as `WGPU_ADAPTER_NAME=nvidia` (see [`docs/development.md`](docs/development.md#desktop-graphics-processor)).
 
+On native Wayland, winit 0.30 does not deliver dropped files. To open an SVG, use File › Open;
+to place artwork in the current document, copy and paste the file in a file manager; or run
+under XWayland (`WAYLAND_DISPLAY= vectorcraft`) for file drag-and-drop
+(see [`docs/development.md`](docs/development.md#linux-wayland-and-x11)).
+
 On Linux under KDE Plasma 6.3 or later with Wayland, a drawing tablet's pen moves the cursor but VectorCraft doesn't
 respond to it yet (#491). Start the app under XWayland instead: `WAYLAND_DISPLAY= vectorcraft` (see
 [`docs/development.md`](docs/development.md#linux-wayland-and-x11)).
@@ -181,19 +186,28 @@ Register the MCP server with Claude Code:
 claude mcp add vectorcraft -- /path/to/vectorcraft-cli mcp
 ```
 
+To keep an agent to one project's files, give it folders to read and write (the same flags as PhotoCraft):
+
+```sh
+claude mcp add vectorcraft -- /path/to/vectorcraft-cli mcp --automation-read-root /work/project --automation-write-root /work/project
+```
+
 The details are in [`docs/mcp.md`](docs/mcp.md) and [`docs/control-protocol.md`](docs/control-protocol.md).
 
 For the experimental, unsupported 64-bit Windows 7 build, see [Windows 7 instructions](docs/windows7.md).
 
 ## Status
 
-VectorCraft is under active development. [**ROADMAP.md**](ROADMAP.md) covers what ships today, the
-milestones, and honest time-to-parity estimates.
+VectorCraft is under active development. [**ROADMAP.md**](ROADMAP.md) has the stage, the numbers by dimension
+and what's next; [`docs/target-app-parity.md`](docs/target-app-parity.md) the full parity assessment and
+[`docs/gaps.md`](docs/gaps.md) the ranked list of what's missing.
 
-**Where we are (2026-10-09):** roughly 69–75% of Illustrator's features exist and work, and about 40–55% of
-"a power user can't tell the difference". Everyday vector illustration is close to usable: drawing and path tools,
+**Where we are (2026-10-10): alpha.** About 88% of Illustrator 2026's menu items, tools, effects and formats exist
+(92.5% of menu items do something), feature depth is ~75%, and we estimate ~65% "ready for real work" for a mainstream illustrator (~62% against
+all of Illustrator): everyday
+vector illustration is close to usable: drawing and path tools,
 Pathfinder and Shape Builder, paint, gradients, appearance and transparency, type with styles, threading and Hebrew/Arabic bidirectional layout, and
-files (SVG, PDF and PDF-compatible `.ai` with PDF/X, EPS, DXF, EMF/WMF, raster formats and PSD, Print, Package).
+files (SVG, PDF and PDF-compatible `.ai` with PDF/X, EPS, DXF, EMF/WMF, raster formats, PSD out and PSD/PSB in as their merged image, Print, Package).
 Affinity documents (`.af` from Affinity 3, `.afdesign`, `.afpub` and, by their content, `.afphoto` from Affinity 1 and 2) open
 and place natively: layers, groups, artboards and pages, curves and shapes, fills, gradients and strokes, clipping
 and masks, text and images, with what didn't come in (effects, adjustments, brushes, master pages…) listed in the
@@ -202,23 +216,25 @@ doesn't write Affinity files. Current `.af` validation includes 33 pinned files,
 and every-board SVG/PDF/PSD export, with fixes for Affinity 3 artboards, source-backed JPEGs and text runs.
 [Scope and limits](crates/affinity/README.md); [source audit and remaining gaps](docs/affinity-validation.md).
 The interface
-speaks English, Japanese, Traditional and Simplified Chinese, Spanish, French, Italian, Russian and Ukrainian (and Czech and Brazilian Portuguese in the menus).
-The scores are
-self-assessed, so the [honest assessment](ROADMAP.md#honest-assessment-2026-10-05) explains how far to trust them.
+speaks English, German, Japanese, Traditional and Simplified Chinese, Spanish, French, Italian, Russian and Ukrainian (and Czech and Brazilian Portuguese in the menus);
+[localization-parity.md](docs/localization-parity.md) has the details.
+The scores are self-assessed from our code against Illustrator's public documentation;
+[target-app-parity.md](docs/target-app-parity.md#how-this-was-measured-2026-10-10) explains how far to trust them.
 
 **What's missing:**
-- 3D and Materials;
-- the Photoshop-style raster effects (Effect Gallery);
-- CJK composition for vertical type (vertical type itself has initial support, with a Japanese interface);
-- Variables and scripting;
+- reliable exchange of Illustrator's own `.ai` files (layer structure in real files; Illustrator's editing data isn't written);
 - an interaction-fidelity pass covering every tool's modifiers and small behaviours;
-- packaging for Windows and Linux.
+- 3D and Materials beyond the initial live Revolve (Extrude & Bevel, Inflate, Rotate, materials);
+- about half of the Photoshop-style raster effects (29 of 57 still missing) and the Effect Gallery;
+- CJK composition for vertical type (vertical type itself has initial support, with a Japanese interface);
+- scripting, and the rest of Variables (image and graph kinds, dataset import);
+- generative AI features.
 
-**Where we're going:** next is the interaction-fidelity pass alongside the raster-effects package, then 3D and
-advanced type, then hardening and packaging for 1.0. The prioritized list is in
-[Where we're lacking](ROADMAP.md#where-were-lacking-in-priority-order).
+**Where we're going:** next is the interaction-fidelity pass, `.ai` files from real users and start-up stability,
+alongside the raster-effects package; then type, the Illustrator 2026 additions and 3D. The ranked list is in
+[`docs/gaps.md`](docs/gaps.md).
 
-**Workspace:** `crates/{geom, color, doc, pathops, text, effects, trace, brush, render, svg, pdf, eps, cad, metafile, format, tools, engine, ui-egui, mcp, testkit}`
+**Workspace:** `crates/{geom, color, doc, pathops, text, effects, three-d, trace, brush, render, svg, pdf, eps, cad, metafile, format, tools, engine, ui-egui, mcp, testkit}`
 and `apps/{vectorcraft, vectorcraft-cli, vectorcraft-web}`. The egui frontend is its own crate, so
 the UI can be swapped without touching the engine.
 

@@ -58,7 +58,7 @@
 
 ## What works today
 
-DeckCraft is in early development, heading for its first alpha (see the [roadmap](ROADMAP.md)).
+DeckCraft is in alpha, heading for beta (see the [roadmap](ROADMAP.md)).
 Today it can:
 
 - **Make decks**: slide masters and eleven layouts with placeholders that inherit position and
@@ -102,6 +102,9 @@ git clone https://github.com/storytold/deckcraft
 cd deckcraft
 cargo run --release -p deckcraft-cli -- render --sample --all --scale 1 out/
 ```
+
+On Linux, the build also needs the ALSA headers for slide-show sound: `alsa-lib-devel` on Fedora,
+`libasound2-dev` on Debian and Ubuntu, `alsa-lib` on Arch. Without them it stops at `alsa-sys`.
 
 Fonts come from [craft-fonts](https://github.com/storytold/craft-fonts): clone it next to this repo
 (`../craft-fonts`) and local builds pick it up automatically; without it DeckCraft uses your system
@@ -151,10 +154,12 @@ deckcraft-cli mcp --connect 7990        # drive the running app (deckcraft --con
 
 ## Roadmap
 
-DeckCraft covers about **79% of PowerPoint's features by breadth** (93% of the core ones) and is
-roughly **80% of the way to a first alpha**. See [ROADMAP.md](ROADMAP.md) for the alpha checklist,
-parity estimates and what's next, and [docs/parity.md](docs/parity.md) for the feature-by-feature
-scorecard.
+DeckCraft is in **alpha**. It covers **79% of PowerPoint's features by breadth** (92% of the core
+ones, measured) and is about **55% of the way to replacing PowerPoint for real work** (estimated).
+See [ROADMAP.md](ROADMAP.md) for the stage, numbers by dimension and what's next,
+[docs/target-app-parity.md](docs/target-app-parity.md) for the full assessment,
+[docs/gaps.md](docs/gaps.md) for every known shortfall and
+[docs/parity-checklist.md](docs/parity-checklist.md) for the feature-by-feature checklist.
 
 ## Downloads
 
@@ -201,6 +206,8 @@ and web backend defaults are unchanged.
 | Debian/Ubuntu | `deckcraft-<ver>-linux-x86_64.deb` | `deckcraft-<ver>-linux-aarch64.deb` | |
 | Fedora/RHEL/openSUSE | `deckcraft-<ver>-linux-x86_64.rpm` | `deckcraft-<ver>-linux-aarch64.rpm` | |
 | Tarball | `deckcraft-<ver>-linux-x86_64.tar.gz` | `deckcraft-<ver>-linux-aarch64.tar.gz` | Unpack anywhere |
+
+RISC-V 64 (riscv64): `deckcraft-<ver>-linux-riscv64.tar.gz`, a tarball only (cross-compiled; needs glibc 2.39+, e.g. Ubuntu 24.04+).
 
 ### FreeBSD
 

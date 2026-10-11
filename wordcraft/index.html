@@ -8,12 +8,12 @@
       location.replace('https://wordcraft.debarghaya.in' + location.pathname.replace(/^\/wordcraft/i, '') + location.search + location.hash);
     }
   </script>
-  <title>WordCraft</title>
   <link rel="canonical" href="https://wordcraft.debarghaya.in/">
+  <title>WordCraft</title>
   
 <script type="module">
-import init, * as bindings from './wordcraft-web-bf24e657ac946abf.js';
-const wasm = await init({ module_or_path: './wordcraft-web-bf24e657ac946abf_bg.wasm' });
+import init, * as bindings from './wordcraft-web-d288edabbaf506a2.js';
+const wasm = await init({ module_or_path: './wordcraft-web-d288edabbaf506a2_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -28,7 +28,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
     #wordcraft_loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
       color: #555; font: 14px system-ui, sans-serif; pointer-events: none; }
   </style>
-<link rel="modulepreload" href="./wordcraft-web-bf24e657ac946abf.js" crossorigin="anonymous" integrity="sha384-2HSfjbaz1rkCxR10vfW8U5LRQBoXZsxiVDjN+uT2jY+Ps6k7D5lquix46HmyDiJx"><link rel="preload" href="./wordcraft-web-bf24e657ac946abf_bg.wasm" crossorigin="anonymous" integrity="sha384-SNK5So5Ip/AwqdRBxwCcNAVGAgaCBWNeG11Uy51+y43AXnzCIVFhTKECkguJu5vP" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="./wordcraft-web-d288edabbaf506a2.js" crossorigin="anonymous" integrity="sha384-ZTrCWMSzgZGVvTWr4vgZVvxextt4m0o2Z3ManBaHGU4mcE1GvaDqhsvpOmLYHulq"><link rel="preload" href="./wordcraft-web-d288edabbaf506a2_bg.wasm" crossorigin="anonymous" integrity="sha384-s6BPNknN42JrFZGpzvUwI2lWCrydkx/TGGeHxuw94P5cNG4q7FLFhpGkiUeEYKVd" as="fetch" type="application/wasm"></head>
 <body>
   <canvas id="wordcraft_canvas"></canvas>
   <div id="wordcraft_loading">Loading WordCraft&hellip;</div>

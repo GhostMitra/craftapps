@@ -13,6 +13,7 @@ import urllib.request
 import zipfile
 import tempfile
 import shutil
+import stat
 from pathlib import Path
 
 APPS = [
@@ -111,6 +112,43 @@ def patch_index_html(app_dir, app_name):
     index_path.write_text(content, encoding="utf-8")
     print(f"[{app_name}] Successfully patched index.html with domain routing")
 
+def remove_path(path):
+    if not path.exists():
+        return
+    if path.is_dir():
+        def on_error(func, p, exc_info):
+            try:
+                os.chmod(p, stat.S_IWRITE)
+                func(p)
+            except Exception:
+                pass
+        shutil.rmtree(path, onerror=on_error)
+    else:
+        try:
+            path.unlink()
+        except PermissionError:
+            os.chmod(path, stat.S_IWRITE)
+            path.unlink()
+
+def clean_dir(target_dir):
+    if target_dir.exists():
+        for item in target_dir.iterdir():
+            remove_path(item)
+    else:
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+def find_extracted_root(extract_path):
+    """Find the root directory inside the extracted zip containing the web app files."""
+    if (extract_path / "index.html").exists():
+        return extract_path
+    index_files = list(extract_path.glob("**/index.html"))
+    if index_files:
+        return index_files[0].parent
+    child_dirs = [p for p in extract_path.iterdir() if p.is_dir()]
+    if len(child_dirs) == 1:
+        return child_dirs[0]
+    return extract_path
+
 def update_app(app_name, download_url, target_dir):
     print(f"[{app_name}] Downloading {download_url}...")
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_file:
@@ -121,12 +159,24 @@ def update_app(app_name, download_url, target_dir):
         with urllib.request.urlopen(req) as response, open(tmp_zip_path, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
 
-        print(f"[{app_name}] Extracting to {target_dir}...")
-        target_dir.mkdir(parents=True, exist_ok=True)
+        print(f"[{app_name}] Extracting archive to temporary directory...")
+        with tempfile.TemporaryDirectory() as extract_dir:
+            extract_path = Path(extract_dir)
+            with zipfile.ZipFile(tmp_zip_path, 'r') as zip_ref:
+                zip_ref.extractall(extract_path)
 
-        with zipfile.ZipFile(tmp_zip_path, 'r') as zip_ref:
-            # Extract files
-            zip_ref.extractall(target_dir)
+            src_dir = find_extracted_root(extract_path)
+            print(f"[{app_name}] Found web distribution in {src_dir.name}")
+
+            print(f"[{app_name}] Replacing old files in {target_dir}...")
+            clean_dir(target_dir)
+
+            for item in src_dir.iterdir():
+                dst = target_dir / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dst)
+                else:
+                    shutil.copy2(item, dst)
 
         # Patch index.html
         patch_index_html(target_dir, app_name)
@@ -134,6 +184,35 @@ def update_app(app_name, download_url, target_dir):
     finally:
         if os.path.exists(tmp_zip_path):
             os.remove(tmp_zip_path)
+
+def flatten_nested_folder(app_dir, app_name):
+    """Checks if app_dir contains an improperly nested release directory like wordcraft-web-0.5.0 and flattens it."""
+    if not app_dir.exists():
+        return False
+    nested_dirs = [p for p in app_dir.iterdir() if p.is_dir() and "-web-" in p.name]
+    if not nested_dirs:
+        return False
+
+    nested_dir = nested_dirs[0]
+    print(f"[{app_name}] Found nested folder {nested_dir.name}. Migrating files directly to {app_dir.name}/...")
+
+    temp_stage = app_dir.parent / f".tmp_{app_name}"
+    if temp_stage.exists():
+        remove_path(temp_stage)
+
+    shutil.move(str(nested_dir), str(temp_stage))
+    clean_dir(app_dir)
+
+    for item in temp_stage.iterdir():
+        dst = app_dir / item.name
+        if item.is_dir():
+            shutil.copytree(item, dst)
+        else:
+            shutil.copy2(item, dst)
+
+    remove_path(temp_stage)
+    patch_index_html(app_dir, app_name)
+    return True
 
 def main():
     force = "--force" in sys.argv
@@ -145,6 +224,12 @@ def main():
     print(f"Checking for updates across {len(APPS)} CraftApps...")
 
     for app in APPS:
+        app_dir = ROOT_DIR / app
+
+        # Clean up any previously created nested subdirectories
+        if not check_only and flatten_nested_folder(app_dir, app):
+            updated_apps.append(f"{app} (flattened)")
+
         current_version = versions.get(app, "none")
         release_data = fetch_latest_release(app)
         if not release_data:
@@ -162,9 +247,10 @@ def main():
         if latest_tag != current_version or force:
             print(f"[{app}] Update available: {current_version} -> {latest_tag}")
             if not check_only:
-                app_dir = ROOT_DIR / app
                 update_app(app, asset["browser_download_url"], app_dir)
                 versions[app] = latest_tag
+                if f"{app} (flattened)" in updated_apps:
+                    updated_apps.remove(f"{app} (flattened)")
                 updated_apps.append(f"{app} ({latest_tag})")
         else:
             print(f"[{app}] Up to date: {latest_tag}")
