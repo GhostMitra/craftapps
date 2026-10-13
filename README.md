@@ -1,6 +1,6 @@
 # CraftOS &mdash; Web Desktop Studio 🖥️🎨
 
-> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 12 applications in floating resizable windows on Firebase.**
+> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 13 applications in floating resizable windows on Firebase.**
 
 ![Rust](https://img.shields.io/badge/Language-Rust-dea584?style=flat-square&logo=rust&logoColor=white)
 ![WebAssembly](https://img.shields.io/badge/Technology-WebAssembly-654ff0?style=flat-square&logo=webassembly&logoColor=white)
@@ -26,7 +26,7 @@ Every creative application runs client-side with native-level performance and ha
   - 🟡 **Minimize (−):** Minimizes the application down to the taskbar.
   - 🟢 **Maximize (⤢):** Expands the application to occupy the full desktop screen.
 - **Frosted-Glass Taskbar / Dock:**
-  - **Start Menu ("CraftOS"):** Search and launch any of the 12 applications with keyboard navigation.
+  - **Start Menu ("CraftOS"):** Search and launch any of the 13 applications with keyboard navigation.
   - **Task Switcher:** Click running taskbar pills to focus, restore, or minimize windows.
   - **System Tray:** Live digital clock, active memory/process monitor, wallpaper switcher, and desktop fullscreen toggle.
 - **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
@@ -36,6 +36,7 @@ Every creative application runs client-side with native-level performance and ha
 | :--- | :--- | :--- | :--- | :--- |
 | **PhotoCraft** | [`photocraft.debarghaya.in`](https://photocraft.debarghaya.in/) | [`/photocraft/`](https://craftapps.web.app/photocraft/) | **Adobe Photoshop** | Layers, blend modes, adjustments, masks, GPU raster graphics |
 | **VectorCraft** | [`vectorcraft.debarghaya.in`](https://vectorcraft.debarghaya.in/) | [`/vectorcraft/`](https://craftapps.web.app/vectorcraft/) | **Adobe Illustrator** | Bézier pen tool, boolean path ops, SVG vector design |
+| **FigCraft** | [`figcraft.debarghaya.in`](https://figcraft.debarghaya.in/) | [`/figcraft/`](https://craftapps.web.app/figcraft/) | **Figma** | UI/UX design, interactive prototyping, vector components |
 | **CADCraft** | [`cadcraft.debarghaya.in`](https://cadcraft.debarghaya.in/) | [`/cadcraft/`](https://craftapps.web.app/cadcraft/) | **Autodesk AutoCAD** | Command line, object snaps, layers, dimensions, DXF drawings |
 | **DesignCraft** | [`designcraft.debarghaya.in`](https://designcraft.debarghaya.in/) | [`/designcraft/`](https://craftapps.web.app/designcraft/) | **Adobe InDesign** | Multi-page spreads, master page templating, linked text frames |
 | **FilmCraft** | [`filmcraft.debarghaya.in`](https://filmcraft.debarghaya.in/) | [`/filmcraft/`](https://craftapps.web.app/filmcraft/) | **Adobe Premiere Pro** | Multi-track timeline, video cutting, transitions, color grading |
@@ -138,7 +139,7 @@ Add one of the following secrets to your GitHub repository (**Settings ▸ Secre
 
 ## 🔄 Automated Upstream Release Sync
 
-The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows/auto-update-upstream.yml) continuously monitors all 12 upstream repos (`https://github.com/storytold/*`):
+The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows/auto-update-upstream.yml) continuously monitors all 13 upstream repos (`https://github.com/storytold/*`):
 - **Runs Every 6 Hours**: Checks GitHub Releases API for any new web version tags.
 - **Auto-Download & Extraction**: Downloads the latest `<app>-web-*.zip` release artifact and extracts it into the app directory.
 - **Auto-Domain Routing**: Preserves custom subdomain routing and redirect guards (`https://<app>.debarghaya.in/`).

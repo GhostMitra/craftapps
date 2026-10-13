@@ -25,7 +25,8 @@ const CRAFT_APPS = [
   'lightcraft',
   'pdfcraft',
   'deckcraft',
-  'gridcraft'
+  'gridcraft',
+  'figcraft'
 ];
 
 export default {

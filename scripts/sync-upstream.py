@@ -24,6 +24,7 @@ APPS = [
     'deckcraft',
     'designcraft',
     'effectcraft',
+    'figcraft',
     'filmcraft',
     'gridcraft',
     'lightcraft',

@@ -6,7 +6,7 @@
   <script>
     if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
       var seg = location.pathname.split('/').filter(Boolean)[0];
-      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft'];
+      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft'];
       if (seg && apps.indexOf(seg.toLowerCase()) !== -1) {
         location.replace('https://' + seg.toLowerCase() + '.debarghaya.in' + location.pathname.replace(new RegExp('^/' + seg, 'i'), '') + location.search + location.hash);
       } else {
@@ -16,7 +16,7 @@
   </script>
   <title>CraftApps</title>
   <link rel="canonical" href="https://apps.debarghaya.in/">
-  <meta name="description" content="A clean menu of 12 creative and productivity web apps.">
+  <meta name="description" content="A clean menu of 13 creative and productivity web apps.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><path d='M8 16l6-6 10 10-6 6z' fill='white' opacity='0.9'/><circle cx='11' cy='21' r='3' fill='%2338bdf8'/></svg>">
   <style>
     :root {
@@ -440,6 +440,20 @@
               <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
             </div>
             <div class="app-desc">Document Authoring</div>
+          </div>
+        </a>
+
+        <!-- 13. FigCraft -->
+        <a href="/figcraft/" data-app="figcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #02da96;" data-name="figcraft figma ui ux design prototyping interface wireframe vector">
+          <div class="app-icon">
+            <img src="/icons/figcraft.svg" alt="FigCraft">
+          </div>
+          <div class="app-info">
+            <div class="app-name">
+              <span>FigCraft</span>
+              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </div>
+            <div class="app-desc">Interface &amp; Prototyping</div>
           </div>
         </a>
       </div>
