@@ -111,10 +111,13 @@ numbers):
 | Layouts & plotting | Paper-space layouts, viewports (scale, lock, per-viewport layer freeze), MSPACE/PSPACE through viewports, page setups, PLOT and EXPORTPDF |
 | Parametric | Geometric and dimensional constraints, AUTOCONSTRAIN, PARAMETERS with expressions, conflict detection; constraints re-solve after every edit |
 | Grips | Hot grips with Space to cycle Stretch, Move, Rotate, Scale and Mirror |
-| Interface languages | English and Ukrainian (Українська), live switching and a remembered Auto/system-language choice; [details](docs/localization.md) |
+| Interface languages | English, Ukrainian (Українська), Brazilian Portuguese (Português (Brasil)), German (Deutsch), Spanish (Español), Czech (Čeština), Russian (Русский), French (Français) and Simplified Chinese (简体中文, with an installed CJK font), live switching and a remembered Auto/system-language choice; [details](docs/localization.md) |
 | Automation | MCP server, JSON control channel, `cadcraft-cli` (info, convert, run, commands, mcp) |
 
 ## Quick start
+
+Desktop and web UI builds require Rust 1.95 or later. The core workspace's declared minimum
+remains Rust 1.90.
 
 ```sh
 git clone https://github.com/storytold/cadcraft
@@ -135,7 +138,13 @@ The web build: `cd apps/cadcraft-web && trunk serve` (needs [trunk](https://trun
 
 ### Fonts
 
-CADCraft never ships fonts; it uses the TrueType/OpenType fonts installed on your system. SHX
+CADCraft has no fonts in its repository; it uses the TrueType/OpenType fonts installed on your
+system. Builds made with the optional [craft-fonts](https://github.com/storytold/craft-fonts)
+input (`CRAFT_FONTS_DIR=<absolute path to a checkout> cargo build --release`) also embed its
+fonts: BIZ UDPGothic, BIZ UDMincho and Shippori Mincho (Japanese) and Noto Sans Arabic (the web
+build, which has no system fonts, only BIZ UDPGothic Regular and Noto Sans Arabic). A text style
+can use them by family name, and they draw characters a text's font lacks when no installed
+wide-coverage CJK font has them. Without `CRAFT_FONTS_DIR` nothing is embedded. SHX
 fonts (including big fonts such as `chineset.shx`) aren't read yet: text in an SHX style is drawn
 with our own stroke font, and any character a text's font lacks (CJK, for example) is drawn from
 an installed font that has it, preferring wide-coverage fonts such as Noto Sans CJK, Source Han
@@ -148,6 +157,26 @@ run) an environment variable, steer this:
 | `FONTFALLBACK` | `CADCRAFT_FONTFALLBACK` | Fonts tried first for characters a text's font lacks, comma-separated, e.g. `Noto Sans CJK TC, msjh.ttc`. |
 
 `.` clears either one.
+
+**Your own fonts.** Any `.ttf`, `.otf` or `.ttc` font works: install it in the system font folder
+(Windows `C:\Windows\Fonts` or per-user fonts, macOS `/Library/Fonts` or `~/Library/Fonts`,
+Linux and the BSDs `/usr/share/fonts`, `/usr/local/share/fonts`, `~/.local/share/fonts` or
+`~/.fonts`) and name it in a text style (`STYLE`, or `style {"name":"FA","font":"Vazirmatn"}`)
+by file name (`Vazirmatn-Regular.ttf`) or family name (`Vazirmatn`), or inline in MTEXT with
+`\fVazirmatn;`. Restart CADCraft after installing a font: the font folders are scanned once.
+
+**Right-to-left text (Persian, Arabic, Urdu, Hebrew).** TEXT and MTEXT lines are laid out with the
+Unicode Bidirectional Algorithm (the paragraph direction comes from its first letter, so numbers
+and Latin words inside Persian text keep their own order), and Arabic-script text is shaped with
+OpenType (contextual letter forms, lam-alef and other ligatures, ZWNJ / ZWJ, mark positioning).
+Justification (left, centre, right, MTEXT attachment and wrapping) still refers to the text's box.
+Our stroke font has no Arabic letters, so Persian in a stroke-font style is drawn from an
+installed font that has them: Vazirmatn, Noto Naskh Arabic, Noto Sans Arabic, Segoe UI, Tahoma,
+Arial and DejaVu Sans are looked for first. To choose the font, install a free Persian font such
+as [Vazirmatn](https://github.com/rastikerdar/vazirmatn) (SIL Open Font License) and either use it
+in the text style or set `FONTFALLBACK` (`CADCRAFT_FONTFALLBACK="Vazirmatn"`). Formatting changes
+inside a word (an MTEXT colour change in the middle of a Persian word) break the joining at that
+point.
 
 ### Logs
 
@@ -212,6 +241,14 @@ apps: cadcraft · cadcraft-cli · cadcraft-web
 
 Nothing below `ui-egui` knows about egui, so the front end can be replaced. `cargo xtask ci`
 checks formatting, clippy, tests, asset attribution, the crate layering and the wasm build.
+
+Drafting and layer-palette icon buttons use the pinned `craft-ui` button component for interaction,
+accessible labels and keyboard focus. CADCraft keeps its multicolor icon painter, dark palette,
+disabled tint and tool commands. The native host saves workspace visibility and toolset choices
+atomically; `CADCRAFT_CONFIG_DIR` selects an isolated profile. Compact toolbar groups move into a
+More menu, and status readouts truncate with a full-value tooltip before they reach layout tabs.
+Painted toolbar and tab controls
+have accessible labels and visible keyboard focus. Property controls remain application-specific.
 
 ## Accessibility
 
@@ -346,3 +383,5 @@ Forks and modified versions must remove them.
   <a href="https://getartcraft.com/"><img alt="ArtCraft" src="docs/brand/artcraft-mark.svg" width="28"></a><br>
   <sub>Made by the <a href="https://getartcraft.com/">ArtCraft</a> team and community.</sub>
 </p>
+
+Tool Sets, Layers, and Properties can be regrouped, split, floated within the app window, closed, and reopened. The drawing canvas stays visible and cannot be closed or turned into a tab. Drag a panel header to a target edge or another header. Its context menu offers Float panel, Move to group, and Close panel. Existing panel toggles reopen panels at their saved location; Reset Panel Layout restores the app layout. Floating panels remain inside the current app window.
