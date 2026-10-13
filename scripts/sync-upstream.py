@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
 Sync Upstream Releases for CraftApps Suite
-Checks storytold/* repositories for new web releases, downloads and extracts them,
-and patches index.html with debarghaya.in custom subdomain routing.
+Downloads official WebAssembly web releases directly from storytold/* repositories,
+extracts and flattens them into the dist/ directory, and patches index.html
+with custom subdomain routing (debarghaya.in).
+
+All built assets live exclusively in dist/ (git-ignored) for zero repo bloat.
 """
 
 import os
@@ -32,6 +35,7 @@ APPS = [
 ]
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+DIST_DIR = ROOT_DIR / "dist"
 VERSIONS_FILE = ROOT_DIR / "versions.json"
 
 def get_headers():
@@ -71,7 +75,6 @@ def find_web_asset(release_data, app_name):
         name = asset.get("name", "")
         if f"{app_name}-web-" in name and name.endswith(".zip"):
             return asset
-    # Fallback to any *-web-*.zip
     for asset in assets:
         name = asset.get("name", "")
         if "-web-" in name and name.endswith(".zip"):
@@ -93,12 +96,9 @@ def patch_index_html(app_dir, app_name):
   </script>
   <link rel="canonical" href="https://{app_name}.debarghaya.in/">"""
 
-    # Check if redirect script is already present
     if f"{app_name}.debarghaya.in" in content and "location.replace" in content:
-        print(f"[{app_name}] index.html redirect script already in place")
         return
 
-    # Inject after <meta name="viewport" ...> or inside <head>
     viewport_match = re.search(r'(<meta[^>]*viewport[^>]*>)', content, re.IGNORECASE)
     if viewport_match:
         content = content[:viewport_match.end()] + "\n" + redirect_script + content[viewport_match.end():]
@@ -149,7 +149,7 @@ def find_extracted_root(extract_path):
         return child_dirs[0]
     return extract_path
 
-def update_app(app_name, download_url, target_dir):
+def download_and_extract_app(app_name, download_url, target_dir):
     print(f"[{app_name}] Downloading {download_url}...")
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_file:
         tmp_zip_path = tmp_file.name
@@ -166,9 +166,6 @@ def update_app(app_name, download_url, target_dir):
                 zip_ref.extractall(extract_path)
 
             src_dir = find_extracted_root(extract_path)
-            print(f"[{app_name}] Found web distribution in {src_dir.name}")
-
-            print(f"[{app_name}] Replacing old files in {target_dir}...")
             clean_dir(target_dir)
 
             for item in src_dir.iterdir():
@@ -180,56 +177,45 @@ def update_app(app_name, download_url, target_dir):
 
         # Patch index.html
         patch_index_html(target_dir, app_name)
+        print(f"[{app_name}] Extracted and installed into {target_dir.relative_to(ROOT_DIR)}")
 
     finally:
         if os.path.exists(tmp_zip_path):
             os.remove(tmp_zip_path)
 
-def flatten_nested_folder(app_dir, app_name):
-    """Checks if app_dir contains an improperly nested release directory like wordcraft-web-0.5.0 and flattens it."""
-    if not app_dir.exists():
-        return False
-    nested_dirs = [p for p in app_dir.iterdir() if p.is_dir() and "-web-" in p.name]
-    if not nested_dirs:
-        return False
+def prepare_portal():
+    """Ensure dist directory exists and copies root portal landing page & icons."""
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
+    portal_index = ROOT_DIR / "index.html"
+    if portal_index.exists():
+        shutil.copy2(portal_index, DIST_DIR / "index.html")
+        print("[portal] Installed root index.html to dist/index.html")
 
-    nested_dir = nested_dirs[0]
-    print(f"[{app_name}] Found nested folder {nested_dir.name}. Migrating files directly to {app_dir.name}/...")
-
-    temp_stage = app_dir.parent / f".tmp_{app_name}"
-    if temp_stage.exists():
-        remove_path(temp_stage)
-
-    shutil.move(str(nested_dir), str(temp_stage))
-    clean_dir(app_dir)
-
-    for item in temp_stage.iterdir():
-        dst = app_dir / item.name
-        if item.is_dir():
-            shutil.copytree(item, dst)
-        else:
-            shutil.copy2(item, dst)
-
-    remove_path(temp_stage)
-    patch_index_html(app_dir, app_name)
-    return True
+    icons_src = ROOT_DIR / "icons"
+    if icons_src.exists():
+        icons_dst = DIST_DIR / "icons"
+        if icons_dst.exists():
+            shutil.rmtree(icons_dst)
+        shutil.copytree(icons_src, icons_dst)
+        print("[portal] Installed icons to dist/icons/")
 
 def main():
     force = "--force" in sys.argv
     check_only = "--check-only" in sys.argv
+    specific_app = None
+    for arg in sys.argv[1:]:
+        if not arg.startswith("--") and arg in APPS:
+            specific_app = arg
 
+    prepare_portal()
     versions = load_versions()
     updated_apps = []
 
-    print(f"Checking for updates across {len(APPS)} CraftApps...")
+    target_apps = [specific_app] if specific_app else APPS
+    print(f"Checking updates for {len(target_apps)} CraftApps (output: dist/)...")
 
-    for app in APPS:
-        app_dir = ROOT_DIR / app
-
-        # Clean up any previously created nested subdirectories
-        if not check_only and flatten_nested_folder(app_dir, app):
-            updated_apps.append(f"{app} (flattened)")
-
+    for app in target_apps:
+        app_dist_dir = DIST_DIR / app
         current_version = versions.get(app, "none")
         release_data = fetch_latest_release(app)
         if not release_data:
@@ -244,13 +230,14 @@ def main():
             print(f"[{app}] No web release asset found for tag {latest_tag}")
             continue
 
-        if latest_tag != current_version or force:
-            print(f"[{app}] Update available: {current_version} -> {latest_tag}")
+        # If dist folder doesn't exist yet, we must download even if version matched
+        needs_download = (latest_tag != current_version) or force or (not (app_dist_dir / "index.html").exists())
+
+        if needs_download:
+            print(f"[{app}] Updating to {latest_tag}...")
             if not check_only:
-                update_app(app, asset["browser_download_url"], app_dir)
+                download_and_extract_app(app, asset["browser_download_url"], app_dist_dir)
                 versions[app] = latest_tag
-                if f"{app} (flattened)" in updated_apps:
-                    updated_apps.remove(f"{app} (flattened)")
                 updated_apps.append(f"{app} ({latest_tag})")
         else:
             print(f"[{app}] Up to date: {latest_tag}")
@@ -258,16 +245,14 @@ def main():
     if updated_apps and not check_only:
         save_versions(versions)
         summary = ", ".join(updated_apps)
-        print(f"\nCompleted updates: {summary}")
-        
-        # Write to GITHUB_OUTPUT if running in GitHub Actions
+        print(f"\nCompleted sync: {summary}")
         github_output = os.environ.get("GITHUB_OUTPUT")
         if github_output:
             with open(github_output, "a", encoding="utf-8") as f:
                 f.write("updated=true\n")
                 f.write(f"summary={summary}\n")
     else:
-        print("\nAll applications are currently up to date.")
+        print("\nAll applications ready in dist/.")
         github_output = os.environ.get("GITHUB_OUTPUT")
         if github_output:
             with open(github_output, "a", encoding="utf-8") as f:

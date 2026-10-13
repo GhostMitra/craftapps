@@ -7,6 +7,10 @@ package-lock.json
 firebase-debug.log*
 firestore-debug.log*
 ui-debug.log*
+# Build and Distribution
+dist/
+.trunk/
+**/dist/
 
 # Rust & Cargo build artifacts (intermediate compiler caches)
 **/target/
