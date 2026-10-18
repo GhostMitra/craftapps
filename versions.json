@@ -1,15 +1,15 @@
 {
-  "cadcraft": "v0.7.0",
-  "deckcraft": "v0.7.0",
-  "designcraft": "v0.8.0",
-  "effectcraft": "v0.10.0",
-  "figcraft": "v0.6.0",
-  "filmcraft": "v0.8.0",
-  "gridcraft": "v0.7.0",
+  "cadcraft": "v0.8.0",
+  "deckcraft": "v0.8.0",
+  "designcraft": "v0.9.0",
+  "effectcraft": "v0.11.1",
+  "figcraft": "v0.7.0",
+  "filmcraft": "v0.9.0",
+  "gridcraft": "v0.8.0",
   "lightcraft": "v0.8.0",
-  "pdfcraft": "v0.8.0",
-  "photocraft": "v0.9.0",
-  "soundcraft": "v0.7.0",
+  "pdfcraft": "v0.9.0",
+  "photocraft": "v0.10.0",
+  "soundcraft": "v0.8.0",
   "vectorcraft": "v0.12.0",
-  "wordcraft": "v0.7.0"
+  "wordcraft": "v0.8.0"
 }
