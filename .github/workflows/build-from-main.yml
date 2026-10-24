@@ -45,53 +45,54 @@ permissions:
   pull-requests: write
 
 jobs:
+  setup:
+    name: Determine Applications to Build
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Generate Build Matrix
+        id: set-matrix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+
+          all_apps = [
+              {"app": "cadcraft", "fonts_ref": "3d9ab3a132ed0eff457e424226a435a901da30d3", "web_fonts": False},
+              {"app": "deckcraft", "fonts_ref": "43913056ce82a3fdad0ef69f6b88d1dc922a8104", "web_fonts": False},
+              {"app": "designcraft", "fonts_ref": "a71c20e30af613287c504f7e685ca8fad77752bc", "web_fonts": True},
+              {"app": "effectcraft", "fonts_ref": "", "web_fonts": False},
+              {"app": "figcraft", "fonts_ref": "43913056ce82a3fdad0ef69f6b88d1dc922a8104", "web_fonts": True},
+              {"app": "filmcraft", "fonts_ref": "bfcbf714e45a3ea8e98f88ab2b7971372a576414", "web_fonts": False},
+              {"app": "gridcraft", "fonts_ref": "abb83316d96aa59c1cf64784289e378fe9fa5695", "web_fonts": False},
+              {"app": "lightcraft", "fonts_ref": "a71c20e30af613287c504f7e685ca8fad77752bc", "web_fonts": True},
+              {"app": "pdfcraft", "fonts_ref": "3d9ab3a132ed0eff457e424226a435a901da30d3", "web_fonts": False},
+              {"app": "photocraft", "fonts_ref": "abb83316d96aa59c1cf64784289e378fe9fa5695", "web_fonts": False},
+              {"app": "soundcraft", "fonts_ref": "", "web_fonts": False},
+              {"app": "vectorcraft", "fonts_ref": "a71c20e30af613287c504f7e685ca8fad77752bc", "web_fonts": True},
+              {"app": "wordcraft", "fonts_ref": "8dcdacd5153e64560d109541a47d806f26f048c0", "web_fonts": False}
+          ]
+
+          selected = "${{ inputs.app }}".strip().lower()
+          if not selected or selected == "all":
+              target = all_apps
+          else:
+              target = [a for a in all_apps if a["app"] == selected]
+
+          matrix_json = json.dumps({"include": target})
+          print("Build matrix:", matrix_json)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"matrix={matrix_json}\n")
+          PY
+
   build-apps:
     name: Build ${{ matrix.app }} (${{ inputs.branch || 'main' }})
+    needs: [setup]
     runs-on: ubuntu-latest
-    if: inputs.app == 'all' || inputs.app == '' || inputs.app == matrix.app
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - app: cadcraft
-            fonts_ref: '3d9ab3a132ed0eff457e424226a435a901da30d3'
-            web_fonts: false
-          - app: deckcraft
-            fonts_ref: '43913056ce82a3fdad0ef69f6b88d1dc922a8104'
-            web_fonts: false
-          - app: designcraft
-            fonts_ref: 'a71c20e30af613287c504f7e685ca8fad77752bc'
-            web_fonts: true
-          - app: effectcraft
-            fonts_ref: ''
-            web_fonts: false
-          - app: figcraft
-            fonts_ref: '43913056ce82a3fdad0ef69f6b88d1dc922a8104'
-            web_fonts: true
-          - app: filmcraft
-            fonts_ref: 'bfcbf714e45a3ea8e98f88ab2b7971372a576414'
-            web_fonts: false
-          - app: gridcraft
-            fonts_ref: 'abb83316d96aa59c1cf64784289e378fe9fa5695'
-            web_fonts: false
-          - app: lightcraft
-            fonts_ref: 'a71c20e30af613287c504f7e685ca8fad77752bc'
-            web_fonts: true
-          - app: pdfcraft
-            fonts_ref: '3d9ab3a132ed0eff457e424226a435a901da30d3'
-            web_fonts: false
-          - app: photocraft
-            fonts_ref: 'abb83316d96aa59c1cf64784289e378fe9fa5695'
-            web_fonts: false
-          - app: soundcraft
-            fonts_ref: ''
-            web_fonts: false
-          - app: vectorcraft
-            fonts_ref: 'a71c20e30af613287c504f7e685ca8fad77752bc'
-            web_fonts: true
-          - app: wordcraft
-            fonts_ref: '8dcdacd5153e64560d109541a47d806f26f048c0'
-            web_fonts: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
 
     steps:
       - name: Checkout CraftApps Repository
@@ -169,8 +170,8 @@ jobs:
 
   deploy:
     name: Assemble & Deploy to Firebase
-    needs: [build-apps]
-    if: always() && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
+    needs: [setup, build-apps]
+    if: always() && needs.setup.result == 'success' && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
 
     steps:
