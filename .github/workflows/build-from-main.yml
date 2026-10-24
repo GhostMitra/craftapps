@@ -7,26 +7,10 @@ on:
   workflow_dispatch:
     inputs:
       app:
-        description: 'Application to build ("auto" checks for new commits, "all" builds all, or select specific app)'
+        description: 'App(s) to build: "auto", "all", single app (e.g. "figcraft"), or comma-separated list (e.g. "figcraft, photocraft")'
         required: true
         default: 'auto'
-        type: choice
-        options:
-          - auto
-          - all
-          - cadcraft
-          - deckcraft
-          - designcraft
-          - effectcraft
-          - figcraft
-          - filmcraft
-          - gridcraft
-          - lightcraft
-          - pdfcraft
-          - photocraft
-          - soundcraft
-          - vectorcraft
-          - wordcraft
+        type: string
       branch:
         description: 'Upstream git branch to inspect and build'
         required: false
@@ -85,8 +69,8 @@ jobs:
       - name: Report Check Summary
         run: |
           if [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
-            echo "### 🚀 Upstream Changes Detected (${{ steps.check.outputs.count }} app(s))" >> $GITHUB_STEP_SUMMARY
-            echo "Queued for WebAssembly compilation: **${{ steps.check.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
+            echo "### 🚀 Upstream Build Queued (${{ steps.check.outputs.count }} app(s))" >> $GITHUB_STEP_SUMMARY
+            echo "Applications to compile: **${{ steps.check.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
           else
             echo "### ✅ All Applications Up to Date" >> $GITHUB_STEP_SUMMARY
             echo "No new commits found on \`main\` across upstream repositories. Skipping build and deployment." >> $GITHUB_STEP_SUMMARY
@@ -161,6 +145,8 @@ jobs:
         env:
           CRAFT_FONTS_DIR: ${{ matrix.fonts_ref != '' && format('{0}/craft-fonts', github.workspace) || '' }}
           CRAFT_FONTS_REQUIRED: ${{ matrix.web_fonts && '1' || '' }}
+          FIGCRAFT_WASM_MAX_BYTES: '52428800'
+          PHOTOCRAFT_WEB_MAX_FILE_BYTES: '52428800'
         run: |
           python craftapps/scripts/build-upstream.py \
             --app ${{ matrix.app }} \

@@ -3,11 +3,13 @@
 Check Upstream Main Branch Commits for CraftApps Suite
 Queries the latest commit SHA of the main branch for each storytold repository,
 compares against upstream-commits.json, and outputs which applications have new commits.
+Supports checking single or multiple comma-separated applications.
 """
 
 import os
 import sys
 import json
+import re
 import urllib.request
 import argparse
 from pathlib import Path
@@ -65,9 +67,26 @@ def fetch_latest_commit_sha(app_name, branch="main"):
         print(f"[{app_name}] Failed to fetch latest commit for {branch}: {e}", file=sys.stderr)
         return None
 
+def parse_target_apps(app_input):
+    if not app_input:
+        return "auto", list(APP_METADATA.keys())
+    
+    raw = app_input.strip().lower()
+    if raw == "auto":
+        return "auto", list(APP_METADATA.keys())
+    if raw == "all":
+        return "all", list(APP_METADATA.keys())
+    
+    tokens = [t.strip() for t in re.split(r'[, \t]+', raw) if t.strip()]
+    valid = [t for t in tokens if t in APP_METADATA]
+    if not valid:
+        print(f"Warning: No recognized app names in '{app_input}'. Defaulting to 'auto'.", file=sys.stderr)
+        return "auto", list(APP_METADATA.keys())
+    return "custom", valid
+
 def main():
     parser = argparse.ArgumentParser(description="Check for new upstream commits on main")
-    parser.add_argument("--app", default="auto", help="App to check/build ('auto', 'all', or specific app name)")
+    parser.add_argument("--app", default="auto", help="App(s) to check/build: 'auto', 'all', a single app, or comma-separated list")
     parser.add_argument("--branch", default="main", help="Git branch to inspect (default: main)")
     parser.add_argument("--force", action="store_true", help="Force rebuild regardless of commit diff")
     parser.add_argument("--update-sha", nargs=2, metavar=("APP", "SHA"), help="Update recorded commit SHA for an app")
@@ -82,21 +101,16 @@ def main():
         return
 
     recorded_commits = load_recorded_commits()
-    target_app = args.app.lower().strip()
+    mode, apps_to_check = parse_target_apps(args.app)
 
-    if target_app == "all":
-        apps_to_check = list(APP_METADATA.keys())
-    elif target_app in APP_METADATA:
-        apps_to_check = [target_app]
-    else:
-        # 'auto' or unspecified
-        apps_to_check = list(APP_METADATA.keys())
+    # Force rebuild if --force is passed OR if user manually listed specific app(s) or 'all'
+    force_build = args.force or (mode in ("custom", "all"))
 
     matrix_items = []
     changed_apps_summary = []
     latest_shas = {}
 
-    print(f"Inspecting branch '{args.branch}' across {len(apps_to_check)} applications...")
+    print(f"Inspecting branch '{args.branch}' across {len(apps_to_check)} application(s) (mode: {mode}, force: {force_build})...")
 
     for app in apps_to_check:
         meta = APP_METADATA[app]
@@ -107,11 +121,7 @@ def main():
         latest_shas[app] = latest_sha
         prev_sha = recorded_commits.get(app, "")
 
-        # A build is needed if:
-        # 1. User forced it (--force or --app is specific / 'all')
-        # 2. Latest SHA differs from recorded SHA
         has_new_commit = (latest_sha != prev_sha)
-        force_build = args.force or (target_app in APP_METADATA) or (target_app == "all")
 
         if has_new_commit or force_build:
             matrix_items.append({
@@ -126,7 +136,7 @@ def main():
                 changed_apps_summary.append(f"{app} ({short_prev} -> {short_new})")
                 print(f"[{app}] NEW commit detected on {args.branch}: {short_prev} -> {short_new}")
             else:
-                print(f"[{app}] Rebuilding (forced): {latest_sha[:8]}")
+                print(f"[{app}] Rebuilding (forced/manual): {latest_sha[:8]}")
         else:
             print(f"[{app}] Up to date on {args.branch} ({latest_sha[:8]})")
 
@@ -142,7 +152,7 @@ def main():
             f.write(f"has_changes={'true' if has_changes else 'false'}\n")
             f.write(f"matrix={matrix_output}\n")
             f.write(f"count={len(matrix_items)}\n")
-            f.write(f"summary={', '.join(changed_apps_summary) if changed_apps_summary else 'None'}\n")
+            f.write(f"summary={', '.join(changed_apps_summary) if changed_apps_summary else ', '.join(apps_to_check)}\n")
             f.write(f"latest_shas={json.dumps(latest_shas)}\n")
 
 if __name__ == "__main__":

@@ -161,15 +161,24 @@ The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/buil
 ### Triggering via GitHub Actions UI
 1. Go to **Actions** ▸ **Build Upstream from Main & Deploy to Firebase**.
 2. Click **Run workflow**.
-3. Select `app: auto` (checks commits and builds only what changed), `all`, or a specific app, and click **Run workflow**.
+3. In `app`, specify:
+   - `auto` &mdash; Automatically checks all repos and builds only what changed.
+   - `all` &mdash; Builds all 13 applications.
+   - A single app (e.g. `figcraft`)
+   - Multiple comma-separated apps (e.g. `figcraft, photocraft, cadcraft`)
+4. Check **Force rebuild** if you want to bypass commit comparison.
+5. Click **Run workflow**.
 
 ### Triggering via GitHub CLI
 ```bash
-# Check all upstream repos for new commits and build/deploy only changed apps:
+# Check all upstream repos for new commits and build/deploy ONLY changed apps:
 gh workflow run build-from-main.yml -f app=auto
 
-# Force rebuild of a specific app from main and deploy:
-gh workflow run build-from-main.yml -f app=photocraft -f branch=main --raw-field force=true
+# Force rebuild of a single app (e.g. figcraft):
+gh workflow run build-from-main.yml -f app=figcraft -f branch=main --raw-field force=true
+
+# Force rebuild of multiple apps (e.g. figcraft and photocraft):
+gh workflow run build-from-main.yml -f app="figcraft, photocraft" -f branch=main --raw-field force=true
 
 # Force rebuild of all 13 apps from main in parallel and deploy:
 gh workflow run build-from-main.yml -f app=all --raw-field force=true

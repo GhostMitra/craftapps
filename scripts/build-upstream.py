@@ -133,6 +133,9 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False):
 
     env = os.environ.copy()
     env["CI"] = "true"
+    # Allow larger WebAssembly binaries for Firebase Hosting (default Cloudflare limit is 24 MiB)
+    env["FIGCRAFT_WASM_MAX_BYTES"] = "52428800"
+    env["PHOTOCRAFT_WEB_MAX_FILE_BYTES"] = "52428800"
 
     font_ref, needs_web_fonts = APP_FONTS.get(app_name, ('', False))
 
