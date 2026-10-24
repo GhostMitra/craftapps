@@ -203,6 +203,7 @@ def prepare_portal():
 def main():
     force = "--force" in sys.argv
     check_only = "--check-only" in sys.argv
+    fill_missing = "--fill-missing" in sys.argv
     specific_app = None
     for arg in sys.argv[1:]:
         if not arg.startswith("--") and arg in APPS:
@@ -217,6 +218,12 @@ def main():
 
     for app in target_apps:
         app_dist_dir = DIST_DIR / app
+        app_has_index = (app_dist_dir / "index.html").exists()
+
+        if fill_missing and app_has_index:
+            print(f"[{app}] Already present in dist/ (preserving build)")
+            continue
+
         current_version = versions.get(app, "none")
         release_data = fetch_latest_release(app)
         if not release_data:
@@ -232,7 +239,7 @@ def main():
             continue
 
         # If dist folder doesn't exist yet, we must download even if version matched
-        needs_download = (latest_tag != current_version) or force or (not (app_dist_dir / "index.html").exists())
+        needs_download = (not app_has_index) if fill_missing else ((latest_tag != current_version) or force or (not app_has_index))
 
         if needs_download:
             print(f"[{app}] Updating to {latest_tag}...")

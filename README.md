@@ -148,6 +148,32 @@ The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows
 
 ---
 
+## 🏗️ Build Upstream from Main & Deploy to Firebase
+
+The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) compiles the bleeding-edge web applications directly from their `main` branch rather than waiting for formal release tags:
+
+- **Direct Source Compilation**: Clones the upstream `storytold/*` repositories directly from `main` (or a custom branch).
+- **Web-Only Compilation**: Compiles the WebAssembly and JS glue using Trunk and `wasm32-unknown-unknown` via `packaging/web/package.sh`.
+- **Parallel Matrix**: Builds all 13 applications concurrently across separate Ubuntu runners with Cargo/Rust caching.
+- **Single App or Full Suite**: Choose between building a single application (e.g., `photocraft`) or all 13 applications at once.
+- **Fail-Safe Deployment**: Assembles built assets into `dist/`, automatically preserves existing releases for unbuilt apps, injects domain routing, and deploys directly to Firebase Hosting.
+
+### Triggering via GitHub Actions UI
+1. Go to **Actions** ▸ **Build Upstream from Main & Deploy to Firebase**.
+2. Click **Run workflow**.
+3. Select an application (or `all`), choose the upstream branch (default: `main`), and click **Run workflow**.
+
+### Triggering via GitHub CLI
+```bash
+# Build a single app from main and deploy to Firebase
+gh workflow run build-from-main.yml -f app=photocraft -f branch=main
+
+# Build all 13 apps from main in parallel and deploy
+gh workflow run build-from-main.yml -f app=all
+```
+
+---
+
 ## 🔒 Privacy & Security
 
 - **100% Client-Side:** Files you open, edit, or save remain in your browser's local memory or Origin Private File System (OPFS).

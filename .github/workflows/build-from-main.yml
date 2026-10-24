@@ -1,0 +1,233 @@
+name: Build Upstream from Main & Deploy to Firebase
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Application to build from main (choose "all" to build complete suite)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - cadcraft
+          - deckcraft
+          - designcraft
+          - effectcraft
+          - figcraft
+          - filmcraft
+          - gridcraft
+          - lightcraft
+          - pdfcraft
+          - photocraft
+          - soundcraft
+          - vectorcraft
+          - wordcraft
+      branch:
+        description: 'Upstream git branch to checkout and build'
+        required: false
+        default: 'main'
+        type: string
+      force_deploy:
+        description: 'Deploy to Firebase Hosting after build'
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    # Weekly build of upstream main branch across all applications (Sunday 03:00 UTC)
+    - cron: '0 3 * * 0'
+  repository_dispatch:
+    types: [build-upstream-main]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-apps:
+    name: Build ${{ matrix.app }} (${{ inputs.branch || 'main' }})
+    runs-on: ubuntu-latest
+    if: inputs.app == 'all' || inputs.app == '' || inputs.app == matrix.app
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: cadcraft
+            fonts_ref: '3d9ab3a132ed0eff457e424226a435a901da30d3'
+            web_fonts: false
+          - app: deckcraft
+            fonts_ref: '43913056ce82a3fdad0ef69f6b88d1dc922a8104'
+            web_fonts: false
+          - app: designcraft
+            fonts_ref: 'a71c20e30af613287c504f7e685ca8fad77752bc'
+            web_fonts: true
+          - app: effectcraft
+            fonts_ref: ''
+            web_fonts: false
+          - app: figcraft
+            fonts_ref: '43913056ce82a3fdad0ef69f6b88d1dc922a8104'
+            web_fonts: true
+          - app: filmcraft
+            fonts_ref: 'bfcbf714e45a3ea8e98f88ab2b7971372a576414'
+            web_fonts: false
+          - app: gridcraft
+            fonts_ref: 'abb83316d96aa59c1cf64784289e378fe9fa5695'
+            web_fonts: false
+          - app: lightcraft
+            fonts_ref: 'a71c20e30af613287c504f7e685ca8fad77752bc'
+            web_fonts: true
+          - app: pdfcraft
+            fonts_ref: '3d9ab3a132ed0eff457e424226a435a901da30d3'
+            web_fonts: false
+          - app: photocraft
+            fonts_ref: 'abb83316d96aa59c1cf64784289e378fe9fa5695'
+            web_fonts: false
+          - app: soundcraft
+            fonts_ref: ''
+            web_fonts: false
+          - app: vectorcraft
+            fonts_ref: 'a71c20e30af613287c504f7e685ca8fad77752bc'
+            web_fonts: true
+          - app: wordcraft
+            fonts_ref: '8dcdacd5153e64560d109541a47d806f26f048c0'
+            web_fonts: false
+
+    steps:
+      - name: Checkout CraftApps Repository
+        uses: actions/checkout@v4
+        with:
+          path: craftapps
+
+      - name: Checkout Upstream App (${{ matrix.app }})
+        uses: actions/checkout@v4
+        with:
+          repository: storytold/${{ matrix.app }}
+          ref: ${{ inputs.branch || 'main' }}
+          path: app-repo
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo & Build Artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app-repo -> target
+          key: ${{ matrix.app }}-web-${{ inputs.branch || 'main' }}
+
+      - name: Install Trunk CLI
+        shell: bash
+        run: |
+          TRUNK_VERSION="0.21.14"
+          echo "Installing Trunk v${TRUNK_VERSION}..."
+          curl -fsSL "https://github.com/trunk-rs/trunk/releases/download/v${TRUNK_VERSION}/trunk-x86_64-unknown-linux-gnu.tar.gz" -o trunk.tar.gz
+          tar -xzf trunk.tar.gz
+          sudo mv trunk /usr/local/bin/
+          trunk --version
+
+      - name: Check out craft-fonts (if required)
+        if: matrix.fonts_ref != ''
+        uses: actions/checkout@v4
+        with:
+          repository: storytold/craft-fonts
+          ref: ${{ matrix.fonts_ref }}
+          path: craft-fonts
+          persist-credentials: false
+
+      - name: Check out craft-i18n (if required)
+        shell: bash
+        run: |
+          if [ -f app-repo/craft-i18n.rev ]; then
+            REV=$(tr -d '[:space:]' < app-repo/craft-i18n.rev)
+            echo "Checking out craft-i18n at commit ${REV}..."
+            git clone --filter=blob:none https://github.com/storytold/craft-i18n.git craft-i18n
+            (cd craft-i18n && git checkout "$REV")
+            echo "CRAFT_I18N_DIR=$GITHUB_WORKSPACE/craft-i18n" >> $GITHUB_ENV
+            echo "CRAFT_I18N_REQUIRED=1" >> $GITHUB_ENV
+          fi
+
+      - name: Build Web Target via Packaging Script
+        shell: bash
+        env:
+          CRAFT_FONTS_DIR: ${{ matrix.fonts_ref != '' && format('{0}/craft-fonts', github.workspace) || '' }}
+          CRAFT_FONTS_REQUIRED: ${{ matrix.web_fonts && '1' || '' }}
+        run: |
+          python craftapps/scripts/build-upstream.py \
+            --app ${{ matrix.app }} \
+            --repo-dir app-repo \
+            --output-dir output/${{ matrix.app }} \
+            ${{ matrix.fonts_ref != '' && format('--fonts-dir {0}/craft-fonts', github.workspace) || '' }}
+
+      - name: Upload Built App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ matrix.app }}
+          path: output/${{ matrix.app }}/
+          retention-days: 1
+
+  deploy:
+    name: Assemble & Deploy to Firebase
+    needs: [build-apps]
+    if: always() && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout CraftApps Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download Built App Artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          path: downloaded-artifacts
+          pattern: app-*
+          merge-multiple: false
+
+      - name: Assemble Built Apps into dist/
+        shell: bash
+        run: |
+          mkdir -p dist
+          if [ -d downloaded-artifacts ]; then
+            for d in downloaded-artifacts/app-*; do
+              if [ -d "$d" ]; then
+                app_name="${d##*downloaded-artifacts/app-}"
+                echo "Installing built application $app_name into dist/$app_name..."
+                mkdir -p "dist/$app_name"
+                cp -R "$d/." "dist/$app_name/"
+              fi
+            done
+          fi
+
+      - name: Prepare Portal Shell & Fill Missing Apps
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/sync-upstream.py --fill-missing
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS }}
+          projectId: craftapps
+          channelId: live
+
+      - name: Report Deployment Status
+        shell: bash
+        run: |
+          echo "### 🚀 Deployed Upstream Build to Firebase Hosting" >> $GITHUB_STEP_SUMMARY
+          echo "Applications compiled and assembled into \`dist/\`:" >> $GITHUB_STEP_SUMMARY
+          for app in dist/*; do
+            if [ -d "$app" ] && [ "$(basename "$app")" != "icons" ]; then
+              echo "- **$(basename "$app")**" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Live URL: [craftapps.web.app](https://craftapps.web.app)" >> $GITHUB_STEP_SUMMARY
