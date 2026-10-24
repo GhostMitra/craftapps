@@ -1,14 +1,18 @@
 name: Build Upstream from Main & Deploy to Firebase
 
 on:
+  schedule:
+    # Check upstream main branches every 6 hours for new commits
+    - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       app:
-        description: 'Application to build from main (choose "all" to build complete suite)'
+        description: 'Application to build ("auto" checks for new commits, "all" builds all, or select specific app)'
         required: true
-        default: 'all'
+        default: 'auto'
         type: choice
         options:
+          - auto
           - all
           - cadcraft
           - deckcraft
@@ -24,75 +28,78 @@ on:
           - vectorcraft
           - wordcraft
       branch:
-        description: 'Upstream git branch to checkout and build'
+        description: 'Upstream git branch to inspect and build'
         required: false
         default: 'main'
         type: string
+      force:
+        description: 'Force rebuild even if no new commit is detected'
+        required: false
+        default: false
+        type: boolean
       force_deploy:
         description: 'Deploy to Firebase Hosting after build'
         required: false
         default: true
         type: boolean
-  schedule:
-    # Weekly build of upstream main branch across all applications (Sunday 03:00 UTC)
-    - cron: '0 3 * * 0'
   repository_dispatch:
     types: [build-upstream-main]
 
 permissions:
-  contents: read
+  contents: write
   checks: write
   pull-requests: write
 
 jobs:
-  setup:
-    name: Determine Applications to Build
+  check-changes:
+    name: Check Upstream Main Commits
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.check.outputs.has_changes }}
+      matrix: ${{ steps.check.outputs.matrix }}
+      count: ${{ steps.check.outputs.count }}
+      summary: ${{ steps.check.outputs.summary }}
+      latest_shas: ${{ steps.check.outputs.latest_shas }}
     steps:
-      - name: Generate Build Matrix
-        id: set-matrix
-        shell: bash
+      - name: Checkout CraftApps Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check for New Commits on Upstream Main
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 - <<'PY'
-          import json, os
+          FORCE_FLAG=""
+          if [ "${{ inputs.force }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          APP_ARG="${{ inputs.app || 'auto' }}"
+          BRANCH_ARG="${{ inputs.branch || 'main' }}"
+          python scripts/check-upstream-commits.py --app "$APP_ARG" --branch "$BRANCH_ARG" $FORCE_FLAG
 
-          all_apps = [
-              {"app": "cadcraft", "fonts_ref": "3d9ab3a132ed0eff457e424226a435a901da30d3", "web_fonts": False},
-              {"app": "deckcraft", "fonts_ref": "43913056ce82a3fdad0ef69f6b88d1dc922a8104", "web_fonts": False},
-              {"app": "designcraft", "fonts_ref": "a71c20e30af613287c504f7e685ca8fad77752bc", "web_fonts": True},
-              {"app": "effectcraft", "fonts_ref": "", "web_fonts": False},
-              {"app": "figcraft", "fonts_ref": "43913056ce82a3fdad0ef69f6b88d1dc922a8104", "web_fonts": True},
-              {"app": "filmcraft", "fonts_ref": "bfcbf714e45a3ea8e98f88ab2b7971372a576414", "web_fonts": False},
-              {"app": "gridcraft", "fonts_ref": "abb83316d96aa59c1cf64784289e378fe9fa5695", "web_fonts": False},
-              {"app": "lightcraft", "fonts_ref": "a71c20e30af613287c504f7e685ca8fad77752bc", "web_fonts": True},
-              {"app": "pdfcraft", "fonts_ref": "3d9ab3a132ed0eff457e424226a435a901da30d3", "web_fonts": False},
-              {"app": "photocraft", "fonts_ref": "abb83316d96aa59c1cf64784289e378fe9fa5695", "web_fonts": False},
-              {"app": "soundcraft", "fonts_ref": "", "web_fonts": False},
-              {"app": "vectorcraft", "fonts_ref": "a71c20e30af613287c504f7e685ca8fad77752bc", "web_fonts": True},
-              {"app": "wordcraft", "fonts_ref": "8dcdacd5153e64560d109541a47d806f26f048c0", "web_fonts": False}
-          ]
-
-          selected = "${{ inputs.app }}".strip().lower()
-          if not selected or selected == "all":
-              target = all_apps
-          else:
-              target = [a for a in all_apps if a["app"] == selected]
-
-          matrix_json = json.dumps({"include": target})
-          print("Build matrix:", matrix_json)
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
-              f.write(f"matrix={matrix_json}\n")
-          PY
+      - name: Report Check Summary
+        run: |
+          if [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
+            echo "### 🚀 Upstream Changes Detected (${{ steps.check.outputs.count }} app(s))" >> $GITHUB_STEP_SUMMARY
+            echo "Queued for WebAssembly compilation: **${{ steps.check.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ All Applications Up to Date" >> $GITHUB_STEP_SUMMARY
+            echo "No new commits found on \`main\` across upstream repositories. Skipping build and deployment." >> $GITHUB_STEP_SUMMARY
+          fi
 
   build-apps:
     name: Build ${{ matrix.app }} (${{ inputs.branch || 'main' }})
-    needs: [setup]
+    needs: [check-changes]
+    if: needs.check-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.check-changes.outputs.matrix) }}
 
     steps:
       - name: Checkout CraftApps Repository
@@ -116,7 +123,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: app-repo -> target
-          key: ${{ matrix.app }}-web-${{ inputs.branch || 'main' }}
+          key: ${{ matrix.app }}-web-${{ inputs.branch || 'main' }}-${{ matrix.latest_sha }}
 
       - name: Install Trunk CLI
         shell: bash
@@ -170,13 +177,15 @@ jobs:
 
   deploy:
     name: Assemble & Deploy to Firebase
-    needs: [setup, build-apps]
-    if: always() && needs.setup.result == 'success' && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
+    needs: [check-changes, build-apps]
+    if: always() && needs.check-changes.outputs.has_changes == 'true' && (needs.build-apps.result == 'success' || needs.build-apps.result == 'skipped') && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout CraftApps Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -212,6 +221,42 @@ jobs:
         run: |
           python scripts/sync-upstream.py --fill-missing
 
+      - name: Update Tracked Commit Metadata
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+
+          latest_shas_str = '''${{ needs.check-changes.outputs.latest_shas }}'''
+          if latest_shas_str:
+              try:
+                  latest_shas = json.loads(latest_shas_str)
+                  commits_file = "upstream-commits.json"
+                  current = {}
+                  if os.path.exists(commits_file):
+                      with open(commits_file, "r", encoding="utf-8") as f:
+                          current = json.load(f)
+                  current.update(latest_shas)
+                  with open(commits_file, "w", encoding="utf-8") as f:
+                      json.dump(current, f, indent=2, sort_keys=True)
+                      f.write("\n")
+                  print("Updated upstream-commits.json with latest SHAs")
+              except Exception as e:
+                  print("Warning: failed to update upstream-commits.json:", e)
+          PY
+
+      - name: Commit Updated Commit Hashes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add upstream-commits.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(upstream): update tracked main commit SHAs [skip ci]"
+            git push origin main
+          else
+            echo "upstream-commits.json is unchanged; skipping commit."
+          fi
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -223,12 +268,7 @@ jobs:
       - name: Report Deployment Status
         shell: bash
         run: |
-          echo "### 🚀 Deployed Upstream Build to Firebase Hosting" >> $GITHUB_STEP_SUMMARY
-          echo "Applications compiled and assembled into \`dist/\`:" >> $GITHUB_STEP_SUMMARY
-          for app in dist/*; do
-            if [ -d "$app" ] && [ "$(basename "$app")" != "icons" ]; then
-              echo "- **$(basename "$app")**" >> $GITHUB_STEP_SUMMARY
-            fi
-          done
+          echo "### 🚀 Deployed Updated Application(s) to Firebase Hosting" >> $GITHUB_STEP_SUMMARY
+          echo "Newly built from \`main\`: **${{ needs.check-changes.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Live URL: [craftapps.web.app](https://craftapps.web.app)" >> $GITHUB_STEP_SUMMARY
+          echo "Live suite accessible at: [craftapps.web.app](https://craftapps.web.app)" >> $GITHUB_STEP_SUMMARY

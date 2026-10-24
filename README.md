@@ -150,26 +150,29 @@ The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows
 
 ## 🏗️ Build Upstream from Main & Deploy to Firebase
 
-The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) compiles the bleeding-edge web applications directly from their `main` branch rather than waiting for formal release tags:
+The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) monitors the `main` branch across all 13 upstream repositories (`https://github.com/storytold/*`), detects when new commits are pushed, compiles only the modified apps, and deploys to Firebase Hosting:
 
-- **Direct Source Compilation**: Clones the upstream `storytold/*` repositories directly from `main` (or a custom branch).
-- **Web-Only Compilation**: Compiles the WebAssembly and JS glue using Trunk and `wasm32-unknown-unknown` via `packaging/web/package.sh`.
-- **Parallel Matrix**: Builds all 13 applications concurrently across separate Ubuntu runners with Cargo/Rust caching.
-- **Single App or Full Suite**: Choose between building a single application (e.g., `photocraft`) or all 13 applications at once.
-- **Fail-Safe Deployment**: Assembles built assets into `dist/`, automatically preserves existing releases for unbuilt apps, injects domain routing, and deploys directly to Firebase Hosting.
+- **Automated Commit Diff Tracking**: Tracks the latest built commit SHA for every repository in `upstream-commits.json`.
+- **Build Changed Apps Only**: When new commits appear on `main`, the build matrix only spins up runners for the apps that actually changed, avoiding redundant builds.
+- **Zero-Touch Cron**: Automatically checks every 6 hours; if no upstream commits have changed, the workflow exits early in seconds without wasting runner minutes.
+- **Web-Only Compilation**: Compiles WebAssembly and JS glue using Trunk and `wasm32-unknown-unknown` via `packaging/web/package.sh`.
+- **Atomic Firebase Deployment**: Assembles the newly built app(s) into `dist/` alongside existing applications, preserving custom subdomain routing and deploying the complete suite to Firebase Hosting.
 
 ### Triggering via GitHub Actions UI
 1. Go to **Actions** ▸ **Build Upstream from Main & Deploy to Firebase**.
 2. Click **Run workflow**.
-3. Select an application (or `all`), choose the upstream branch (default: `main`), and click **Run workflow**.
+3. Select `app: auto` (checks commits and builds only what changed), `all`, or a specific app, and click **Run workflow**.
 
 ### Triggering via GitHub CLI
 ```bash
-# Build a single app from main and deploy to Firebase
-gh workflow run build-from-main.yml -f app=photocraft -f branch=main
+# Check all upstream repos for new commits and build/deploy only changed apps:
+gh workflow run build-from-main.yml -f app=auto
 
-# Build all 13 apps from main in parallel and deploy
-gh workflow run build-from-main.yml -f app=all
+# Force rebuild of a specific app from main and deploy:
+gh workflow run build-from-main.yml -f app=photocraft -f branch=main --raw-field force=true
+
+# Force rebuild of all 13 apps from main in parallel and deploy:
+gh workflow run build-from-main.yml -f app=all --raw-field force=true
 ```
 
 ---
