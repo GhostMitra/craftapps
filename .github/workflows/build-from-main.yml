@@ -186,6 +186,15 @@ jobs:
           pattern: app-*
           merge-multiple: false
 
+      - name: Restore Persistent Distribution Cache
+        uses: actions/cache/restore@v4
+        id: dist-cache
+        with:
+          path: dist
+          key: craftapps-dist-${{ github.run_id }}
+          restore-keys: |
+            craftapps-dist-
+
       - name: Assemble Built Apps into dist/
         shell: bash
         run: |
@@ -194,17 +203,28 @@ jobs:
             for d in downloaded-artifacts/app-*; do
               if [ -d "$d" ]; then
                 app_name="${d##*downloaded-artifacts/app-}"
-                echo "Installing built application $app_name into dist/$app_name..."
+                echo "Replacing build files for $app_name in dist/$app_name..."
+                rm -rf "dist/$app_name"
                 mkdir -p "dist/$app_name"
                 cp -R "$d/." "dist/$app_name/"
               fi
             done
           fi
 
-      - name: Prepare Portal Shell & Fill Missing Apps
+      - name: Prepare Root Portal Shell
+        shell: bash
+        run: |
+          mkdir -p dist/icons
+          cp index.html dist/index.html
+          cp -R icons/. dist/icons/
+          echo "Installed portal shell to dist/index.html and dist/icons/"
+
+      - name: Fallback Baseline for Cold Cache
+        if: steps.dist-cache.outputs.cache-matched-key == ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "Cold cache detected: populating baseline applications once..."
           python scripts/sync-upstream.py --fill-missing
 
       - name: Update Tracked Commit Metadata
@@ -250,6 +270,13 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS }}
           projectId: craftapps
           channelId: live
+
+      - name: Save Persistent Distribution Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: dist
+          key: craftapps-dist-${{ github.run_id }}
 
       - name: Report Deployment Status
         shell: bash
