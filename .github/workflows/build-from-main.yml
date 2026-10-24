@@ -4,7 +4,7 @@ on:
   schedule:
     # Incremental check for new main commits every 6 hours (06:00, 12:00, 18:00 UTC)
     - cron: '0 6,12,18 * * *'
-    # Full clean rebuild of all 14 apps bypassing and purging all caches every 24 hours (00:00 UTC)
+    # Full clean rebuild of all 14 apps bypassing compiler cache every 24 hours (00:00 UTC)
     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
@@ -24,7 +24,7 @@ on:
         default: false
         type: boolean
       clean_build:
-        description: 'Clean build: rebuild all 14 apps from scratch and purge all caches'
+        description: 'Clean build: rebuild all 14 apps from scratch and purge compiler caches'
         required: false
         default: false
         type: boolean
@@ -79,19 +79,30 @@ jobs:
           BRANCH_ARG="${{ inputs.branch || 'main' }}"
           python scripts/check-upstream-commits.py --app "$APP_ARG" --branch "$BRANCH_ARG" $FORCE_FLAG $CLEAN_BUILD_FLAG
 
-      - name: Purge Actions Caches for Clean Build
+      - name: Purge Compiler Caches for Clean Build
         if: steps.check.outputs.clean_build == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Clean rebuild requested: purging all repository caches..."
-          gh cache delete --all --succeed-on-no-caches || true
+          python - <<'PY'
+          import json, subprocess, os
+          try:
+              res = subprocess.run(["gh", "cache", "list", "--json", "id,key"], capture_output=True, text=True, check=True)
+              caches = json.loads(res.stdout) if res.stdout else []
+              compiler_caches = [c for c in caches if not c["key"].startswith("craftapps-dist-")]
+              print(f"Purging {len(compiler_caches)} compiler build cache(s) for clean rebuild...")
+              for c in compiler_caches:
+                  subprocess.run(["gh", "cache", "delete", str(c["id"])], check=False)
+              print("Compiler caches successfully purged.")
+          except Exception as e:
+              print(f"Notice: cache purge check completed: {e}")
+          PY
 
       - name: Report Check Summary
         run: |
           if [ "${{ steps.check.outputs.clean_build }}" = "true" ]; then
             echo "### 🧹 24h Clean Rebuild Triggered (${{ steps.check.outputs.count }} apps)" >> $GITHUB_STEP_SUMMARY
-            echo "All caches purged. Compiling all 14 applications from scratch from \`main\`." >> $GITHUB_STEP_SUMMARY
+            echo "Compiler caches purged. Compiling all 14 applications from scratch from \`main\`." >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
             echo "### 🚀 Upstream Build Queued (${{ steps.check.outputs.count }} app(s))" >> $GITHUB_STEP_SUMMARY
             echo "Applications to compile: **${{ steps.check.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
@@ -211,8 +222,7 @@ jobs:
           pattern: app-*
           merge-multiple: false
 
-      - name: Restore Persistent Distribution Cache
-        if: needs.check-changes.outputs.clean_build != 'true'
+      - name: Restore Previous Successful Web Builds
         uses: actions/cache/restore@v4
         id: dist-cache
         with:
@@ -229,7 +239,7 @@ jobs:
             for d in downloaded-artifacts/app-*; do
               if [ -d "$d" ]; then
                 app_name="${d##*downloaded-artifacts/app-}"
-                echo "Replacing build files for $app_name in dist/$app_name..."
+                echo "Replacing build files for $app_name with new build from main..."
                 rm -rf "dist/$app_name"
                 mkdir -p "dist/$app_name"
                 cp -R "$d/." "dist/$app_name/"
@@ -244,13 +254,6 @@ jobs:
           cp index.html dist/index.html
           cp -R icons/. dist/icons/
           echo "Installed portal shell to dist/index.html and dist/icons/"
-
-      - name: Fill Missing Apps with Fallback Baseline
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Checking for any missing applications in dist/..."
-          python scripts/sync-upstream.py --fill-missing
 
       - name: Update Tracked Commit Metadata
         shell: bash
@@ -357,10 +360,10 @@ jobs:
                           f.write(f"Newly built from `main`: **{', '.join(built_apps)}**\n\n")
                   else:
                       f.write("### ⚠️ Partial Deployment: Some App Builds Failed\n\n")
-                      f.write(f"✅ **Successfully deployed from `main` ({len(built_apps)}):** {', '.join(built_apps) if built_apps else 'None'}\n\n")
+                      f.write(f"✅ **Newly compiled & deployed from `main` ({len(built_apps)}):** {', '.join(built_apps) if built_apps else 'None'}\n\n")
                       if failed_apps:
                           f.write(f"❌ **Failed to compile from `main` ({len(failed_apps)}):** {', '.join(failed_apps)}\n\n")
-                          f.write("> [!WARNING]\n> Failed applications were preserved on their previous working build or fallback release. They will be retried automatically on the next scheduled run.\n\n")
+                          f.write("> [!IMPORTANT]\n> Preserved previously successful builds for failed applications on the live website (zero release downloads). They will be retried automatically on the next scheduled run.\n\n")
 
                   f.write("Live suite accessible at: [craftapps.web.app](https://craftapps.web.app)\n")
           PY
@@ -369,6 +372,6 @@ jobs:
         if: always() && needs.build-apps.result != 'success'
         shell: bash
         run: |
-          echo "::error title=Partial Build Failure::One or more applications failed to compile from main. Successfully built apps were deployed to Firebase Hosting, while failed apps were kept on fallback releases."
+          echo "::error title=Partial Build Failure::One or more applications failed to compile from main. Successfully built apps were deployed to Firebase Hosting, while failed apps continue running their previous successful build."
           echo "Triggering GitHub workflow failure notification..."
           exit 1

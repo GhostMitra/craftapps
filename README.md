@@ -148,7 +148,7 @@ The primary deployment workflow at [`.github/workflows/build-from-main.yml`](.gi
 - **Granular Matrix Compilation**: Spawns parallel matrix runners only for apps requiring compilation, respecting app-specific font bundles and WebAssembly size budgets (50 MiB).
 - **Web-Only Compilation**: Compiles WebAssembly and JS glue using Trunk and `wasm32-unknown-unknown` via `packaging/web/package.sh`.
 - **Atomic Firebase Deployment**: Assembles built apps into `dist/` alongside root portal assets (`index.html` and icons), preserving custom subdomain routing and deploying the complete suite to Firebase Hosting.
-- **Resilient Partial Deployments & GitHub Notifications**: If any app fails to compile from `main` (even during daily clean rebuilds), the remaining successful applications are deployed to Firebase without interruption. Failed apps are preserved on their working baseline release, and GitHub triggers a failure notification with exact diagnostic logs so you are alerted immediately.
+- **Resilient Partial Deployments & GitHub Notifications**: If any app fails to compile from `main` (even during 24h clean rebuilds), the remaining successful applications are deployed to Firebase without interruption. Any failed application continues running its previous successful build on the website (without downloading external release zips), and GitHub triggers a failure notification with exact compiler logs so you are alerted immediately.
 
 ### Triggering via GitHub Actions UI
 1. Go to **Actions** ▸ **Build Upstream from Main & Deploy to Firebase**.
