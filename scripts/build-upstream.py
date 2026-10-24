@@ -28,10 +28,15 @@ APPS = [
     'lightcraft',
     'pdfcraft',
     'photocraft',
+    'solidcraft',
     'soundcraft',
     'vectorcraft',
     'wordcraft'
 ]
+
+APP_REPOS = {
+    'solidcraft': 'tangency-labs/solidcraft'
+}
 
 # Upstream font reference commits mapped from official release workflows
 APP_FONTS = {
@@ -45,6 +50,7 @@ APP_FONTS = {
     'lightcraft': ('a71c20e30af613287c504f7e685ca8fad77752bc', True),
     'pdfcraft': ('3d9ab3a132ed0eff457e424226a435a901da30d3', False),
     'photocraft': ('abb83316d96aa59c1cf64784289e378fe9fa5695', False),
+    'solidcraft': ('', False),
     'soundcraft': ('', False),
     'vectorcraft': ('a71c20e30af613287c504f7e685ca8fad77752bc', True),
     'wordcraft': ('8dcdacd5153e64560d109541a47d806f26f048c0', False),
@@ -234,7 +240,8 @@ def main():
         temp_dir = tempfile.mkdtemp(prefix=f"craftapp-{app_name}-")
         repo_path = Path(temp_dir)
         cleanup_repo = True
-        upstream_url = f"https://github.com/storytold/{app_name}.git"
+        repo_slug = APP_REPOS.get(app_name, f"storytold/{app_name}")
+        upstream_url = f"https://github.com/{repo_slug}.git"
         clone_repo(upstream_url, repo_path, branch=args.branch)
 
     try:

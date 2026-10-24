@@ -30,10 +30,15 @@ APPS = [
     'lightcraft',
     'pdfcraft',
     'photocraft',
+    'solidcraft',
     'soundcraft',
     'vectorcraft',
     'wordcraft'
 ]
+
+APP_REPOS = {
+    'solidcraft': 'tangency-labs/solidcraft'
+}
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT_DIR / "dist"
@@ -61,7 +66,8 @@ def save_versions(versions):
         f.write("\n")
 
 def fetch_latest_release(app_name):
-    url = f"https://api.github.com/repos/storytold/{app_name}/releases/latest"
+    repo = APP_REPOS.get(app_name, f"storytold/{app_name}")
+    url = f"https://api.github.com/repos/{repo}/releases/latest"
     req = urllib.request.Request(url, headers=get_headers())
     try:
         with urllib.request.urlopen(req) as resp:

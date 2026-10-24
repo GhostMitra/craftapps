@@ -28,6 +28,7 @@ APP_METADATA = {
     'lightcraft': {'fonts_ref': 'a71c20e30af613287c504f7e685ca8fad77752bc', 'web_fonts': True},
     'pdfcraft': {'fonts_ref': '3d9ab3a132ed0eff457e424226a435a901da30d3', 'web_fonts': False},
     'photocraft': {'fonts_ref': 'abb83316d96aa59c1cf64784289e378fe9fa5695', 'web_fonts': False},
+    'solidcraft': {'repo': 'tangency-labs/solidcraft', 'fonts_ref': '', 'web_fonts': False},
     'soundcraft': {'fonts_ref': '', 'web_fonts': False},
     'vectorcraft': {'fonts_ref': 'a71c20e30af613287c504f7e685ca8fad77752bc', 'web_fonts': True},
     'wordcraft': {'fonts_ref': '8dcdacd5153e64560d109541a47d806f26f048c0', 'web_fonts': False},
@@ -57,8 +58,9 @@ def save_recorded_commits(commits):
         json.dump(commits, f, indent=2, sort_keys=True)
         f.write("\n")
 
-def fetch_latest_commit_sha(app_name, branch="main"):
-    url = f"https://api.github.com/repos/storytold/{app_name}/commits/{branch}"
+def fetch_latest_commit_sha(app_name, repo_slug=None, branch="main"):
+    repo = repo_slug or f"storytold/{app_name}"
+    url = f"https://api.github.com/repos/{repo}/commits/{branch}"
     req = urllib.request.Request(url, headers=get_headers())
     try:
         with urllib.request.urlopen(req) as resp:
@@ -114,7 +116,7 @@ def main():
 
     for app in apps_to_check:
         meta = APP_METADATA[app]
-        latest_sha = fetch_latest_commit_sha(app, branch=args.branch)
+        latest_sha = fetch_latest_commit_sha(app, repo_slug=meta.get("repo"), branch=args.branch)
         if not latest_sha:
             continue
 
@@ -126,6 +128,7 @@ def main():
         if has_new_commit or force_build:
             matrix_items.append({
                 "app": app,
+                "repo": meta.get("repo", f"storytold/{app}"),
                 "fonts_ref": meta["fonts_ref"],
                 "web_fonts": meta["web_fonts"],
                 "latest_sha": latest_sha

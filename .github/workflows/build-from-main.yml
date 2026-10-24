@@ -94,7 +94,7 @@ jobs:
       - name: Checkout Upstream App (${{ matrix.app }})
         uses: actions/checkout@v4
         with:
-          repository: storytold/${{ matrix.app }}
+          repository: ${{ matrix.repo || format('storytold/{0}', matrix.app) }}
           ref: ${{ inputs.branch || 'main' }}
           path: app-repo
 

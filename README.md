@@ -1,6 +1,6 @@
 # CraftOS &mdash; Web Desktop Studio 🖥️🎨
 
-> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 13 applications in floating resizable windows on Firebase.**
+> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 14 applications in floating resizable windows on Firebase.**
 
 ![Rust](https://img.shields.io/badge/Language-Rust-dea584?style=flat-square&logo=rust&logoColor=white)
 ![WebAssembly](https://img.shields.io/badge/Technology-WebAssembly-654ff0?style=flat-square&logo=webassembly&logoColor=white)
@@ -26,7 +26,7 @@ Every creative application runs client-side with native-level performance and ha
   - 🟡 **Minimize (−):** Minimizes the application down to the taskbar.
   - 🟢 **Maximize (⤢):** Expands the application to occupy the full desktop screen.
 - **Frosted-Glass Taskbar / Dock:**
-  - **Start Menu ("CraftOS"):** Search and launch any of the 13 applications with keyboard navigation.
+  - **Start Menu ("CraftOS"):** Search and launch any of the 14 applications with keyboard navigation.
   - **Task Switcher:** Click running taskbar pills to focus, restore, or minimize windows.
   - **System Tray:** Live digital clock, active memory/process monitor, wallpaper switcher, and desktop fullscreen toggle.
 - **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
@@ -47,6 +47,7 @@ Every creative application runs client-side with native-level performance and ha
 | **DeckCraft** | [`deckcraft.debarghaya.in`](https://deckcraft.debarghaya.in/) | [`/deckcraft/`](https://craftapps.web.app/deckcraft/) | **MS PowerPoint** | Slide deck creator, vector shapes, animations, presenter mode |
 | **GridCraft** | [`gridcraft.debarghaya.in`](https://gridcraft.debarghaya.in/) | [`/gridcraft/`](https://craftapps.web.app/gridcraft/) | **Microsoft Excel** | Fast formula calculation engine, data grid, charts |
 | **WordCraft** | [`wordcraft.debarghaya.in`](https://wordcraft.debarghaya.in/) | [`/wordcraft/`](https://craftapps.web.app/wordcraft/) | **Microsoft Word** | Document design, typography styles, tables, citations |
+| **SolidCraft** | [`solidcraft.debarghaya.in`](https://solidcraft.debarghaya.in/) | [`/solidcraft/`](https://craftapps.web.app/solidcraft/) | **SolidWorks** | Parametric 3D CAD, feature tree, constraints, B-Rep modeling, MCP |
 | **CraftApps Portal** | [`apps.debarghaya.in`](https://apps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | **App Launcher** | Central portal and creative application launcher |
 
 ---
@@ -150,7 +151,7 @@ The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows
 
 ## 🏗️ Build Upstream from Main & Deploy to Firebase
 
-The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) monitors the `main` branch across all 13 upstream repositories (`https://github.com/storytold/*`), detects when new commits are pushed, compiles only the modified apps, and deploys to Firebase Hosting:
+The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) monitors the `main` branch across all 14 upstream repositories (`storytold/*` and `tangency-labs/solidcraft`), detects when new commits are pushed, compiles only the modified apps, and deploys to Firebase Hosting:
 
 - **Automated Commit Diff Tracking**: Tracks the latest built commit SHA for every repository in `upstream-commits.json`.
 - **Build Changed Apps Only**: When new commits appear on `main`, the build matrix only spins up runners for the apps that actually changed, avoiding redundant builds.
@@ -180,7 +181,7 @@ gh workflow run build-from-main.yml -f app=figcraft -f branch=main --raw-field f
 # Force rebuild of multiple apps (e.g. figcraft and photocraft):
 gh workflow run build-from-main.yml -f app="figcraft, photocraft" -f branch=main --raw-field force=true
 
-# Force rebuild of all 13 apps from main in parallel and deploy:
+# Force rebuild of all 14 apps from main in parallel and deploy:
 gh workflow run build-from-main.yml -f app=all --raw-field force=true
 ```
 
