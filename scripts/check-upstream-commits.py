@@ -3,7 +3,7 @@
 Check Upstream Main Branch Commits for CraftApps Suite
 Queries the latest commit SHA of the main branch for each storytold repository,
 compares against upstream-commits.json, and outputs which applications have new commits.
-Supports checking single or multiple comma-separated applications.
+Supports checking single or multiple comma-separated applications and clean rebuilds.
 """
 
 import os
@@ -91,6 +91,7 @@ def main():
     parser.add_argument("--app", default="auto", help="App(s) to check/build: 'auto', 'all', a single app, or comma-separated list")
     parser.add_argument("--branch", default="main", help="Git branch to inspect (default: main)")
     parser.add_argument("--force", action="store_true", help="Force rebuild regardless of commit diff")
+    parser.add_argument("--clean-build", action="store_true", help="Clean rebuild: force all 14 apps and bypass all caches")
     parser.add_argument("--update-sha", nargs=2, metavar=("APP", "SHA"), help="Update recorded commit SHA for an app")
     args = parser.parse_args()
 
@@ -103,16 +104,23 @@ def main():
         return
 
     recorded_commits = load_recorded_commits()
-    mode, apps_to_check = parse_target_apps(args.app)
+    is_clean = args.clean_build
 
-    # Force rebuild if --force is passed OR if user manually listed specific app(s) or 'all'
-    force_build = args.force or (mode in ("custom", "all"))
+    if is_clean:
+        mode = "all"
+        apps_to_check = list(APP_METADATA.keys())
+    else:
+        mode, apps_to_check = parse_target_apps(args.app)
+
+    # Force rebuild if --force or --clean-build is passed OR if user manually listed specific app(s) or 'all'
+    force_build = args.force or is_clean or (mode in ("custom", "all"))
 
     matrix_items = []
     changed_apps_summary = []
     latest_shas = {}
 
-    print(f"Inspecting branch '{args.branch}' across {len(apps_to_check)} application(s) (mode: {mode}, force: {force_build})...")
+    status_desc = f"clean build: {is_clean}" if is_clean else f"mode: {mode}, force: {force_build}"
+    print(f"Inspecting branch '{args.branch}' across {len(apps_to_check)} application(s) ({status_desc})...")
 
     for app in apps_to_check:
         meta = APP_METADATA[app]
@@ -133,7 +141,9 @@ def main():
                 "web_fonts": meta["web_fonts"],
                 "latest_sha": latest_sha
             })
-            if has_new_commit:
+            if is_clean:
+                print(f"[{app}] Clean rebuild from {args.branch} at {latest_sha[:8]}")
+            elif has_new_commit:
                 short_prev = prev_sha[:8] if prev_sha else "none"
                 short_new = latest_sha[:8]
                 changed_apps_summary.append(f"{app} ({short_prev} -> {short_new})")
@@ -157,6 +167,7 @@ def main():
             f.write(f"count={len(matrix_items)}\n")
             f.write(f"summary={', '.join(changed_apps_summary) if changed_apps_summary else ', '.join(apps_to_check)}\n")
             f.write(f"latest_shas={json.dumps(latest_shas)}\n")
+            f.write(f"clean_build={'true' if is_clean else 'false'}\n")
 
 if __name__ == "__main__":
     main()

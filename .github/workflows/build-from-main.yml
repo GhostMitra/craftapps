@@ -2,8 +2,10 @@ name: Build Upstream from Main & Deploy to Firebase
 
 on:
   schedule:
-    # Check upstream main branches every 6 hours for new commits
-    - cron: '0 */6 * * *'
+    # Incremental check for new main commits every 6 hours (06:00, 12:00, 18:00 UTC)
+    - cron: '0 6,12,18 * * *'
+    # Full clean rebuild of all 14 apps bypassing and purging all caches every 24 hours (00:00 UTC)
+    - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       app:
@@ -21,6 +23,11 @@ on:
         required: false
         default: false
         type: boolean
+      clean_build:
+        description: 'Clean build: rebuild all 14 apps from scratch and purge all caches'
+        required: false
+        default: false
+        type: boolean
       force_deploy:
         description: 'Deploy to Firebase Hosting after build'
         required: false
@@ -33,6 +40,7 @@ permissions:
   contents: write
   checks: write
   pull-requests: write
+  actions: write
 
 jobs:
   check-changes:
@@ -44,6 +52,7 @@ jobs:
       count: ${{ steps.check.outputs.count }}
       summary: ${{ steps.check.outputs.summary }}
       latest_shas: ${{ steps.check.outputs.latest_shas }}
+      clean_build: ${{ steps.check.outputs.clean_build }}
     steps:
       - name: Checkout CraftApps Repository
         uses: actions/checkout@v4
@@ -58,17 +67,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          CLEAN_BUILD_FLAG=""
+          if [ "${{ inputs.clean_build }}" = "true" ] || [ "${{ github.event.schedule }}" = "0 0 * * *" ]; then
+            CLEAN_BUILD_FLAG="--clean-build"
+          fi
           FORCE_FLAG=""
           if [ "${{ inputs.force }}" = "true" ]; then
             FORCE_FLAG="--force"
           fi
           APP_ARG="${{ inputs.app || 'auto' }}"
           BRANCH_ARG="${{ inputs.branch || 'main' }}"
-          python scripts/check-upstream-commits.py --app "$APP_ARG" --branch "$BRANCH_ARG" $FORCE_FLAG
+          python scripts/check-upstream-commits.py --app "$APP_ARG" --branch "$BRANCH_ARG" $FORCE_FLAG $CLEAN_BUILD_FLAG
+
+      - name: Purge Actions Caches for Clean Build
+        if: steps.check.outputs.clean_build == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Clean rebuild requested: purging all repository caches..."
+          gh cache delete --all --succeed-on-no-caches || true
 
       - name: Report Check Summary
         run: |
-          if [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
+          if [ "${{ steps.check.outputs.clean_build }}" = "true" ]; then
+            echo "### 🧹 24h Clean Rebuild Triggered (${{ steps.check.outputs.count }} apps)" >> $GITHUB_STEP_SUMMARY
+            echo "All caches purged. Compiling all 14 applications from scratch from \`main\`." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
             echo "### 🚀 Upstream Build Queued (${{ steps.check.outputs.count }} app(s))" >> $GITHUB_STEP_SUMMARY
             echo "Applications to compile: **${{ steps.check.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
           else
@@ -104,6 +128,7 @@ jobs:
           targets: wasm32-unknown-unknown
 
       - name: Cache Cargo & Build Artifacts
+        if: needs.check-changes.outputs.clean_build != 'true'
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: app-repo -> target
@@ -187,6 +212,7 @@ jobs:
           merge-multiple: false
 
       - name: Restore Persistent Distribution Cache
+        if: needs.check-changes.outputs.clean_build != 'true'
         uses: actions/cache/restore@v4
         id: dist-cache
         with:
@@ -220,7 +246,7 @@ jobs:
           echo "Installed portal shell to dist/index.html and dist/icons/"
 
       - name: Fallback Baseline for Cold Cache
-        if: steps.dist-cache.outputs.cache-matched-key == ''
+        if: steps.dist-cache.outputs.cache-matched-key == '' && needs.check-changes.outputs.clean_build != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -281,7 +307,12 @@ jobs:
       - name: Report Deployment Status
         shell: bash
         run: |
-          echo "### 🚀 Deployed Updated Application(s) to Firebase Hosting" >> $GITHUB_STEP_SUMMARY
-          echo "Newly built from \`main\`: **${{ needs.check-changes.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.check-changes.outputs.clean_build }}" = "true" ]; then
+            echo "### 🧹 24h Clean Rebuild & Deployment Complete" >> $GITHUB_STEP_SUMMARY
+            echo "All 14 applications cleanly compiled from \`main\` and deployed to Firebase Hosting." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 🚀 Deployed Updated Application(s) to Firebase Hosting" >> $GITHUB_STEP_SUMMARY
+            echo "Newly built from \`main\`: **${{ needs.check-changes.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Live suite accessible at: [craftapps.web.app](https://craftapps.web.app)" >> $GITHUB_STEP_SUMMARY

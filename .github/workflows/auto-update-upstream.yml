@@ -1,9 +1,10 @@
 name: Sync Upstream Releases & Deploy
 
 on:
-  schedule:
-    # Runs every 6 hours automatically to check for new releases
-    - cron: '0 */6 * * *'
+  # Automated scheduled deployment is now powered directly by .github/workflows/build-from-main.yml
+  # (compiling the 14 apps from upstream main every 6h and performing a 24h clean rebuild).
+  # schedule:
+  #   - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       force:

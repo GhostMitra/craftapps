@@ -138,52 +138,50 @@ Add one of the following secrets to your GitHub repository (**Settings ▸ Secre
 
 ---
 
-## 🔄 Automated Upstream Release Sync
-
-The workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows/auto-update-upstream.yml) continuously monitors all 13 upstream repos (`https://github.com/storytold/*`):
-- **Runs Every 6 Hours**: Checks GitHub Releases API for any new web version tags.
-- **Auto-Download & Extraction**: Downloads the latest `<app>-web-*.zip` release artifact and extracts it into the app directory.
-- **Auto-Domain Routing**: Preserves custom subdomain routing and redirect guards (`https://<app>.debarghaya.in/`).
-- **Auto-Deploy**: Commits the new version back to the repository and immediately deploys to Firebase Hosting.
-- **Manual Trigger**: Can also be executed anytime via GitHub Actions **Run workflow** (with an optional `force` flag).
-
----
-
 ## 🏗️ Build Upstream from Main & Deploy to Firebase
 
-The workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) monitors the `main` branch across all 14 upstream repositories (`storytold/*` and `tangency-labs/solidcraft`), detects when new commits are pushed, compiles only the modified apps, and deploys to Firebase Hosting:
+The primary deployment workflow at [`.github/workflows/build-from-main.yml`](.github/workflows/build-from-main.yml) monitors the `main` branch across all 14 upstream repositories (`storytold/*` and `tangency-labs/solidcraft`), compiling native WebAssembly applications directly from source and deploying to Firebase Hosting:
 
+- **6-Hour Incremental Diff Check (`0 6,12,18 * * *`)**: Queries GitHub API for the latest commit SHA on `main`. If commits are unchanged, the check exits in seconds with zero runner minutes used. When new commits are found, only the modified apps are compiled in parallel and merged into the distribution.
+- **24-Hour Full Clean Rebuild (`0 0 * * *`)**: Once every 24 hours at 00:00 UTC, the workflow purges all repository caches (`gh cache delete --all`), compiles all 14 applications cleanly from scratch, rebuilds `dist/`, and redeploys to Firebase.
 - **Automated Commit Diff Tracking**: Tracks the latest built commit SHA for every repository in `upstream-commits.json`.
-- **Build Changed Apps Only**: When new commits appear on `main`, the build matrix only spins up runners for the apps that actually changed, avoiding redundant builds.
-- **Zero-Touch Cron**: Automatically checks every 6 hours; if no upstream commits have changed, the workflow exits early in seconds without wasting runner minutes.
+- **Granular Matrix Compilation**: Spawns parallel matrix runners only for apps requiring compilation, respecting app-specific font bundles and WebAssembly size budgets (50 MiB).
 - **Web-Only Compilation**: Compiles WebAssembly and JS glue using Trunk and `wasm32-unknown-unknown` via `packaging/web/package.sh`.
-- **Atomic Firebase Deployment**: Assembles the newly built app(s) into `dist/` alongside existing applications, preserving custom subdomain routing and deploying the complete suite to Firebase Hosting.
+- **Atomic Firebase Deployment**: Assembles built apps into `dist/` alongside root portal assets (`index.html` and icons), preserving custom subdomain routing and deploying the complete suite to Firebase Hosting.
 
 ### Triggering via GitHub Actions UI
 1. Go to **Actions** ▸ **Build Upstream from Main & Deploy to Firebase**.
 2. Click **Run workflow**.
-3. In `app`, specify:
-   - `auto` &mdash; Automatically checks all repos and builds only what changed.
-   - `all` &mdash; Builds all 13 applications.
-   - A single app (e.g. `figcraft`)
-   - Multiple comma-separated apps (e.g. `figcraft, photocraft, cadcraft`)
-4. Check **Force rebuild** if you want to bypass commit comparison.
-5. Click **Run workflow**.
+3. Options:
+   - `app`: `auto` (default, checks for changes), `all` (all 14 apps), a single app (e.g. `solidcraft`), or a comma-separated list (e.g. `figcraft, photocraft, solidcraft`).
+   - `branch`: Git branch to inspect and build (default `main`).
+   - `force`: Force rebuild regardless of commit diff.
+   - `clean_build`: Purge all caches and rebuild all 14 apps completely from scratch.
+4. Click **Run workflow**.
 
 ### Triggering via GitHub CLI
 ```bash
 # Check all upstream repos for new commits and build/deploy ONLY changed apps:
 gh workflow run build-from-main.yml -f app=auto
 
-# Force rebuild of a single app (e.g. figcraft):
-gh workflow run build-from-main.yml -f app=figcraft -f branch=main --raw-field force=true
+# Force rebuild of a single app (e.g. solidcraft or figcraft):
+gh workflow run build-from-main.yml -f app=solidcraft -f branch=main --raw-field force=true
 
 # Force rebuild of multiple apps (e.g. figcraft and photocraft):
 gh workflow run build-from-main.yml -f app="figcraft, photocraft" -f branch=main --raw-field force=true
 
 # Force rebuild of all 14 apps from main in parallel and deploy:
 gh workflow run build-from-main.yml -f app=all --raw-field force=true
+
+# 24-hour style 100% clean rebuild: purge all caches and compile all 14 apps from scratch:
+gh workflow run build-from-main.yml --raw-field clean_build=true
 ```
+
+---
+
+## 🔄 Legacy Upstream Release Sync
+
+The backup workflow at [`.github/workflows/auto-update-upstream.yml`](.github/workflows/auto-update-upstream.yml) provides on-demand fallback downloading of official GitHub release archive zips via `workflow_dispatch` without compiling from source. Scheduled runs have been superseded by `build-from-main.yml`.
 
 ---
 
