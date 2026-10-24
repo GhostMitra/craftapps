@@ -189,7 +189,7 @@ jobs:
   deploy:
     name: Assemble & Deploy to Firebase
     needs: [check-changes, build-apps]
-    if: always() && needs.check-changes.outputs.has_changes == 'true' && (needs.build-apps.result == 'success' || needs.build-apps.result == 'skipped') && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
+    if: always() && needs.check-changes.outputs.has_changes == 'true' && needs.build-apps.result != 'cancelled' && (inputs.force_deploy == true || inputs.force_deploy == '' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
 
     steps:
@@ -245,12 +245,11 @@ jobs:
           cp -R icons/. dist/icons/
           echo "Installed portal shell to dist/index.html and dist/icons/"
 
-      - name: Fallback Baseline for Cold Cache
-        if: steps.dist-cache.outputs.cache-matched-key == '' && needs.check-changes.outputs.clean_build != 'true'
+      - name: Fill Missing Apps with Fallback Baseline
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Cold cache detected: populating baseline applications once..."
+          echo "Checking for any missing applications in dist/..."
           python scripts/sync-upstream.py --fill-missing
 
       - name: Update Tracked Commit Metadata
@@ -263,16 +262,32 @@ jobs:
           if latest_shas_str:
               try:
                   latest_shas = json.loads(latest_shas_str)
+                  built_apps = set()
+                  if os.path.exists("downloaded-artifacts"):
+                      for d in os.listdir("downloaded-artifacts"):
+                          if d.startswith("app-"):
+                              built_apps.add(d[4:])
+
                   commits_file = "upstream-commits.json"
                   current = {}
                   if os.path.exists(commits_file):
                       with open(commits_file, "r", encoding="utf-8") as f:
                           current = json.load(f)
-                  current.update(latest_shas)
-                  with open(commits_file, "w", encoding="utf-8") as f:
-                      json.dump(current, f, indent=2, sort_keys=True)
-                      f.write("\n")
-                  print("Updated upstream-commits.json with latest SHAs")
+
+                  updated_any = False
+                  for app, sha in latest_shas.items():
+                      if app in built_apps:
+                          current[app] = sha
+                          updated_any = True
+                          print(f"Recorded updated SHA for {app}: {sha[:8]}")
+                      else:
+                          print(f"Skipping SHA for {app} (build failed; will retry on next check)")
+
+                  if updated_any:
+                      with open(commits_file, "w", encoding="utf-8") as f:
+                          json.dump(current, f, indent=2, sort_keys=True)
+                          f.write("\n")
+                      print("Updated upstream-commits.json with successful SHAs")
               except Exception as e:
                   print("Warning: failed to update upstream-commits.json:", e)
           PY
@@ -307,12 +322,53 @@ jobs:
       - name: Report Deployment Status
         shell: bash
         run: |
-          if [ "${{ needs.check-changes.outputs.clean_build }}" = "true" ]; then
-            echo "### 🧹 24h Clean Rebuild & Deployment Complete" >> $GITHUB_STEP_SUMMARY
-            echo "All 14 applications cleanly compiled from \`main\` and deployed to Firebase Hosting." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### 🚀 Deployed Updated Application(s) to Firebase Hosting" >> $GITHUB_STEP_SUMMARY
-            echo "Newly built from \`main\`: **${{ needs.check-changes.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Live suite accessible at: [craftapps.web.app](https://craftapps.web.app)" >> $GITHUB_STEP_SUMMARY
+          python - <<'PY'
+          import os, json
+
+          built_apps = []
+          if os.path.exists("downloaded-artifacts"):
+              for d in os.listdir("downloaded-artifacts"):
+                  if d.startswith("app-"):
+                      built_apps.append(d[4:])
+          built_apps.sort()
+
+          latest_shas_str = '''${{ needs.check-changes.outputs.latest_shas }}'''
+          queued_apps = []
+          if latest_shas_str:
+              try:
+                  queued_apps = sorted(list(json.loads(latest_shas_str).keys()))
+              except Exception:
+                  pass
+
+          failed_apps = [a for a in queued_apps if a not in built_apps]
+
+          clean_build = "${{ needs.check-changes.outputs.clean_build }}" == "true"
+          build_result = "${{ needs.build-apps.result }}"
+
+          step_summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+          if step_summary_file:
+              with open(step_summary_file, "a", encoding="utf-8") as f:
+                  if build_result == "success":
+                      if clean_build:
+                          f.write("### 🧹 24h Clean Rebuild & Deployment Complete\n\n")
+                          f.write("All 14 applications cleanly compiled from `main` and deployed to Firebase Hosting.\n\n")
+                      else:
+                          f.write("### 🚀 Deployed Updated Application(s) to Firebase Hosting\n\n")
+                          f.write(f"Newly built from `main`: **{', '.join(built_apps)}**\n\n")
+                  else:
+                      f.write("### ⚠️ Partial Deployment: Some App Builds Failed\n\n")
+                      f.write(f"✅ **Successfully deployed from `main` ({len(built_apps)}):** {', '.join(built_apps) if built_apps else 'None'}\n\n")
+                      if failed_apps:
+                          f.write(f"❌ **Failed to compile from `main` ({len(failed_apps)}):** {', '.join(failed_apps)}\n\n")
+                          f.write("> [!WARNING]\n> Failed applications were preserved on their previous working build or fallback release. They will be retried automatically on the next scheduled run.\n\n")
+
+                  f.write("Live suite accessible at: [craftapps.web.app](https://craftapps.web.app)\n")
+          PY
+
+      - name: Notify on App Build Failures
+        if: always() && needs.build-apps.result != 'success'
+        shell: bash
+        run: |
+          echo "::error title=Partial Build Failure::One or more applications failed to compile from main. Successfully built apps were deployed to Firebase Hosting, while failed apps were kept on fallback releases."
+          echo "Triggering GitHub workflow failure notification..."
+          exit 1
