@@ -121,7 +121,7 @@ Your live site will be accessible at:
 
 ## 🤖 Automated CI/CD (GitHub Actions)
 
-This repository includes an automated workflow at [`.github/workflows/firebase-deploy.yml`](.github/workflows/firebase-deploy.yml) that automatically deploys to Firebase Hosting whenever you push to `main` (or trigger it manually via `workflow_dispatch`).
+This repository includes an automated workflow at [`.github/workflows/firebase-deploy.yml`](.github/workflows/firebase-deploy.yml) that updates the portal UI shell (`index.html`, `icons/**`, `firebase.json`) on Firebase Hosting when those files change, preserving the compiled WebAssembly applications from cache without downloading release zips.
 
 ### Setting up GitHub Secrets
 

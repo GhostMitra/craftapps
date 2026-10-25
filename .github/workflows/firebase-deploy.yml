@@ -1,12 +1,13 @@
-name: Deploy to Firebase Hosting
+name: Deploy Portal to Firebase Hosting
 
 on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'README.md'
-      - '.gitignore'
+    paths:
+      - 'index.html'
+      - 'icons/**'
+      - 'firebase.json'
   workflow_dispatch:
 
 permissions:
@@ -16,23 +17,29 @@ permissions:
 
 jobs:
   deploy:
-    name: Build & Deploy to Firebase Hosting
+    name: Deploy Portal Shell to Firebase Hosting
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Restore Persistent Web Distribution Cache
+        uses: actions/cache/restore@v4
+        id: dist-cache
         with:
-          python-version: '3.11'
+          path: dist
+          key: craftapps-dist-${{ github.run_id }}
+          restore-keys: |
+            craftapps-dist-
 
-      - name: Download & Prepare Web Applications
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare Root Portal Shell
+        shell: bash
         run: |
-          python scripts/sync-upstream.py
+          mkdir -p dist/icons
+          cp index.html dist/index.html
+          cp -R icons/. dist/icons/
+          echo "Installed portal shell to dist/index.html and dist/icons/"
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -41,3 +48,10 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS }}
           projectId: craftapps
           channelId: live
+
+      - name: Save Persistent Web Distribution Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: dist
+          key: craftapps-dist-${{ github.run_id }}
