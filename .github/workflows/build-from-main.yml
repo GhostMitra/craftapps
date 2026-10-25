@@ -188,6 +188,7 @@ jobs:
             --app ${{ matrix.app }} \
             --repo-dir app-repo \
             --output-dir output/${{ matrix.app }} \
+            --commit-sha ${{ matrix.latest_sha }} \
             ${{ matrix.fonts_ref != '' && format('--fonts-dir {0}/craft-fonts', github.workspace) || '' }}
 
       - name: Upload Built App Artifact

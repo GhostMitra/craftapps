@@ -4,6 +4,7 @@ Build Upstream CraftApp from Main Branch (WebAssembly/Web target)
 Clones or uses a local checkout of storytold/{app}, compiles the web target using
 upstream packaging scripts (packaging/web/package.sh), extracts the built assets into dist/{app},
 and patches index.html with custom domain routing (debarghaya.in).
+Bakes git commit provenance directly into Cargo.toml and WebAssembly binaries.
 """
 
 import os
@@ -15,6 +16,7 @@ import zipfile
 import tempfile
 import re
 import stat
+import datetime
 from pathlib import Path
 
 APPS = [
@@ -58,57 +60,56 @@ APP_FONTS = {
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-def patch_index_html(app_dir, app_name):
-    index_path = app_dir / "index.html"
+def patch_index_html(target_dir, app_name):
+    """
+    Patch index.html with subdomain redirection guard and canonical links.
+    """
+    index_path = target_dir / "index.html"
     if not index_path.exists():
-        print(f"[{app_name}] Warning: index.html not found in {app_dir}")
+        print(f"Warning: {index_path} not found for patching")
         return
 
     content = index_path.read_text(encoding="utf-8")
 
-    redirect_script = f"""  <script>
-    if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {{
-      location.replace('https://{app_name}.debarghaya.in' + location.pathname.replace(/^\\/{app_name}/i, '') + location.search + location.hash);
-    }}
-  </script>
-  <link rel="canonical" href="https://{app_name}.debarghaya.in/">"""
+    redirect_script = f"""
+    <!-- CraftApps Domain Router & Redirection Guard -->
+    <script>
+      (function() {{
+        var host = window.location.hostname;
+        var path = window.location.pathname;
+        if (host === "{app_name}.debarghaya.in" && path.indexOf("/{app_name}") === 0) {{
+          var newPath = path.replace(/^\/{app_name}/, "") || "/";
+          window.location.replace("https://{app_name}.debarghaya.in" + newPath + window.location.search + window.location.hash);
+        }}
+      }})();
+    </script>
+    """
 
-    if f"{app_name}.debarghaya.in" in content and "location.replace" in content:
-        print(f"[{app_name}] index.html already patched with domain routing")
-        return
+    canonical_tag = f'<link rel="canonical" href="https://{app_name}.debarghaya.in/" />'
 
-    viewport_match = re.search(r'(<meta[^>]*viewport[^>]*>)', content, re.IGNORECASE)
-    if viewport_match:
-        content = content[:viewport_match.end()] + "\n" + redirect_script + content[viewport_match.end():]
-    else:
-        head_match = re.search(r'(<head[^>]*>)', content, re.IGNORECASE)
-        if head_match:
-            content = content[:head_match.end()] + "\n" + redirect_script + content[head_match.end():]
+    if "CraftApps Domain Router" not in content:
+        if "<head>" in content:
+            content = content.replace("<head>", f"<head>\n{redirect_script}\n    {canonical_tag}")
+        elif "<HEAD>" in content:
+            content = content.replace("<HEAD>", f"<HEAD>\n{redirect_script}\n    {canonical_tag}")
         else:
-            content = redirect_script + "\n" + content
+            content = f"{redirect_script}\n{canonical_tag}\n" + content
+        index_path.write_text(content, encoding="utf-8")
+        print(f"[{app_name}] Patched index.html with domain routing guard")
 
-    index_path.write_text(content, encoding="utf-8")
-    print(f"[{app_name}] Successfully patched index.html with domain routing")
-
-def find_extracted_root(extract_path):
-    """Find the root directory containing index.html."""
-    if (extract_path / "index.html").exists():
-        return extract_path
-    index_files = list(extract_path.glob("**/index.html"))
-    if index_files:
-        return index_files[0].parent
-    child_dirs = [p for p in extract_path.iterdir() if p.is_dir()]
-    if len(child_dirs) == 1:
-        return child_dirs[0]
-    return extract_path
+def find_extracted_root(temp_dir):
+    """Find directory containing index.html after extraction."""
+    if (temp_dir / "index.html").exists():
+        return temp_dir
+    for p in temp_dir.rglob("index.html"):
+        return p.parent
+    return temp_dir
 
 def clean_dir(target_dir):
-    def on_error(func, p, exc_info):
-        try:
-            os.chmod(p, stat.S_IWRITE)
-            func(p)
-        except Exception:
-            pass
+    """Empty target directory while preserving the folder itself."""
+    def on_error(func, path, exc_info):
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
 
     if target_dir.exists():
         for item in target_dir.iterdir():
@@ -132,16 +133,62 @@ def clone_repo(repo_url, target_path, branch="main", depth=1):
     if res.returncode != 0:
         raise RuntimeError(f"Failed to clone {repo_url}")
 
-def build_app(app_name, repo_path, fonts_dir=None, skip_build=False):
+def inject_commit_version(repo_path, commit_sha, app_name):
+    """
+    Bake commit SHA into Cargo.toml version metadata so that env!("CARGO_PKG_VERSION")
+    in Rust WebAssembly binaries automatically displays the commit version in the About dialog.
+    """
+    sha = commit_sha
+    if not sha:
+        try:
+            res = subprocess.run(["git", "-C", str(repo_path), "rev-parse", "HEAD"], capture_output=True, text=True)
+            if res.returncode == 0:
+                sha = res.stdout.strip()
+        except Exception:
+            pass
+
+    if not sha:
+        return "", ""
+
+    short_sha = sha[:7]
+    cargo_toml = repo_path / "Cargo.toml"
+    new_ver = ""
+    if cargo_toml.exists():
+        content = cargo_toml.read_text(encoding="utf-8")
+        pattern = r'(\[(?:workspace\.)?package\][\s\S]*?version\s*=\s*")([^"\+]+)(")'
+        match = re.search(pattern, content)
+        if match:
+            base_ver = match.group(2).strip()
+            new_ver = f"{base_ver}+git.{short_sha}"
+            content = re.sub(pattern, rf'\g<1>{new_ver}\g<3>', content, count=1)
+            cargo_toml.write_text(content, encoding="utf-8")
+            print(f"[{app_name}] Injected commit version into Cargo.toml: {new_ver} (for wasm About dialog)")
+
+    return sha, new_ver
+
+def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=None):
     package_sh = repo_path / "packaging" / "web" / "package.sh"
     if not package_sh.exists():
         raise FileNotFoundError(f"Missing packaging script: {package_sh}")
+
+    # Inject commit SHA into Cargo.toml so WebAssembly About dialog renders commit version
+    sha, new_ver = inject_commit_version(repo_path, commit_sha, app_name)
 
     env = os.environ.copy()
     env["CI"] = "true"
     # Allow larger WebAssembly binaries for Firebase Hosting (default Cloudflare limit is 24 MiB)
     env["FIGCRAFT_WASM_MAX_BYTES"] = "52428800"
     env["PHOTOCRAFT_WEB_MAX_FILE_BYTES"] = "52428800"
+
+    # Bake commit SHA provenance into environment variables
+    app_upper = app_name.upper()
+    if sha:
+        env[f"{app_upper}_BUILD_SHA"] = sha
+        env[f"{app_upper}_BUILD_DATE"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        if new_ver:
+            env[f"{app_upper}_VERSION"] = new_ver
+        env["BUILD_SHA"] = sha
+        env["GIT_SHA"] = sha
 
     font_ref, needs_web_fonts = APP_FONTS.get(app_name, ('', False))
 
@@ -223,6 +270,7 @@ def main():
     parser.add_argument("--branch", default="main", help="Upstream branch to checkout (if cloning)")
     parser.add_argument("--output-dir", help="Target output directory for built web assets")
     parser.add_argument("--fonts-dir", help="Path to craft-fonts directory (if needed)")
+    parser.add_argument("--commit-sha", help="Commit SHA of upstream main to bake into version/About dialog")
     parser.add_argument("--skip-build", action="store_true", help="Skip compilation and package existing build")
 
     args = parser.parse_args()
@@ -245,7 +293,7 @@ def main():
         clone_repo(upstream_url, repo_path, branch=args.branch)
 
     try:
-        build_app(app_name, repo_path, fonts_dir=args.fonts_dir, skip_build=args.skip_build)
+        build_app(app_name, repo_path, fonts_dir=args.fonts_dir, skip_build=args.skip_build, commit_sha=args.commit_sha)
         extract_and_install(app_name, repo_path, output_dir)
     finally:
         if cleanup_repo and repo_path.exists():

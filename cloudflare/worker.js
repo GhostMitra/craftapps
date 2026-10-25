@@ -90,17 +90,33 @@ async function proxyUpstream(request, upstreamUrl) {
   newHeaders.set("X-Forwarded-Host", new URL(request.url).hostname);
   newHeaders.set("X-Forwarded-Proto", new URL(request.url).protocol.replace(':', ''));
 
-  const proxyRequest = new Request(upstreamUrl, {
+  const isStaticAsset = /\.(wasm|js|png|jpg|jpeg|svg|css|woff2|ico|zip)$/i.test(upstreamUrl.pathname);
+
+  const fetchOptions = {
     method: request.method,
     headers: newHeaders,
     body: request.body,
-    redirect: "follow"
-  });
+    redirect: "follow",
+  };
 
+  // Cache static WebAssembly binaries, JS glue, and media assets at Cloudflare's Edge CDN.
+  // This drastically reduces Firebase Hosting download bandwidth quota by serving static assets from edge cache.
+  if (isStaticAsset) {
+    fetchOptions.cf = {
+      cacheEverything: true,
+      cacheTtl: 31536000, // 1 year edge cache
+    };
+  }
+
+  const proxyRequest = new Request(upstreamUrl, fetchOptions);
   const response = await fetch(proxyRequest);
 
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Access-Control-Allow-Origin", "*");
+
+  if (isStaticAsset) {
+    responseHeaders.set("Cache-Control", "public, max-age=31536000, immutable");
+  }
 
   return new Response(response.body, {
     status: response.status,
