@@ -1,0 +1,124 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: "en-US"
+early_access: false
+
+tone_instructions: >-
+  You are an expert code reviewer specializing in WebAssembly web apps, Rust packaging,
+  Python automation, GitHub Actions CI/CD pipelines, and high-performance frontend architecture.
+  Keep review feedback concise, constructive, actionable, and signal-dense. Focus on correctness,
+  security, resource leaks, cross-platform compatibility, and strict adherence to the project's
+  zero-dependency and zero-bloat architecture. Avoid nitpicks on personal style or comments.
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    base_branches:
+      - "main"
+
+  path_filters:
+    - "!dist/**"
+    - "!icons/**"
+    - "!**/*.wasm"
+    - "!**/*.zip"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.ico"
+    - "!**/*.lock"
+    - "!**/target/**"
+    - "!**/.trunk/**"
+    - "!**/.firebase/**"
+
+  path_instructions:
+    - path: ".github/workflows/**"
+      instructions: >-
+        Review GitHub Actions workflow files with high attention to CI/CD resilience and security:
+        1. Ensure matrix jobs use 'fail-fast: false' so failures in one app do not cancel others.
+        2. Verify that downstream deployment jobs handle partial build failures gracefully (using
+           'needs.build-apps.result != "cancelled"'). Deployment must proceed for successfully built apps.
+        3. Enforce that clean rebuilds only purge compiler caches ('v0-rust-*') and never delete
+           persistent web distribution caches ('craftapps-dist-*').
+        4. Check that all shell variables in bash blocks are properly quoted (e.g., "$APP_ARG").
+        5. Verify that error annotations ('::error title=...') and exit codes correctly notify the user.
+        6. Ensure secrets (FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS, GITHUB_TOKEN) are securely referenced.
+
+    - path: "scripts/**"
+      instructions: >-
+        Review Python automation scripts according to the repository's strict standard-library philosophy:
+        1. Use ONLY Python 3.11+ standard library modules (urllib.request, json, argparse, pathlib,
+           subprocess, re, shutil). Do NOT add third-party dependencies (requests, pydantic, httpx, etc.).
+        2. Ensure full cross-platform compatibility (Windows CRLF/Paths vs Linux runner POSIX paths)
+           using 'pathlib.Path'.
+        3. Strictly honor WebAssembly size limit overrides (e.g. FIGCRAFT_WASM_MAX_BYTES=52428800 and
+           PHOTOCRAFT_WEB_MAX_FILE_BYTES=52428800).
+        4. When compiling from 'main', do NOT download external release zips; preserve previous working
+           builds if compilation fails.
+        5. Ensure domain routing patches and canonical link injections in HTML are clean and correct.
+
+    - path: "index.html"
+      instructions: >-
+        Review the CraftOS desktop launcher and portal shell for performance and memory management:
+        1. Maintain the zero-dependency vanilla ES6+ and modern CSS3 custom properties architecture.
+           Do not introduce heavyweight frameworks or UI libraries.
+        2. Enforce strict 0 MB idle load: WebAssembly apps must only be fetched and mounted inside
+           iframes on demand when their window is opened.
+        3. Memory lifecycle: Closing a window MUST completely unmount and remove the iframe from the DOM
+           to instantly terminate the WebAssembly instance and free GPU/RAM resources.
+        4. Ensure iframe sandbox and feature-policy permissions are restricted to what is necessary
+           (e.g., 'clipboard-read; clipboard-write; webgpu; cross-origin-isolated; fullscreen').
+        5. Verify responsive layout, glassmorphism UI styles, and multi-window taskbar state tracking.
+
+    - path: "cloudflare/**"
+      instructions: >-
+        Review Cloudflare Worker edge routing scripts:
+        1. Ensure all 14 CraftApps are mapped correctly in the CRAFT_APPS array.
+        2. Verify silent reverse-proxying of subdomains (e.g. 'solidcraft.debarghaya.in') to
+           'craftapps.web.app/solidcraft/' without broken asset URLs.
+        3. Ensure 301 redirects and trailing-slash normalization preserve query parameters.
+        4. Validate CORS and security headers at the edge.
+
+    - path: "firebase.json"
+      instructions: >-
+        Review Firebase Hosting configuration:
+        1. Ensure 'trailingSlash: true' is retained for relative asset and script resolution.
+        2. Confirm WebAssembly files (*.wasm) have 'Content-Type: application/wasm' and immutable caching.
+        3. Confirm HTML files have 'Cache-Control: no-cache' for immediate update propagation.
+        4. Ensure the 'ignore' list keeps build caches, source scripts, and docs out of production hosting.
+
+    - path: "*.json"
+      instructions: >-
+        Review JSON metadata files (upstream-commits.json, versions.json):
+        1. Ensure valid JSON syntax with 2-space indentation and alphabetical sorting.
+        2. Verify all 14 CraftApps (including tangency-labs/solidcraft) are consistently represented.
+
+  tools:
+    actionlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: true
+    yamllint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    markdownlint:
+      enabled: true
+    htmlhint:
+      enabled: true
+
+chat:
+  auto_reply: true
