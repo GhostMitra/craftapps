@@ -78,7 +78,7 @@ def patch_index_html(target_dir, app_name):
         var host = window.location.hostname;
         var path = window.location.pathname;
         if (host === "{app_name}.debarghaya.in" && path.indexOf("/{app_name}") === 0) {{
-          var newPath = path.replace(/^\/{app_name}/, "") || "/";
+          var newPath = path.substring("/{app_name}".length) || "/";
           window.location.replace("https://{app_name}.debarghaya.in" + newPath + window.location.search + window.location.hash);
         }}
       }})();
