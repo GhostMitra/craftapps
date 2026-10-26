@@ -42,20 +42,20 @@ APP_REPOS = {
 
 # Upstream font reference commits mapped from official release workflows
 APP_FONTS = {
-    'cadcraft': ('3d9ab3a132ed0eff457e424226a435a901da30d3', False),
-    'deckcraft': ('43913056ce82a3fdad0ef69f6b88d1dc922a8104', False),
-    'designcraft': ('a71c20e30af613287c504f7e685ca8fad77752bc', True),
+    'cadcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'deckcraft': ('37827adc41fd165f9a9234ac40f94dbad353aa69', False),
+    'designcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
     'effectcraft': ('', False),
-    'figcraft': ('43913056ce82a3fdad0ef69f6b88d1dc922a8104', True),
-    'filmcraft': ('bfcbf714e45a3ea8e98f88ab2b7971372a576414', False),
-    'gridcraft': ('abb83316d96aa59c1cf64784289e378fe9fa5695', False),
-    'lightcraft': ('a71c20e30af613287c504f7e685ca8fad77752bc', True),
-    'pdfcraft': ('3d9ab3a132ed0eff457e424226a435a901da30d3', False),
-    'photocraft': ('abb83316d96aa59c1cf64784289e378fe9fa5695', False),
+    'figcraft': ('37827adc41fd165f9a9234ac40f94dbad353aa69', True),
+    'filmcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'gridcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'lightcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
+    'pdfcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'photocraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'solidcraft': ('', False),
     'soundcraft': ('', False),
-    'vectorcraft': ('a71c20e30af613287c504f7e685ca8fad77752bc', True),
-    'wordcraft': ('8dcdacd5153e64560d109541a47d806f26f048c0', False),
+    'vectorcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
+    'wordcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
 }
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -166,6 +166,23 @@ def inject_commit_version(repo_path, commit_sha, app_name):
 
     return sha, new_ver
 
+def detect_upstream_fonts_config(repo_path, app_name):
+    """
+    Detect fonts_ref and web_fonts flag from the cloned upstream repository's release workflow.
+    """
+    release_yml = repo_path / ".github" / "workflows" / "release.yml"
+    if release_yml.exists():
+        try:
+            content = release_yml.read_text(encoding="utf-8")
+            fonts_match = re.search(r'craft-fonts-ref:\s*([a-f0-9]+)', content)
+            web_match = re.search(r'web-craft-fonts:\s*(true|false)', content, re.IGNORECASE)
+            fref = fonts_match.group(1) if fonts_match else ''
+            wfonts = (web_match.group(1).lower() == 'true') if web_match else False
+            return fref, wfonts
+        except Exception:
+            pass
+    return None, None
+
 def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=None):
     package_sh = repo_path / "packaging" / "web" / "package.sh"
     if not package_sh.exists():
@@ -191,6 +208,10 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=
         env["GIT_SHA"] = sha
 
     font_ref, needs_web_fonts = APP_FONTS.get(app_name, ('', False))
+    dyn_ref, dyn_web = detect_upstream_fonts_config(repo_path, app_name)
+    if dyn_ref is not None:
+        font_ref = dyn_ref
+        needs_web_fonts = dyn_web
 
     if fonts_dir and Path(fonts_dir).exists():
         env["CRAFT_FONTS_DIR"] = str(Path(fonts_dir).resolve())

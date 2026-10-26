@@ -18,20 +18,20 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 COMMITS_FILE = ROOT_DIR / "upstream-commits.json"
 
 APP_METADATA = {
-    'cadcraft': {'fonts_ref': '3d9ab3a132ed0eff457e424226a435a901da30d3', 'web_fonts': False},
-    'deckcraft': {'fonts_ref': '43913056ce82a3fdad0ef69f6b88d1dc922a8104', 'web_fonts': False},
-    'designcraft': {'fonts_ref': 'a71c20e30af613287c504f7e685ca8fad77752bc', 'web_fonts': True},
+    'cadcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'deckcraft': {'fonts_ref': '37827adc41fd165f9a9234ac40f94dbad353aa69', 'web_fonts': False},
+    'designcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
     'effectcraft': {'fonts_ref': '', 'web_fonts': False},
-    'figcraft': {'fonts_ref': '43913056ce82a3fdad0ef69f6b88d1dc922a8104', 'web_fonts': True},
-    'filmcraft': {'fonts_ref': 'bfcbf714e45a3ea8e98f88ab2b7971372a576414', 'web_fonts': False},
-    'gridcraft': {'fonts_ref': 'abb83316d96aa59c1cf64784289e378fe9fa5695', 'web_fonts': False},
-    'lightcraft': {'fonts_ref': 'a71c20e30af613287c504f7e685ca8fad77752bc', 'web_fonts': True},
-    'pdfcraft': {'fonts_ref': '3d9ab3a132ed0eff457e424226a435a901da30d3', 'web_fonts': False},
-    'photocraft': {'fonts_ref': 'abb83316d96aa59c1cf64784289e378fe9fa5695', 'web_fonts': False},
+    'figcraft': {'fonts_ref': '37827adc41fd165f9a9234ac40f94dbad353aa69', 'web_fonts': True},
+    'filmcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'gridcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'lightcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
+    'pdfcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'photocraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'solidcraft': {'repo': 'tangency-labs/solidcraft', 'fonts_ref': '', 'web_fonts': False},
     'soundcraft': {'fonts_ref': '', 'web_fonts': False},
-    'vectorcraft': {'fonts_ref': 'a71c20e30af613287c504f7e685ca8fad77752bc', 'web_fonts': True},
-    'wordcraft': {'fonts_ref': '8dcdacd5153e64560d109541a47d806f26f048c0', 'web_fonts': False},
+    'vectorcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
+    'wordcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
 }
 
 def get_headers():
@@ -68,6 +68,29 @@ def fetch_latest_commit_sha(app_name, repo_slug=None, branch="main"):
     except Exception as e:
         print(f"[{app_name}] Failed to fetch latest commit for {branch}: {e}", file=sys.stderr)
         return None
+
+def fetch_upstream_fonts_config(app_name, repo_slug=None, branch="main"):
+    """
+    Fetch exact craft-fonts commit ref and web-craft-fonts boolean directly from
+    the upstream repository's .github/workflows/release.yml to prevent font drift.
+    """
+    repo = repo_slug or f"storytold/{app_name}"
+    url = f"https://raw.githubusercontent.com/{repo}/{branch}/.github/workflows/release.yml"
+    headers = {"User-Agent": "CraftApps-Commit-Checker"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            content = resp.read().decode("utf-8")
+            fonts_match = re.search(r'craft-fonts-ref:\s*([a-f0-9]+)', content)
+            web_match = re.search(r'web-craft-fonts:\s*(true|false)', content, re.IGNORECASE)
+            fref = fonts_match.group(1) if fonts_match else ''
+            wfonts = (web_match.group(1).lower() == 'true') if web_match else False
+            return fref, wfonts
+    except Exception:
+        return None, None
 
 def parse_target_apps(app_input):
     if not app_input:
@@ -134,11 +157,17 @@ def main():
         has_new_commit = (latest_sha != prev_sha)
 
         if has_new_commit or force_build:
+            # Dynamically query upstream release.yml for craft-fonts configuration
+            repo_slug = meta.get("repo", f"storytold/{app}")
+            dyn_fonts_ref, dyn_web_fonts = fetch_upstream_fonts_config(app, repo_slug=repo_slug, branch=args.branch)
+            fonts_ref = dyn_fonts_ref if dyn_fonts_ref is not None else meta["fonts_ref"]
+            web_fonts = dyn_web_fonts if dyn_web_fonts is not None else meta["web_fonts"]
+
             matrix_items.append({
                 "app": app,
-                "repo": meta.get("repo", f"storytold/{app}"),
-                "fonts_ref": meta["fonts_ref"],
-                "web_fonts": meta["web_fonts"],
+                "repo": repo_slug,
+                "fonts_ref": fonts_ref,
+                "web_fonts": web_fonts,
                 "latest_sha": latest_sha
             })
             if is_clean:
