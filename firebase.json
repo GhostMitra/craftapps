@@ -57,6 +57,19 @@
         ]
       },
       {
+        "source": "**/snippets/**/*.js",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "text/javascript"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
         "source": "**/*.@(png|jpg|jpeg|svg|ico|woff2)",
         "headers": [
           {

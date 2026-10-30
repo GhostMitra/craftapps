@@ -230,6 +230,24 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=
 
     package_sh = repo_path / "packaging" / "web" / "package.sh"
     if package_sh.exists():
+        # Upstream bugfix: Ensure wasm-bindgen snippets (eframe inline JS) are bundled into package zip
+        try:
+            sh_content = package_sh.read_text(encoding="utf-8")
+            if 'cp "$GLUE"' in sh_content and 'APP/snippets' not in sh_content:
+                snippet_patch = '''cp "$GLUE" "$WORK/$NAME/app/photocraft-web.js"
+if [[ -d "$APP/snippets" ]]; then
+  cp -R "$APP/snippets" "$WORK/$NAME/app/"
+  cp -R "$APP/snippets" "$WORK/$NAME/"
+fi
+if [[ -d "$BOOT/snippets" ]]; then
+  cp -R "$BOOT/snippets" "$WORK/$NAME/"
+fi'''
+                sh_content = sh_content.replace('cp "$GLUE" "$WORK/$NAME/app/photocraft-web.js"', snippet_patch)
+                package_sh.write_text(sh_content, encoding="utf-8")
+                print(f"[{app_name}] Patched package.sh to bundle wasm-bindgen snippets")
+        except Exception as e:
+            print(f"[{app_name}] Notice: package.sh snippet check: {e}")
+
         cmd = ["bash", "packaging/web/package.sh"]
         if skip_build:
             cmd.append("--skip-build")
@@ -316,6 +334,31 @@ def extract_and_install(app_name, repo_path, output_dir):
                 shutil.copy2(item, dst)
     else:
         raise FileNotFoundError(f"[{app_name}] Could not find built release zip, web-package, or dist/web directory")
+
+    # 5. Restore wasm-bindgen snippets if omitted by upstream package script
+    snippet_candidates = [
+        repo_path / "dist" / "web" / "snippets",
+        repo_path / "apps" / f"{app_name}-web" / "dist" / "snippets",
+        repo_path / "dist" / "snippets"
+    ]
+    for cdir in [repo_path / "dist", repo_path / "target"]:
+        if cdir.exists():
+            for s in cdir.rglob("snippets"):
+                if s.is_dir() and any(s.glob("**/*.js")):
+                    snippet_candidates.append(s)
+
+    for snip in snippet_candidates:
+        if snip.exists() and snip.is_dir():
+            if (out_path / "app").exists():
+                app_dst = out_path / "app" / "snippets"
+                if not app_dst.exists():
+                    print(f"[{app_name}] Restoring missing snippets to {app_dst}")
+                    shutil.copytree(snip, app_dst)
+            root_dst = out_path / "snippets"
+            if not root_dst.exists():
+                print(f"[{app_name}] Restoring missing snippets to {root_dst}")
+                shutil.copytree(snip, root_dst)
+            break
 
     # Patch index.html with canonical & domain routing
     patch_index_html(out_path, app_name)

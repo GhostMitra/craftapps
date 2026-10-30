@@ -49,7 +49,20 @@ export default {
       if (targetPath !== `/${targetApp}` && !targetPath.startsWith(`/${targetApp}/`)) {
         targetPath = `/${targetApp}` + (targetPath.startsWith('/') ? targetPath : `/${targetPath}`);
       }
-      return proxyUpstream(request, new URL(targetPath + url.search, targetOrigin));
+      const response = await proxyUpstream(request, new URL(targetPath + url.search, targetOrigin));
+
+      // Snippet resolution fallback: handle /app/snippets vs /snippets differences
+      if (response.status === 404 && targetPath.includes('/snippets/')) {
+        const altPath = targetPath.includes('/app/snippets/')
+          ? targetPath.replace('/app/snippets/', '/snippets/')
+          : targetPath.replace('/snippets/', '/app/snippets/');
+        const altResp = await proxyUpstream(request, new URL(altPath + url.search, targetOrigin));
+        if (altResp.ok) {
+          return altResp;
+        }
+      }
+
+      return response;
     }
 
     // 2. Portal Subroute Redirect (e.g. apps.debarghaya.in/photocraft -> photocraft.debarghaya.in/)
@@ -105,7 +118,11 @@ async function proxyUpstream(request, upstreamUrl) {
   if (isStaticAsset) {
     fetchOptions.cf = {
       cacheEverything: true,
-      cacheTtl: 31536000, // 1 year edge cache
+      cacheTtlByStatus: {
+        "200-299": 31536000, // 1 year edge cache for successful assets
+        "404": 0,            // Do NOT cache 404 responses
+        "500-599": 0         // Do NOT cache 5xx server errors
+      }
     };
   }
 
@@ -115,8 +132,17 @@ async function proxyUpstream(request, upstreamUrl) {
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Access-Control-Allow-Origin", "*");
 
-  if (isStaticAsset) {
+  // Ensure correct MIME types for WebAssembly and JavaScript
+  if (upstreamUrl.pathname.endsWith(".wasm") && response.ok) {
+    responseHeaders.set("Content-Type", "application/wasm");
+  } else if (upstreamUrl.pathname.endsWith(".js") && response.ok) {
+    responseHeaders.set("Content-Type", "text/javascript; charset=utf-8");
+  }
+
+  if (isStaticAsset && response.ok) {
     responseHeaders.set("Cache-Control", "public, max-age=31536000, immutable");
+  } else if (!response.ok) {
+    responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate");
   }
 
   return new Response(response.body, {
