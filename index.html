@@ -18,6 +18,10 @@
   <title>ArtCraft Launcher &bull; Craft App Suite</title>
   <link rel="canonical" href="https://apps.debarghaya.in/">
   <meta name="description" content="One place to discover, launch and open every app in the Craft App Suite, built in pure Rust and WebAssembly.">
+    <!-- Craft Suite Fonts: Archivo (signature ArtCraft sans) & Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Geist+Mono:wght@100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><path d='M8 16l6-6 10 10-6 6z' fill='white' opacity='0.9'/><circle cx='11' cy='21' r='3' fill='%2338bdf8'/></svg>">
   <style>
     /* Theme tokens after ArtCraft Launcher (MIT / Apache-2.0) */
@@ -31,8 +35,8 @@
       --good: #08775e;
       --warning: #906000;
       --bad: #a62e32;
-      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --mono: "SF Mono", "Geist Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+      --sans: "Archivo", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: "Geist Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
       color-scheme: light;
     }
 
@@ -143,7 +147,8 @@
       gap: 12px;
       text-decoration: none;
       font-size: 21px;
-      font-weight: 700;
+      font-weight: 680;
+      font-stretch: 110%;
       letter-spacing: -0.03em;
       white-space: nowrap;
       padding-right: 20px;
@@ -490,9 +495,9 @@
     .status-bar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       margin-top: auto;
-      padding-top: 18px;
+      padding-top: 16px;
       gap: 10px;
     }
 
@@ -706,7 +711,7 @@
         <span class="brand-badge">Launcher</span>
       </div>
     </a>
-    <div class="suite hud-label">Craft App Suite &bull; WebAssembly</div>
+    <div class="suite hud-label">Craft App Suite</div>
     <div class="topbar-end">
       <div class="view-switch">
         <div class="segments" role="group" aria-label="View switcher">
@@ -774,7 +779,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -809,7 +813,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -844,7 +847,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -879,7 +881,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Engineering</span>
           </div>
           <div class="actions">
@@ -914,7 +915,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -949,7 +949,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -984,7 +983,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -1019,7 +1017,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -1054,7 +1051,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Creative</span>
           </div>
           <div class="actions">
@@ -1089,7 +1085,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Productivity</span>
           </div>
           <div class="actions">
@@ -1124,7 +1119,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Productivity</span>
           </div>
           <div class="actions">
@@ -1159,7 +1153,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Productivity</span>
           </div>
           <div class="actions">
@@ -1194,7 +1187,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Productivity</span>
           </div>
           <div class="actions">
@@ -1229,7 +1221,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Engineering</span>
           </div>
           <div class="actions">
@@ -1264,7 +1255,6 @@
             </div>
           </div>
           <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
             <span class="hud-label faint">Engineering</span>
           </div>
           <div class="actions">
