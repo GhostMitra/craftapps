@@ -49,7 +49,7 @@ export default {
       if (targetPath !== `/${targetApp}` && !targetPath.startsWith(`/${targetApp}/`)) {
         targetPath = `/${targetApp}` + (targetPath.startsWith('/') ? targetPath : `/${targetPath}`);
       }
-      const response = await proxyUpstream(request, new URL(targetPath + url.search, targetOrigin));
+      let response = await proxyUpstream(request, new URL(targetPath + url.search, targetOrigin));
 
       // Snippet resolution fallback: handle /app/snippets vs /snippets differences
       if (response.status === 404 && targetPath.includes('/snippets/')) {
@@ -58,8 +58,25 @@ export default {
           : targetPath.replace('/snippets/', '/app/snippets/');
         const altResp = await proxyUpstream(request, new URL(altPath + url.search, targetOrigin));
         if (altResp.ok) {
-          return altResp;
+          response = altResp;
         }
+      }
+
+      // Strip SRI integrity hashes from HTML to prevent browser false-positives on cached or proxied assets
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("text/html")) {
+        const rewriter = new HTMLRewriter()
+          .on('link[integrity]', {
+            element(element) {
+              element.removeAttribute('integrity');
+            }
+          })
+          .on('script[integrity]', {
+            element(element) {
+              element.removeAttribute('integrity');
+            }
+          });
+        return rewriter.transform(response);
       }
 
       return response;
@@ -80,17 +97,28 @@ export default {
     const upstreamUrl = new URL(url.pathname + url.search, targetOrigin);
     const response = await proxyUpstream(request, upstreamUrl);
 
-    // If serving HTML dashboard on a portal domain, rewrite app links to custom subdomains
+    // If serving HTML dashboard on a portal domain, rewrite app links to custom subdomains and strip SRI integrity tags
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("text/html")) {
-      const rewriter = new HTMLRewriter().on('a.app-link[data-app]', {
-        element(element) {
-          const app = element.getAttribute('data-app');
-          if (app && CRAFT_APPS.includes(app)) {
-            element.setAttribute('href', `https://${app}.${rootDomain}/`);
+      const rewriter = new HTMLRewriter()
+        .on('a.app-link[data-app]', {
+          element(element) {
+            const app = element.getAttribute('data-app');
+            if (app && CRAFT_APPS.includes(app)) {
+              element.setAttribute('href', `https://${app}.${rootDomain}/`);
+            }
           }
-        }
-      });
+        })
+        .on('link[integrity]', {
+          element(element) {
+            element.removeAttribute('integrity');
+          }
+        })
+        .on('script[integrity]', {
+          element(element) {
+            element.removeAttribute('integrity');
+          }
+        });
       return rewriter.transform(response);
     }
 
@@ -144,7 +172,14 @@ async function proxyUpstream(request, upstreamUrl) {
     responseHeaders.set("Content-Type", "text/plain; charset=utf-8");
   }
 
-  if (isStaticAsset && response.ok) {
+  const rawContentType = (responseHeaders.get("Content-Type") || "").toLowerCase();
+  const isHtml = rawContentType.includes("text/html") || upstreamUrl.pathname.endsWith(".html") || upstreamUrl.pathname.endsWith("/");
+
+  if (isHtml) {
+    // Clear site HTTP cache so client browsers purge stale 0-byte or corrupted subresources
+    responseHeaders.set("Clear-Site-Data", '"cache"');
+    responseHeaders.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  } else if (isStaticAsset && response.ok) {
     responseHeaders.set("Cache-Control", "public, max-age=31536000, immutable");
   } else if (!response.ok) {
     responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate");
@@ -154,6 +189,5 @@ async function proxyUpstream(request, upstreamUrl) {
     status: response.status,
     statusText: response.statusText,
     headers: responseHeaders,
-    encodeBody: "manual"
   });
 }

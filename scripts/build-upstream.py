@@ -74,6 +74,9 @@ def patch_index_html(target_dir, app_name):
 
     content = index_path.read_text(encoding="utf-8")
 
+    # Strip subresource integrity attributes from 1st-party scripts and links to avoid browser caching mismatch
+    content = re.sub(r'\s+integrity="sha384-[^"]*"' , '', content)
+
     redirect_script = f"""
     <!-- CraftApps Domain Router & Redirection Guard -->
     <script>
@@ -97,8 +100,8 @@ def patch_index_html(target_dir, app_name):
             content = content.replace("<HEAD>", f"<HEAD>\n{redirect_script}\n    {canonical_tag}")
         else:
             content = f"{redirect_script}\n{canonical_tag}\n" + content
-        index_path.write_text(content, encoding="utf-8")
         print(f"[{app_name}] Patched index.html with domain routing guard")
+    index_path.write_text(content, encoding="utf-8")
 
 def find_extracted_root(temp_dir):
     """Find directory containing index.html after extraction."""
