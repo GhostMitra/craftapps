@@ -195,8 +195,6 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=
     # Allow larger WebAssembly binaries for Firebase Hosting (default Cloudflare limit is 24 MiB)
     env["FIGCRAFT_WASM_MAX_BYTES"] = "52428800"
     env["PHOTOCRAFT_WEB_MAX_FILE_BYTES"] = "52428800"
-    # Ensure Trunk defaults to modern Binaryen with bulk-memory & non-trapping float-to-int support
-    env["TRUNK_TOOLS_WASM_OPT"] = "version_122"
 
     # Bake commit SHA provenance into environment variables
     app_upper = app_name.upper()
