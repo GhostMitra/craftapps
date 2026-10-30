@@ -1,17 +1,17 @@
 {
-  "cadcraft": "f536bf406f01541006c81deec47ec842acc83158",
-  "deckcraft": "3a4e30e10e83c5f988a074dba1a519984828b4fd",
+  "cadcraft": "8d1bd19ee29aa3a7f7d8730214fa8d6b90a4e7a6",
+  "deckcraft": "c4221b1a7cd39b6cb2ae43104cb4bf1c041cd6b9",
   "designcraft": "ea08e4c2ba290f092063c99d70c4bdd5afc45887",
   "effectcraft": "ec7ced1f0515f0b6f376dbcc297f1c441f452d6e",
   "fieldcraft": "e9ccf10692a08ea4c6037442c6213e1f68d344b8",
-  "figcraft": "139d5e94a9cc919f2c53ccac6ef7dc824967987d",
+  "figcraft": "b462a483469aea71f89f6d9e2a69324e828943c4",
   "filmcraft": "fed0f42fd52012a337d744743a93409c0b1e8f9d",
-  "gridcraft": "68a4b1a1c3684fa17553ecb2a1f088c75f6a3567",
-  "lightcraft": "5194cc20dea06d725079ac162c6912fc1f0d3a78",
-  "pdfcraft": "1d1cbc4ec92012767f5b48c92b451e15eb401c42",
-  "photocraft": "b1cfff9d30298eea4f446a8f6a5e4285cb43c6e7",
-  "solidcraft": "81b620d7aa5f79770754d5566a3c41a361769470",
+  "gridcraft": "75f7056e1b96f7ce30f402310221ca1a6d083a17",
+  "lightcraft": "8aabf61449bc736d10f1d753b5497b54a55e9365",
+  "pdfcraft": "fa5f9f8c3b3add965f7ec82c743cf02207c55c93",
+  "photocraft": "952c328b3d849eaa110cff9c7ab9977389590ccc",
+  "solidcraft": "736f33430133a33b1e37c23646833723fbc7b54e",
   "soundcraft": "7902d59b475c1df203b212ef3436cc80bee2ccf2",
-  "vectorcraft": "efcc33455369953288808d2a21340c581655e74e",
-  "wordcraft": "3b7f7ed10b2eb0ae3c39b71551d36ed2df1d1d8b"
+  "vectorcraft": "60bccc60c4df5469da2662aa0845be405cb79801",
+  "wordcraft": "5b5810fe1f6f815acc3fda27619f61d9bc08b615"
 }
