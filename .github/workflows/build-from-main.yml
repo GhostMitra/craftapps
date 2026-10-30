@@ -4,7 +4,7 @@ on:
   schedule:
     # Incremental check for new main commits every 6 hours (06:00, 12:00, 18:00 UTC)
     - cron: '0 6,12,18 * * *'
-    # Full clean rebuild of all 16 apps bypassing compiler cache every 24 hours (00:00 UTC)
+    # Full clean rebuild of all 15 apps bypassing compiler cache every 24 hours (00:00 UTC)
     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
@@ -24,7 +24,7 @@ on:
         default: false
         type: boolean
       clean_build:
-        description: 'Clean build: rebuild all 16 apps from scratch and purge compiler caches'
+        description: 'Clean build: rebuild all 15 apps from scratch and purge compiler caches'
         required: false
         default: false
         type: boolean
@@ -102,7 +102,7 @@ jobs:
         run: |
           if [ "${{ steps.check.outputs.clean_build }}" = "true" ]; then
             echo "### 🧹 24h Clean Rebuild Triggered (${{ steps.check.outputs.count }} apps)" >> $GITHUB_STEP_SUMMARY
-            echo "Compiler caches purged. Compiling all 16 applications from scratch from \`main\`." >> $GITHUB_STEP_SUMMARY
+            echo "Compiler caches purged. Compiling all 15 applications from scratch from \`main\`." >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
             echo "### 🚀 Upstream Build Queued (${{ steps.check.outputs.count }} app(s))" >> $GITHUB_STEP_SUMMARY
             echo "Applications to compile: **${{ steps.check.outputs.summary }}**" >> $GITHUB_STEP_SUMMARY
@@ -367,7 +367,7 @@ jobs:
                   if build_result == "success":
                       if clean_build:
                           f.write("### 🧹 24h Clean Rebuild & Deployment Complete\n\n")
-                          f.write("All 16 applications cleanly compiled from `main` and deployed to Firebase Hosting.\n\n")
+                          f.write("All 15 applications cleanly compiled from `main` and deployed to Firebase Hosting.\n\n")
                       else:
                           f.write("### 🚀 Deployed Updated Application(s) to Firebase Hosting\n\n")
                           f.write(f"Newly built from `main`: **{', '.join(built_apps)}**\n\n")

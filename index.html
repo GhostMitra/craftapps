@@ -7,7 +7,7 @@
   <script>
     if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
       var seg = location.pathname.split('/').filter(Boolean)[0];
-      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft','pcbcraft'];
+      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft'];
       if (seg && apps.indexOf(seg.toLowerCase()) !== -1) {
         location.replace('https://' + seg.toLowerCase() + '.debarghaya.in' + location.pathname.replace(new RegExp('^/' + seg, 'i'), '') + location.search + location.hash);
       } else {
@@ -728,11 +728,11 @@
   <main class="wrap lineup">
     <div class="toolbar">
       <div class="toolbar-left">
-        <span id="app-count" class="hud-label faint">16 APPS</span>
+        <span id="app-count" class="hud-label faint">15 APPS</span>
         <div class="category-tabs" role="tablist">
-          <button type="button" class="tab-btn active" data-category="all">All (16)</button>
+          <button type="button" class="tab-btn active" data-category="all">All (15)</button>
           <button type="button" class="tab-btn" data-category="creative">Creative (8)</button>
-          <button type="button" class="tab-btn" data-category="engineering">Engineering (4)</button>
+          <button type="button" class="tab-btn" data-category="engineering">Engineering (3)</button>
           <button type="button" class="tab-btn" data-category="productivity">Productivity (4)</button>
         </div>
       </div>
@@ -1273,41 +1273,6 @@
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
             </a>
             <a class="popout-link app-direct-link" href="/fieldcraft/" target="_blank" rel="noopener" title="Open in new window">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <!-- 16. PCBCraft -->
-      <article class="card" style="--app: #10b981;" data-app="pcbcraft" data-category="engineering" data-order="16" data-search="pcbcraft kicad altium eda schematic capture pcb layout routing circuits electronics tangency labs">
-        <div class="card-head">
-          <span class="number">16</span>
-          <div class="card-links">
-            <a href="https://github.com/tangency-labs/pcbcraft" target="_blank" rel="noopener">SOURCE</a>
-            <a href="/pcbcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="identity">
-            <img class="logo" src="/icons/pcbcraft.svg" alt="PCBCraft" width="56" height="56" loading="lazy">
-            <div class="identity-text">
-              <h2 class="name">PCB<span class="accent">Craft</span></h2>
-              <p class="tagline">EDA schematic capture, interactive PCB layout routing, library authoring</p>
-              <p class="byline community">by Tangency Labs</p>
-              <div class="inspiration-badge">Inspired by <strong>KiCad® / Altium®</strong></div>
-            </div>
-          </div>
-          <div class="status-bar">
-            <span class="status-pill">Ready (Wasm)</span>
-            <span class="hud-label faint">Engineering</span>
-          </div>
-          <div class="actions">
-            <a class="open app-action-link" href="/pcbcraft/">
-              <span>OPEN</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </a>
-            <a class="popout-link app-direct-link" href="/pcbcraft/" target="_blank" rel="noopener" title="Open in new window">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </div>

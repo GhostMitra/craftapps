@@ -27,7 +27,6 @@ APP_METADATA = {
     'filmcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'gridcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'lightcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
-    'pcbcraft': {'repo': 'tangency-labs/pcbcraft', 'fonts_ref': '', 'web_fonts': False},
     'pdfcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'photocraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'solidcraft': {'repo': 'tangency-labs/solidcraft', 'fonts_ref': '', 'web_fonts': False},
@@ -116,7 +115,7 @@ def main():
     parser.add_argument("--app", default="auto", help="App(s) to check/build: 'auto', 'all', a single app, or comma-separated list")
     parser.add_argument("--branch", default="main", help="Git branch to inspect (default: main)")
     parser.add_argument("--force", action="store_true", help="Force rebuild regardless of commit diff")
-    parser.add_argument("--clean-build", action="store_true", help="Clean rebuild: force all 14 apps and bypass all caches")
+    parser.add_argument("--clean-build", action="store_true", help="Clean rebuild: force all 15 apps and bypass all caches")
     parser.add_argument("--update-sha", nargs=2, metavar=("APP", "SHA"), help="Update recorded commit SHA for an app")
     args = parser.parse_args()
 

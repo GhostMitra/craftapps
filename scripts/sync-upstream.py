@@ -29,7 +29,6 @@ APPS = [
     'filmcraft',
     'gridcraft',
     'lightcraft',
-    'pcbcraft',
     'pdfcraft',
     'photocraft',
     'solidcraft',
@@ -41,7 +40,6 @@ APPS = [
 APP_REPOS = {
     'solidcraft': 'tangency-labs/solidcraft',
     'fieldcraft': 'tangency-labs/fieldcraft',
-    'pcbcraft': 'tangency-labs/pcbcraft'
 }
 
 ROOT_DIR = Path(__file__).resolve().parent.parent

@@ -29,7 +29,6 @@ APPS = [
     'filmcraft',
     'gridcraft',
     'lightcraft',
-    'pcbcraft',
     'pdfcraft',
     'photocraft',
     'solidcraft',
@@ -41,7 +40,6 @@ APPS = [
 APP_REPOS = {
     'solidcraft': 'tangency-labs/solidcraft',
     'fieldcraft': 'tangency-labs/fieldcraft',
-    'pcbcraft': 'tangency-labs/pcbcraft'
 }
 
 # Upstream font reference commits mapped from official release workflows
@@ -55,7 +53,6 @@ APP_FONTS = {
     'filmcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'gridcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'lightcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
-    'pcbcraft': ('', False),
     'pdfcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'photocraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'solidcraft': ('', False),
@@ -243,7 +240,7 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=
         if result.returncode != 0:
             raise RuntimeError(f"[{app_name}] Web build failed with exit code {result.returncode}")
     else:
-        # Fallback for apps building directly with Trunk (e.g. fieldcraft, pcbcraft)
+        # Fallback for apps building directly with Trunk (e.g. fieldcraft)
         web_dir = repo_path / "apps" / f"{app_name}-web"
         if not web_dir.exists():
             web_dir = repo_path / "apps" / "web"
