@@ -329,6 +329,13 @@
       color: var(--muted);
     }
 
+    /* Visibility Guards */
+    [hidden],
+    #grid-view[hidden],
+    #table-view[hidden] {
+      display: none !important;
+    }
+
     /* Grid View */
     .grid {
       display: grid;
@@ -639,8 +646,12 @@
       vertical-align: middle;
     }
 
+    .app-table tr {
+      transition: background 0.15s ease;
+    }
+
     .app-table tr:hover td {
-      background: var(--sunken);
+      background: color-mix(in srgb, var(--app, var(--ink)) 6%, var(--bg));
     }
 
     .app-table .table-app-cell {
@@ -657,11 +668,19 @@
       padding: 2px;
       background: rgba(128, 128, 128, 0.08);
       border: 1px solid var(--line);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .app-table tr:hover .table-logo {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
     }
 
     .app-table .table-name {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 680;
+      font-stretch: 110%;
+      letter-spacing: -0.015em;
     }
 
     .app-table .table-tagline {
@@ -1414,7 +1433,8 @@
       cards.forEach(card => {
         const app = card.getAttribute('data-app');
         const category = card.getAttribute('data-category');
-        const name = card.querySelector('.name').innerText;
+        const appColor = card.style.getPropertyValue('--app') || '#4a5568';
+        const nameHtml = card.querySelector('.name').innerHTML;
         const tagline = card.querySelector('.tagline').innerText;
         const inspiration = card.querySelector('.inspiration-badge')?.innerText.replace('Inspired by ', '') || '';
         const byline = card.querySelector('.byline').innerText;
@@ -1426,12 +1446,13 @@
         const tr = document.createElement('tr');
         tr.setAttribute('data-app', app);
         tr.setAttribute('data-category', category);
+        tr.style.setProperty('--app', appColor);
         tr.innerHTML = `
           <td>
             <div class="table-app-cell">
-              <img class="table-logo" src="${logoSrc}" alt="${name}" width="40" height="40" loading="lazy">
+              <img class="table-logo" src="${logoSrc}" alt="${app}" width="40" height="40" loading="lazy">
               <div>
-                <div class="table-name">${name}</div>
+                <div class="table-name">${nameHtml}</div>
                 <div class="byline ${isOfficial ? 'official' : 'community'}" style="margin:2px 0 0;">${byline}</div>
               </div>
             </div>
