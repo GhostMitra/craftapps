@@ -358,20 +358,40 @@
       }
     }
 
-    /* Card Styling */
+    /* Card Styling & ArtCraft Launcher Hover Motions */
     .card {
       --app: #808080;
       --app-ink: var(--app);
+      position: relative;
       border-right: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
       display: flex;
       flex-direction: column;
       background: var(--bg);
-      transition: background 0.15s ease;
+      transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* On hover, a 2 px rule in the app's colour wipes in from the left along the top (ArtCraft Launcher motion) */
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: var(--app);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .card:hover::before {
+      width: 100%;
+    }
+
+    /* A faint wash in the app's colour fades in under the pointer */
     .card:hover {
-      background: var(--sunken);
+      background: color-mix(in srgb, var(--app) 5%, var(--bg));
     }
 
     .card-head {
@@ -437,6 +457,13 @@
       background: rgba(128, 128, 128, 0.08);
       border: 1px solid rgba(128, 128, 128, 0.12);
       padding: 4px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* The icon rises 4px on hover, over a soft drop shadow (ArtCraft Launcher motion) */
+    .card:hover .logo {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
     }
 
     .identity-text {
@@ -695,6 +722,17 @@
       font-size: 15px;
       border: 1px solid var(--line);
       margin-top: 8px;
+    }
+  
+    @media (prefers-reduced-motion: reduce) {
+      .card,
+      .card::before,
+      .logo,
+      .open,
+      .open svg {
+        transition: none !important;
+        transform: none !important;
+      }
     }
   </style>
 </head>
