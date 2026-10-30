@@ -16,7 +16,7 @@
 
 **CraftOS** turns your web browser into a full-featured desktop environment with floating, draggable, and resizable application windows, a frosted-glass taskbar/dock, desktop icons, live system tray, and an application launcher.
 
-Every application in the suite is compiled directly from upstream source repositories (`storytold/*` and `tangency-labs/solidcraft`) into high-performance **WebAssembly** with native-level hardware acceleration (WebGPU / WebGL).
+Every application in the suite is compiled directly from upstream source repositories (`storytold/*` and `tangency-labs/*`) into high-performance **WebAssembly** with native-level hardware acceleration (WebGPU / WebGL).
 
 ---
 
@@ -28,7 +28,7 @@ Every application in the suite is compiled directly from upstream source reposit
   - 🟡 **Minimize (−):** Minimizes the application down to the taskbar pill.
   - 🟢 **Maximize (⤢):** Expands the application to occupy the full desktop screen.
 - **Frosted-Glass Taskbar / Dock:**
-  - **Start Menu ("CraftOS"):** Search and launch any of the 14 applications with instant keyboard filtering.
+  - **Start Menu ("CraftOS"):** Search and launch any of the 16 applications with instant keyboard filtering.
   - **Task Switcher:** Click running taskbar pills to focus, restore, or minimize windows.
   - **System Tray:** Live digital clock, active memory/process monitor, wallpaper switcher, and desktop fullscreen toggle.
 - **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
@@ -54,6 +54,8 @@ Every application in the suite is compiled directly from upstream source reposit
 | **GridCraft** | [`gridcraft.debarghaya.in`](https://gridcraft.debarghaya.in/) | [`/gridcraft/`](https://craftapps.web.app/gridcraft/) | [`storytold/gridcraft`](https://github.com/storytold/gridcraft) | **Microsoft Excel** | Fast formula calculation engine, data grid, charts |
 | **WordCraft** | [`wordcraft.debarghaya.in`](https://wordcraft.debarghaya.in/) | [`/wordcraft/`](https://craftapps.web.app/wordcraft/) | [`storytold/wordcraft`](https://github.com/storytold/wordcraft) | **Microsoft Word** | Document design, typography styles, tables, citations |
 | **SolidCraft** | [`solidcraft.debarghaya.in`](https://solidcraft.debarghaya.in/) | [`/solidcraft/`](https://craftapps.web.app/solidcraft/) | [`tangency-labs/solidcraft`](https://github.com/tangency-labs/solidcraft) | **SolidWorks** | Parametric 3D CAD, feature tree, constraints, B-Rep modeling |
+| **FieldCraft** | [`fieldcraft.debarghaya.in`](https://fieldcraft.debarghaya.in/) | [`/fieldcraft/`](https://craftapps.web.app/fieldcraft/) | [`tangency-labs/fieldcraft`](https://github.com/tangency-labs/fieldcraft) | **ANSYS / Abaqus** | Multiphysics CAE, finite element analysis (FEA), hex/tet meshing, CFD |
+| **PCBCraft** | [`pcbcraft.debarghaya.in`](https://pcbcraft.debarghaya.in/) | [`/pcbcraft/`](https://craftapps.web.app/pcbcraft/) | [`tangency-labs/pcbcraft`](https://github.com/tangency-labs/pcbcraft) | **KiCad / Altium** | EDA schematic capture, interactive PCB layout routing, library authoring |
 | **CraftOS Portal** | [`apps.debarghaya.in`](https://apps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | &mdash; | **Web Desktop OS** | Central desktop workspace and application launcher |
 
 ---
@@ -133,10 +135,10 @@ The primary production pipeline compiles native WebAssembly applications directl
 1. Go to **Actions** ▸ **Build Upstream from Main & Deploy to Firebase**.
 2. Click **Run workflow**.
 3. Options:
-   - `app`: `auto` (checks for changes), `all` (all 14 apps), a single app (e.g. `solidcraft`), or a comma-separated list (e.g. `figcraft, photocraft, solidcraft`).
+   - `app`: `auto` (checks for changes), `all` (all 16 apps), a single app (e.g. `solidcraft`), or a comma-separated list (e.g. `figcraft, photocraft, solidcraft`).
    - `branch`: Git branch to inspect and build (default `main`).
    - `force`: Force rebuild regardless of commit diff.
-   - `clean_build`: Purge compiler caches and rebuild all 14 apps from scratch.
+   - `clean_build`: Purge compiler caches and rebuild all 16 apps from scratch.
 4. Click **Run workflow**.
 
 #### Triggering via GitHub CLI
@@ -150,7 +152,7 @@ gh workflow run build-from-main.yml -f app=solidcraft -f branch=main --raw-field
 # Force rebuild of multiple selected apps:
 gh workflow run build-from-main.yml -f app="figcraft, photocraft" -f branch=main --raw-field force=true
 
-# Force rebuild of all 14 apps from main in parallel and deploy:
+# Force rebuild of all 16 apps from main in parallel and deploy:
 gh workflow run build-from-main.yml -f app=all --raw-field force=true
 
 # 24-hour style clean rebuild (purge compiler caches and recompile all 14 apps from scratch):

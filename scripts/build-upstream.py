@@ -24,10 +24,12 @@ APPS = [
     'deckcraft',
     'designcraft',
     'effectcraft',
+    'fieldcraft',
     'figcraft',
     'filmcraft',
     'gridcraft',
     'lightcraft',
+    'pcbcraft',
     'pdfcraft',
     'photocraft',
     'solidcraft',
@@ -37,7 +39,9 @@ APPS = [
 ]
 
 APP_REPOS = {
-    'solidcraft': 'tangency-labs/solidcraft'
+    'solidcraft': 'tangency-labs/solidcraft',
+    'fieldcraft': 'tangency-labs/fieldcraft',
+    'pcbcraft': 'tangency-labs/pcbcraft'
 }
 
 # Upstream font reference commits mapped from official release workflows
@@ -46,10 +50,12 @@ APP_FONTS = {
     'deckcraft': ('37827adc41fd165f9a9234ac40f94dbad353aa69', False),
     'designcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
     'effectcraft': ('', False),
+    'fieldcraft': ('', False),
     'figcraft': ('37827adc41fd165f9a9234ac40f94dbad353aa69', True),
     'filmcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'gridcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'lightcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
+    'pcbcraft': ('', False),
     'pdfcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'photocraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'solidcraft': ('', False),
@@ -184,10 +190,6 @@ def detect_upstream_fonts_config(repo_path, app_name):
     return None, None
 
 def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=None):
-    package_sh = repo_path / "packaging" / "web" / "package.sh"
-    if not package_sh.exists():
-        raise FileNotFoundError(f"Missing packaging script: {package_sh}")
-
     # Inject commit SHA into Cargo.toml so WebAssembly About dialog renders commit version
     sha, new_ver = inject_commit_version(repo_path, commit_sha, app_name)
 
@@ -229,14 +231,33 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=
         env["CRAFT_I18N_DIR"] = str(i18n_dir.resolve())
         env["CRAFT_I18N_REQUIRED"] = "1"
 
-    cmd = ["bash", "packaging/web/package.sh"]
-    if skip_build:
-        cmd.append("--skip-build")
+    package_sh = repo_path / "packaging" / "web" / "package.sh"
+    if package_sh.exists():
+        cmd = ["bash", "packaging/web/package.sh"]
+        if skip_build:
+            cmd.append("--skip-build")
+        print(f"[{app_name}] Executing: {' '.join(cmd)}")
+        result = subprocess.run(cmd, cwd=str(repo_path), env=env)
+        if result.returncode != 0:
+            raise RuntimeError(f"[{app_name}] Web build failed with exit code {result.returncode}")
+    else:
+        # Fallback for apps building directly with Trunk (e.g. fieldcraft, pcbcraft)
+        web_dir = repo_path / "apps" / f"{app_name}-web"
+        if not web_dir.exists():
+            web_dir = repo_path / "apps" / "web"
+        if not web_dir.exists():
+            candidates = [p.parent for p in repo_path.glob("**/index.html") if "dist" not in p.parts and "target" not in p.parts]
+            if candidates:
+                web_dir = candidates[0]
+            else:
+                raise FileNotFoundError(f"[{app_name}] Missing packaging script or web app directory in {repo_path}")
 
-    print(f"[{app_name}] Executing: {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=str(repo_path), env=env)
-    if result.returncode != 0:
-        raise RuntimeError(f"[{app_name}] Web build failed with exit code {result.returncode}")
+        print(f"[{app_name}] Building web target using trunk in {web_dir}...")
+        dist_target = repo_path / "dist" / "web"
+        trunk_cmd = ["trunk", "build", "--release", "--public-url", "./", "--dist", str(dist_target)]
+        result = subprocess.run(trunk_cmd, cwd=str(web_dir), env=env)
+        if result.returncode != 0:
+            raise RuntimeError(f"[{app_name}] Trunk build failed with exit code {result.returncode}")
 
 def extract_and_install(app_name, repo_path, output_dir):
     out_path = Path(output_dir).resolve()
@@ -261,24 +282,43 @@ def extract_and_install(app_name, repo_path, output_dir):
                     shutil.copytree(item, dst)
                 else:
                     shutil.copy2(item, dst)
-    else:
+    elif (repo_path / "target" / "web-package").exists():
         # 2. Look for web-package directory
         web_package = repo_path / "target" / "web-package"
-        if web_package.exists():
-            pkg_dirs = [p for p in web_package.iterdir() if p.is_dir()]
-            if pkg_dirs:
-                src_root = pkg_dirs[0]
-                print(f"[{app_name}] Copying from web-package directory: {src_root.name}")
-                for item in src_root.iterdir():
-                    dst = out_path / item.name
-                    if item.is_dir():
-                        shutil.copytree(item, dst)
-                    else:
-                        shutil.copy2(item, dst)
-            else:
-                raise FileNotFoundError(f"[{app_name}] No output directory found inside {web_package}")
+        pkg_dirs = [p for p in web_package.iterdir() if p.is_dir()]
+        if pkg_dirs:
+            src_root = pkg_dirs[0]
+            print(f"[{app_name}] Copying from web-package directory: {src_root.name}")
+            for item in src_root.iterdir():
+                dst = out_path / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dst)
+                else:
+                    shutil.copy2(item, dst)
         else:
-            raise FileNotFoundError(f"[{app_name}] Could not find built release zip or web-package directory")
+            raise FileNotFoundError(f"[{app_name}] No output directory found inside {web_package}")
+    elif (repo_path / "dist" / "web" / "index.html").exists():
+        # 3. Look for dist/web directory from Trunk
+        src_root = repo_path / "dist" / "web"
+        print(f"[{app_name}] Copying from dist/web directory: {src_root}")
+        for item in src_root.iterdir():
+            dst = out_path / item.name
+            if item.is_dir():
+                shutil.copytree(item, dst)
+            else:
+                shutil.copy2(item, dst)
+    elif (repo_path / "apps" / f"{app_name}-web" / "dist" / "index.html").exists():
+        # 4. Look for apps/<app>-web/dist directory
+        src_root = repo_path / "apps" / f"{app_name}-web" / "dist"
+        print(f"[{app_name}] Copying from apps/{app_name}-web/dist: {src_root}")
+        for item in src_root.iterdir():
+            dst = out_path / item.name
+            if item.is_dir():
+                shutil.copytree(item, dst)
+            else:
+                shutil.copy2(item, dst)
+    else:
+        raise FileNotFoundError(f"[{app_name}] Could not find built release zip, web-package, or dist/web directory")
 
     # Patch index.html with canonical & domain routing
     patch_index_html(out_path, app_name)

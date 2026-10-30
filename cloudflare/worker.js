@@ -27,7 +27,9 @@ const CRAFT_APPS = [
   'deckcraft',
   'gridcraft',
   'figcraft',
-  'solidcraft'
+  'solidcraft',
+  'fieldcraft',
+  'pcbcraft'
 ];
 
 export default {

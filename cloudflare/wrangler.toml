@@ -19,5 +19,7 @@ routes = [
   { pattern = "gridcraft.debarghaya.in", custom_domain = true },
   { pattern = "figcraft.debarghaya.in", custom_domain = true },
   { pattern = "solidcraft.debarghaya.in", custom_domain = true },
+  { pattern = "fieldcraft.debarghaya.in", custom_domain = true },
+  { pattern = "pcbcraft.debarghaya.in", custom_domain = true },
   { pattern = "apps.debarghaya.in", custom_domain = true }
 ]

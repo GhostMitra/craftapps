@@ -84,7 +84,7 @@ reviews:
     - path: "cloudflare/**"
       instructions: >-
         Review Cloudflare Worker edge routing scripts:
-        1. Ensure all 14 CraftApps are mapped correctly in the CRAFT_APPS array.
+        1. Ensure all 16 CraftApps are mapped correctly in the CRAFT_APPS array.
         2. Verify silent reverse-proxying of subdomains (e.g. 'solidcraft.debarghaya.in') to
            'craftapps.web.app/solidcraft/' without broken asset URLs.
         3. Ensure 301 redirects and trailing-slash normalization preserve query parameters.
@@ -102,7 +102,7 @@ reviews:
       instructions: >-
         Review JSON metadata files (upstream-commits.json, versions.json):
         1. Ensure valid JSON syntax with 2-space indentation and alphabetical sorting.
-        2. Verify all 14 CraftApps (including tangency-labs/solidcraft) are consistently represented.
+        2. Verify all 16 CraftApps (including tangency-labs/solidcraft, tangency-labs/fieldcraft, tangency-labs/pcbcraft) are consistently represented.
 
   tools:
     actionlint:
