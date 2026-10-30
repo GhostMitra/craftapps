@@ -104,7 +104,8 @@ async function proxyUpstream(request, upstreamUrl) {
   newHeaders.set("X-Forwarded-Host", new URL(request.url).hostname);
   newHeaders.set("X-Forwarded-Proto", new URL(request.url).protocol.replace(':', ''));
 
-  const isStaticAsset = /\.(wasm|js|png|jpg|jpeg|svg|css|woff2|ico|zip)$/i.test(upstreamUrl.pathname);
+  const isPartAsset = upstreamUrl.pathname.includes('.part-');
+  const isStaticAsset = isPartAsset || /\.(wasm|js|png|jpg|jpeg|svg|css|woff2|ico|zip|txt)$/i.test(upstreamUrl.pathname);
 
   const fetchOptions = {
     method: request.method,
@@ -132,11 +133,15 @@ async function proxyUpstream(request, upstreamUrl) {
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Access-Control-Allow-Origin", "*");
 
-  // Ensure correct MIME types for WebAssembly and JavaScript
+  // Ensure correct MIME types for WebAssembly, JavaScript, and binary parts
   if (upstreamUrl.pathname.endsWith(".wasm") && response.ok) {
     responseHeaders.set("Content-Type", "application/wasm");
   } else if (upstreamUrl.pathname.endsWith(".js") && response.ok) {
     responseHeaders.set("Content-Type", "text/javascript; charset=utf-8");
+  } else if (isPartAsset && response.ok) {
+    responseHeaders.set("Content-Type", "application/octet-stream");
+  } else if (upstreamUrl.pathname.endsWith("parts.txt") && response.ok) {
+    responseHeaders.set("Content-Type", "text/plain; charset=utf-8");
   }
 
   if (isStaticAsset && response.ok) {
@@ -148,6 +153,7 @@ async function proxyUpstream(request, upstreamUrl) {
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers: responseHeaders
+    headers: responseHeaders,
+    encodeBody: "manual"
   });
 }
