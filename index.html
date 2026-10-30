@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <script>
     if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
       var seg = location.pathname.split('/').filter(Boolean)[0];
@@ -14,22 +15,53 @@
       }
     }
   </script>
-  <title>CraftApps</title>
+  <title>ArtCraft Launcher &bull; Craft App Suite</title>
   <link rel="canonical" href="https://apps.debarghaya.in/">
-  <meta name="description" content="A clean menu of 16 creative and productivity web apps.">
+  <meta name="description" content="One place to discover, launch and open every app in the Craft App Suite, built in pure Rust and WebAssembly.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><path d='M8 16l6-6 10 10-6 6z' fill='white' opacity='0.9'/><circle cx='11' cy='21' r='3' fill='%2338bdf8'/></svg>">
   <style>
+    /* Theme tokens after ArtCraft Launcher (MIT / Apache-2.0) */
     :root {
-      --bg: #090a0f;
-      --card-bg: rgba(18, 22, 34, 0.75);
-      --card-hover: rgba(28, 35, 52, 0.95);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-hover: rgba(255, 255, 255, 0.22);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-      --accent: #6366f1;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg: #f2f1ee;
+      --sunken: #e9e8e4;
+      --ink: #101014;
+      --muted: #656562;
+      --faint: #797975;
+      --line: #cfcec9;
+      --good: #08775e;
+      --warning: #906000;
+      --bad: #a62e32;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --mono: "SF Mono", "Geist Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+      color-scheme: light;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #111214;
+      --sunken: #08090a;
+      --ink: #f4f3f0;
+      --muted: #a4a5a3;
+      --faint: #959694;
+      --line: #343538;
+      --good: #65d3b1;
+      --warning: #f3c366;
+      --bad: #ff9196;
+      color-scheme: dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #111214;
+        --sunken: #08090a;
+        --ink: #f4f3f0;
+        --muted: #a4a5a3;
+        --faint: #959694;
+        --line: #343538;
+        --good: #65d3b1;
+        --warning: #f3c366;
+        --bad: #ff9196;
+        color-scheme: dark;
+      }
     }
 
     * {
@@ -39,35 +71,70 @@
     }
 
     body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 14px/1.5 var(--sans);
+      -webkit-font-smoothing: antialiased;
       min-height: 100vh;
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      line-height: 1.5;
       display: flex;
       flex-direction: column;
-      background-image: 
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.15), transparent),
-        radial-gradient(ellipse 60% 40% at 85% 75%, rgba(56, 189, 248, 0.06), transparent);
-      padding: 40px 24px;
     }
 
-    .container {
-      max-width: 1140px;
-      margin: 0 auto;
+    a {
+      color: inherit;
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+      border: 1px solid var(--line);
+      background: transparent;
+      border-radius: 0;
+    }
+
+    button, select {
+      cursor: pointer;
+    }
+
+    button:hover, select:hover {
+      background: var(--sunken);
+    }
+
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .wrap {
       width: 100%;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 28px;
     }
 
-    /* Top Bar */
-    header {
+    .hud-label, .segments button, .open, .status-pill, .number, .tab-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .faint {
+      color: var(--faint);
+    }
+
+    /* Topbar */
+    .topbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 36px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
+      min-height: 58px;
+      border-bottom: 1px solid var(--line);
+      padding: 0 24px;
+      gap: 18px;
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
 
     .brand {
@@ -75,464 +142,1405 @@
       align-items: center;
       gap: 12px;
       text-decoration: none;
-      color: var(--text);
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #6366f1, #38bdf8);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
-    }
-
-    .brand-title {
-      font-size: 1.35rem;
+      font-size: 21px;
       font-weight: 700;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      padding-right: 20px;
+      border-right: 1px solid var(--line);
+      min-height: 58px;
     }
 
-    .brand-title span {
-      background: linear-gradient(90deg, #6366f1, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* Search */
-    .search-wrap {
-      position: relative;
-      width: 260px;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 9px 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.88rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-      background: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-    }
-
-    /* App Menu Grid */
-    .app-menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 18px;
-    }
-
-    .app-link {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 18px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      text-decoration: none;
-      color: var(--text);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      backdrop-filter: blur(8px);
-    }
-
-    .app-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 3px;
-      background: var(--app-accent, var(--accent));
-      opacity: 0.7;
-      transition: opacity 0.2s;
-    }
-
-    .app-link:hover {
-      background: var(--card-hover);
-      border-color: var(--border-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
-    }
-
-    .app-link:hover::before {
-      opacity: 1;
-      box-shadow: 0 0 10px var(--app-accent, var(--accent));
-    }
-
-    .app-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .brand svg {
       flex-shrink: 0;
-      color: var(--app-accent, #6366f1);
-      transition: transform 0.2s ease;
     }
 
-    .app-icon img {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-      border-radius: 6px;
-      pointer-events: none;
+    .brand .logo-text {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
     }
 
-    .app-link:hover .app-icon {
-      transform: scale(1.06);
+    .brand .brand-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: var(--mono);
+      padding-left: 2px;
     }
 
-    .app-info {
-      flex: 1;
-      min-width: 0;
+    .suite {
+      color: var(--muted);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .app-name {
-      font-size: 1.05rem;
+    .suite::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--good);
+      display: inline-block;
+    }
+
+    .topbar-end {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+    }
+
+    .view-switch {
+      border-left: 1px solid var(--line);
+      padding-left: 14px;
+    }
+
+    .segments {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid var(--line);
+    }
+
+    .segments button {
+      border: 0;
+      border-right: 1px solid var(--line);
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+
+    .segments button:last-child {
+      border-right: 0;
+    }
+
+    .segments button[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--bg);
       font-weight: 600;
-      color: #fff;
+    }
+
+    .theme-control select {
+      padding: 6px 10px;
+      font-size: 12px;
+      background: var(--bg);
+    }
+
+    /* Main Container */
+    main.lineup {
+      flex: 1;
+      padding-top: 18px;
+      padding-bottom: 40px;
+    }
+
+    /* Toolbar */
+    .toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 12px 0 16px;
     }
 
-    .app-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    .app-arrow {
-      color: var(--text-subtle);
-      transition: all 0.2s ease;
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: var(--sunken);
+      color: var(--ink);
+    }
+
+    .tab-btn.active {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+
+    .search-sort {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .sort-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-control select {
+      padding: 7px 10px;
+      font-size: 12px;
+      background: var(--bg);
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-wrapper input[type="search"] {
+      padding: 7px 12px 7px 32px;
+      width: 240px;
+      background: var(--sunken);
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .search-wrapper input[type="search"]::placeholder {
+      color: var(--faint);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--muted);
+    }
+
+    /* Grid View */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+      margin-top: 8px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 1100px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .brand {
+        border-right: 0;
+      }
+      .suite {
+        display: none;
+      }
+    }
+
+    /* Card Styling */
+    .card {
+      --app: #808080;
+      --app-ink: var(--app);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      transition: background 0.15s ease;
+    }
+
+    .card:hover {
+      background: var(--sunken);
+    }
+
+    .card-head {
+      min-height: 40px;
+      padding: 8px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      gap: 10px;
+    }
+
+    .number {
+      background: var(--app);
+      color: #08090a;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      padding: 3px 6px;
+      display: inline-block;
+    }
+
+    .card-links {
+      display: flex;
+      gap: 12px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .card-links a {
+      text-decoration: none;
+      color: var(--muted);
+    }
+
+    .card-links a:hover {
+      color: var(--ink);
+      text-decoration: underline;
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 20px 18px 18px;
+      min-height: 250px;
+    }
+
+    .identity {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .logo {
       flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: rgba(128, 128, 128, 0.08);
+      border: 1px solid rgba(128, 128, 128, 0.12);
+      padding: 4px;
     }
 
-    .app-link:hover .app-arrow {
-      color: #fff;
+    .identity-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .name {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .accent {
+      color: var(--app);
+    }
+
+    .tagline {
+      color: var(--muted);
+      margin: 6px 0 0;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .byline {
+      margin: 6px 0 0;
+      font: 400 10px var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .byline.official {
+      color: var(--app);
+    }
+
+    .byline.community {
+      color: var(--muted);
+    }
+
+    .inspiration-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--faint);
+    }
+
+    .inspiration-badge strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 18px;
+      gap: 10px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--line);
+      padding: 3px 6px;
+      color: var(--good);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      background: var(--bg);
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .open {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 38px;
+      border: 1px solid var(--muted);
+      background: transparent;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      padding: 8px 16px;
+      flex: 1;
+      transition: all 0.15s ease;
+    }
+
+    .open:hover {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+      text-decoration: none;
+    }
+
+    .open svg {
+      transition: transform 0.15s ease;
+    }
+
+    .open:hover svg {
       transform: translate(2px, -2px);
     }
 
-    /* Footer */
-    footer {
-      margin-top: auto;
-      padding-top: 40px;
-      text-align: center;
-      font-size: 0.82rem;
-      color: var(--text-subtle);
+    .popout-link {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.15s ease;
     }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 24px 16px;
-      }
-      .app-menu {
-        grid-template-columns: 1fr;
-      }
-      .search-wrap {
-        width: 100%;
-      }
+    .popout-link:hover {
+      background: var(--sunken);
+      color: var(--ink);
+      border-color: var(--ink);
+    }
+
+    /* Table View */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      margin-top: 8px;
+      margin-bottom: 32px;
+      background: var(--bg);
+    }
+
+    .app-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+      text-align: left;
+    }
+
+    .app-table th {
+      font: 500 10px var(--mono);
+      color: var(--faint);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--sunken);
+    }
+
+    .app-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px;
+      vertical-align: middle;
+    }
+
+    .app-table tr:hover td {
+      background: var(--sunken);
+    }
+
+    .app-table .table-app-cell {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .app-table .table-logo {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 8px;
+      padding: 2px;
+      background: rgba(128, 128, 128, 0.08);
+      border: 1px solid var(--line);
+    }
+
+    .app-table .table-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .app-table .table-tagline {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .app-table .table-equiv {
+      font-size: 12px;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .app-table .table-cat {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .app-table .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .app-table .table-open {
+      padding: 6px 14px;
+      font-size: 10px;
+      min-height: 32px;
+    }
+
+    /* Footer */
+    footer.footer {
+      border-top: 1px solid var(--line);
+      padding: 24px 0 36px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    footer p {
+      margin: 6px 0;
+    }
+
+    footer a {
+      color: var(--ink);
+      text-underline-offset: 3px;
+    }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+      border: 1px solid var(--line);
+      margin-top: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="brand">
-        <div class="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-            <polyline points="2 17 12 22 22 17"></polyline>
-            <polyline points="2 12 12 17 22 12"></polyline>
-          </svg>
+  <header class="topbar">
+    <a class="brand" href="./">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="7" fill="currentColor"/>
+        <path d="M8 16l6-6 10 10-6 6z" fill="var(--bg)" opacity="0.95"/>
+        <circle cx="11" cy="21" r="3" fill="#38bdf8"/>
+      </svg>
+      <div class="logo-text">
+        <span>ArtCraft</span>
+        <span class="brand-badge">Launcher</span>
+      </div>
+    </a>
+    <div class="suite hud-label">Craft App Suite &bull; WebAssembly</div>
+    <div class="topbar-end">
+      <div class="view-switch">
+        <div class="segments" role="group" aria-label="View switcher">
+          <button type="button" id="btn-grid" aria-pressed="true" title="Grid view">Grid</button>
+          <button type="button" id="btn-table" aria-pressed="false" title="Table view">Table</button>
         </div>
-        <div class="brand-title">CraftApps</div>
       </div>
+      <label class="theme-control">
+        <span class="sr-only">Theme</span>
+        <select id="theme" aria-label="Theme selector">
+          <option value="system">Match system</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </label>
+    </div>
+  </header>
 
-      <div class="search-wrap">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search apps...">
+  <main class="wrap lineup">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <span id="app-count" class="hud-label faint">16 APPS</span>
+        <div class="category-tabs" role="tablist">
+          <button type="button" class="tab-btn active" data-category="all">All (16)</button>
+          <button type="button" class="tab-btn" data-category="creative">Creative (8)</button>
+          <button type="button" class="tab-btn" data-category="engineering">Engineering (4)</button>
+          <button type="button" class="tab-btn" data-category="productivity">Productivity (4)</button>
+        </div>
       </div>
-    </header>
-
-    <main>
-      <div class="app-menu" id="appMenu">
-        <!-- 1. PhotoCraft -->
-        <a href="/photocraft/" data-app="photocraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #38bdf8;" data-name="photocraft image photo editor photoshop">
-          <div class="app-icon">
-            <img src="/icons/photocraft.svg" alt="PhotoCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>PhotoCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Image Editor</div>
-          </div>
-        </a>
-
-        <!-- 2. VectorCraft -->
-        <a href="/vectorcraft/" data-app="vectorcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #fb923c;" data-name="vectorcraft vector illustration illustrator svg">
-          <div class="app-icon">
-            <img src="/icons/vectorcraft.svg" alt="VectorCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>VectorCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Vector Illustration</div>
-          </div>
-        </a>
-
-        <!-- 3. CADCraft -->
-        <a href="/cadcraft/" data-app="cadcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #ef4444;" data-name="cadcraft cad 2d 3d autocad drafting">
-          <div class="app-icon">
-            <img src="/icons/cadcraft.png" alt="CADCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>CADCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">2D &amp; 3D CAD</div>
-          </div>
-        </a>
-
-        <!-- 4. DesignCraft -->
-        <a href="/designcraft/" data-app="designcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #f43f5e;" data-name="designcraft page layout indesign publishing">
-          <div class="app-icon">
-            <img src="/icons/designcraft.svg" alt="DesignCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>DesignCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Page Layout</div>
-          </div>
-        </a>
-
-        <!-- 5. FilmCraft -->
-        <a href="/filmcraft/" data-app="filmcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #a78bfa;" data-name="filmcraft video editor premiere pro cuts">
-          <div class="app-icon">
-            <img src="/icons/filmcraft.svg" alt="FilmCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>FilmCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Video Editor</div>
-          </div>
-        </a>
-
-        <!-- 6. EffectCraft -->
-        <a href="/effectcraft/" data-app="effectcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #818cf8;" data-name="effectcraft after effects vfx motion graphics">
-          <div class="app-icon">
-            <img src="/icons/effectcraft.svg" alt="EffectCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>EffectCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Motion &amp; VFX</div>
-          </div>
-        </a>
-
-        <!-- 7. SoundCraft -->
-        <a href="/soundcraft/" data-app="soundcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #2dd4bf;" data-name="soundcraft audio daw pro tools recording mixing">
-          <div class="app-icon">
-            <img src="/icons/soundcraft.png" alt="SoundCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>SoundCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Audio Workstation</div>
-          </div>
-        </a>
-
-        <!-- 8. LightCraft -->
-        <a href="/lightcraft/" data-app="lightcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #06b6d4;" data-name="lightcraft photo raw lightroom develop">
-          <div class="app-icon">
-            <img src="/icons/lightcraft.svg" alt="LightCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>LightCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">RAW Development</div>
-          </div>
-        </a>
-
-        <!-- 9. PdfCraft -->
-        <a href="/pdfcraft/" data-app="pdfcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #e11d48;" data-name="pdfcraft pdf acrobat document reader">
-          <div class="app-icon">
-            <img src="/icons/pdfcraft.svg" alt="PdfCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>PdfCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">PDF Workbench</div>
-          </div>
-        </a>
-
-        <!-- 10. DeckCraft -->
-        <a href="/deckcraft/" data-app="deckcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #f97316;" data-name="deckcraft presentations slides powerpoint">
-          <div class="app-icon">
-            <img src="/icons/deckcraft.png" alt="DeckCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>DeckCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Presentations</div>
-          </div>
-        </a>
-
-        <!-- 11. GridCraft -->
-        <a href="/gridcraft/" data-app="gridcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #10b981;" data-name="gridcraft spreadsheets excel sheets numbers data">
-          <div class="app-icon">
-            <img src="/icons/gridcraft.svg" alt="GridCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>GridCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Spreadsheets</div>
-          </div>
-        </a>
-
-        <!-- 12. WordCraft -->
-        <a href="/wordcraft/" data-app="wordcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #3b82f6;" data-name="wordcraft document authoring word writing docs">
-          <div class="app-icon">
-            <img src="/icons/wordcraft.svg" alt="WordCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>WordCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Document Authoring</div>
-          </div>
-        </a>
-
-        <!-- 13. FigCraft -->
-        <a href="/figcraft/" data-app="figcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #02da96;" data-name="figcraft figma ui ux design prototyping interface wireframe vector">
-          <div class="app-icon">
-            <img src="/icons/figcraft.svg" alt="FigCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>FigCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Interface &amp; Prototyping</div>
-          </div>
-        </a>
-
-        <!-- 14. SolidCraft -->
-        <a href="/solidcraft/" data-app="solidcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #0284c7;" data-name="solidcraft solidworks parametric 3d cad modeling brep mechanical assembly">
-          <div class="app-icon">
-            <img src="/icons/solidcraft.png" alt="SolidCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>SolidCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">Parametric 3D CAD</div>
-          </div>
-        </a>
-
-        <!-- 15. FieldCraft -->
-        <a href="/fieldcraft/" data-app="fieldcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #f97316;" data-name="fieldcraft ansys abaqus fea cae finite element analysis meshing simulation cfd structures heat fluids">
-          <div class="app-icon">
-            <img src="/icons/fieldcraft.svg" alt="FieldCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>FieldCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">CAE &amp; Multiphysics FEA</div>
-          </div>
-        </a>
-
-        <!-- 16. PCBCraft -->
-        <a href="/pcbcraft/" data-app="pcbcraft" target="_blank" rel="noopener" class="app-link" style="--app-accent: #10b981;" data-name="pcbcraft kicad altium eda schematic capture pcb layout routing circuits electronics">
-          <div class="app-icon">
-            <img src="/icons/pcbcraft.svg" alt="PCBCraft">
-          </div>
-          <div class="app-info">
-            <div class="app-name">
-              <span>PCBCraft</span>
-              <svg class="app-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-            <div class="app-desc">EDA &amp; PCB Layout</div>
-          </div>
-        </a>
+      <div class="search-sort">
+        <label class="sort-control">
+          <span class="hud-label faint">Sort</span>
+          <select id="sort-select" aria-label="Sort apps">
+            <option value="suite">Suite order</option>
+            <option value="name">Name</option>
+            <option value="category">Category</option>
+          </select>
+        </label>
+        <div class="search-wrapper">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="search-input" type="search" placeholder="Search apps (Press /)" autocomplete="off" spellcheck="false">
+        </div>
       </div>
-    </main>
+    </div>
 
-    <footer>
-      CraftApps &bull; Open-source WebAssembly Creative Suite
-    </footer>
-  </div>
+    <!-- Grid Container -->
+    <div id="grid-view" class="grid">
+      <!-- 01. PhotoCraft -->
+      <article class="card" style="--app: #2f7bf5;" data-app="photocraft" data-category="creative" data-order="1" data-search="photocraft photo photoshop raster image layers filters gpu storytold">
+        <div class="card-head">
+          <span class="number">01</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/photocraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/photocraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/photocraft.svg" alt="PhotoCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Photo<span class="accent">Craft</span></h2>
+              <p class="tagline">Layers, blend modes, adjustments, masks, GPU raster graphics</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe Photoshop®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/photocraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/photocraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 02. VectorCraft -->
+      <article class="card" style="--app: #e8573f;" data-app="vectorcraft" data-category="creative" data-order="2" data-search="vectorcraft vector illustrator svg bezier pen path boolean design storytold">
+        <div class="card-head">
+          <span class="number">02</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/vectorcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/vectorcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/vectorcraft.svg" alt="VectorCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Vector<span class="accent">Craft</span></h2>
+              <p class="tagline">Bézier pen tool, boolean path ops, SVG vector design</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe Illustrator®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/vectorcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/vectorcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 03. FigCraft -->
+      <article class="card" style="--app: #02da96;" data-app="figcraft" data-category="creative" data-order="3" data-search="figcraft figma ui ux design prototyping interface wireframe vector storytold">
+        <div class="card-head">
+          <span class="number">03</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/figcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/figcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/figcraft.svg" alt="FigCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Fig<span class="accent">Craft</span></h2>
+              <p class="tagline">UI/UX design, interactive prototyping, vector components</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Figma®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/figcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/figcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 04. CADCraft -->
+      <article class="card" style="--app: #3ea6e8;" data-app="cadcraft" data-category="engineering" data-order="4" data-search="cadcraft autocad cad 2d dxf drafting command line layers storytold">
+        <div class="card-head">
+          <span class="number">04</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/cadcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/cadcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/cadcraft.png" alt="CADCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">CAD<span class="accent">Craft</span></h2>
+              <p class="tagline">Command line, object snaps, layers, dimensions, DXF drawings</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Autodesk AutoCAD®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Engineering</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/cadcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/cadcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 05. DesignCraft -->
+      <article class="card" style="--app: #7bb51c;" data-app="designcraft" data-category="creative" data-order="5" data-search="designcraft indesign publishing layout typography pages spreads storytold">
+        <div class="card-head">
+          <span class="number">05</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/designcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/designcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/designcraft.svg" alt="DesignCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Design<span class="accent">Craft</span></h2>
+              <p class="tagline">Multi-page spreads, master page templating, linked text frames</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe InDesign®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/designcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/designcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 06. FilmCraft -->
+      <article class="card" style="--app: #8b5cf6;" data-app="filmcraft" data-category="creative" data-order="6" data-search="filmcraft premiere video editing timeline cuts color grading storytold">
+        <div class="card-head">
+          <span class="number">06</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/filmcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/filmcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/filmcraft.svg" alt="FilmCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Film<span class="accent">Craft</span></h2>
+              <p class="tagline">Multi-track timeline, video cutting, transitions, color grading</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe Premiere Pro®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/filmcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/filmcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 07. EffectCraft -->
+      <article class="card" style="--app: #e0368f;" data-app="effectcraft" data-category="creative" data-order="7" data-search="effectcraft after effects vfx motion graphics keyframes animation storytold">
+        <div class="card-head">
+          <span class="number">07</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/effectcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/effectcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/effectcraft.svg" alt="EffectCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Effect<span class="accent">Craft</span></h2>
+              <p class="tagline">Keyframe animation, visual effects compositing, audio worklets</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe After Effects®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/effectcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/effectcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 08. SoundCraft -->
+      <article class="card" style="--app: #1fa5c9;" data-app="soundcraft" data-category="creative" data-order="8" data-search="soundcraft pro tools daw audio mixing recording sound music storytold">
+        <div class="card-head">
+          <span class="number">08</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/soundcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/soundcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/soundcraft.png" alt="SoundCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Sound<span class="accent">Craft</span></h2>
+              <p class="tagline">Digital Audio Workstation (DAW), multi-track mixing, DSP</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Avid Pro Tools®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/soundcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/soundcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 09. LightCraft -->
+      <article class="card" style="--app: #f2a516;" data-app="lightcraft" data-category="creative" data-order="9" data-search="lightcraft lightroom raw photo editing grading opfs catalog storytold">
+        <div class="card-head">
+          <span class="number">09</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/lightcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/lightcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/lightcraft.svg" alt="LightCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Light<span class="accent">Craft</span></h2>
+              <p class="tagline">RAW development, tone curves, exposure grading, OPFS storage</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe Lightroom®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/lightcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/lightcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 10. PdfCraft -->
+      <article class="card" style="--app: #12a58a;" data-app="pdfcraft" data-category="productivity" data-order="10" data-search="pdfcraft acrobat pdf reader editor merge split annotate redact storytold">
+        <div class="card-head">
+          <span class="number">10</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/pdfcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/pdfcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/pdfcraft.svg" alt="PdfCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Pdf<span class="accent">Craft</span></h2>
+              <p class="tagline">Inspect, annotate, reorder, merge, split, form fill, redact</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe Acrobat®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/pdfcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/pdfcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 11. DeckCraft -->
+      <article class="card" style="--app: #f07a1e;" data-app="deckcraft" data-category="productivity" data-order="11" data-search="deckcraft powerpoint slides presentation deck presenter vector storytold">
+        <div class="card-head">
+          <span class="number">11</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/deckcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/deckcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/deckcraft.png" alt="DeckCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Deck<span class="accent">Craft</span></h2>
+              <p class="tagline">Slide deck creator, vector shapes, animations, presenter mode</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Microsoft PowerPoint®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/deckcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/deckcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 12. GridCraft -->
+      <article class="card" style="--app: #1f9d55;" data-app="gridcraft" data-category="productivity" data-order="12" data-search="gridcraft excel spreadsheets data grid tables formulas charts storytold">
+        <div class="card-head">
+          <span class="number">12</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/gridcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/gridcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/gridcraft.svg" alt="GridCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Grid<span class="accent">Craft</span></h2>
+              <p class="tagline">Fast formula calculation engine, data grid, charts</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Microsoft Excel®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/gridcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/gridcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 13. WordCraft -->
+      <article class="card" style="--app: #3f5fe0;" data-app="wordcraft" data-category="productivity" data-order="13" data-search="wordcraft word documents writing authoring text typography storytold">
+        <div class="card-head">
+          <span class="number">13</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/wordcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/wordcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/wordcraft.svg" alt="WordCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Word<span class="accent">Craft</span></h2>
+              <p class="tagline">Document design, typography styles, tables, citations</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Microsoft Word®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/wordcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/wordcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 14. SolidCraft -->
+      <article class="card" style="--app: #0284c7;" data-app="solidcraft" data-category="engineering" data-order="14" data-search="solidcraft solidworks parametric 3d cad modeling brep mechanical assembly tangency labs">
+        <div class="card-head">
+          <span class="number">14</span>
+          <div class="card-links">
+            <a href="https://github.com/tangency-labs/solidcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/solidcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/solidcraft.png" alt="SolidCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Solid<span class="accent">Craft</span></h2>
+              <p class="tagline">Parametric 3D CAD, feature tree, constraints, B-Rep modeling</p>
+              <p class="byline community">by Tangency Labs</p>
+              <div class="inspiration-badge">Inspired by <strong>SolidWorks®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Engineering</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/solidcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/solidcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 15. FieldCraft -->
+      <article class="card" style="--app: #f97316;" data-app="fieldcraft" data-category="engineering" data-order="15" data-search="fieldcraft ansys abaqus fea cae finite element analysis meshing simulation cfd structures heat fluids tangency labs">
+        <div class="card-head">
+          <span class="number">15</span>
+          <div class="card-links">
+            <a href="https://github.com/tangency-labs/fieldcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/fieldcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/fieldcraft.svg" alt="FieldCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Field<span class="accent">Craft</span></h2>
+              <p class="tagline">Multiphysics CAE, finite element analysis (FEA), hex/tet meshing, CFD</p>
+              <p class="byline community">by Tangency Labs</p>
+              <div class="inspiration-badge">Inspired by <strong>ANSYS® / Abaqus®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Engineering</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/fieldcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/fieldcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 16. PCBCraft -->
+      <article class="card" style="--app: #10b981;" data-app="pcbcraft" data-category="engineering" data-order="16" data-search="pcbcraft kicad altium eda schematic capture pcb layout routing circuits electronics tangency labs">
+        <div class="card-head">
+          <span class="number">16</span>
+          <div class="card-links">
+            <a href="https://github.com/tangency-labs/pcbcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/pcbcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/pcbcraft.svg" alt="PCBCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">PCB<span class="accent">Craft</span></h2>
+              <p class="tagline">EDA schematic capture, interactive PCB layout routing, library authoring</p>
+              <p class="byline community">by Tangency Labs</p>
+              <div class="inspiration-badge">Inspired by <strong>KiCad® / Altium®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="status-pill">Ready (Wasm)</span>
+            <span class="hud-label faint">Engineering</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/pcbcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/pcbcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Table Container (Hidden by default) -->
+    <div id="table-view" class="table-container" hidden>
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th style="width: 32%;">Application</th>
+            <th style="width: 30%;">Inspiration &bull; Capabilities</th>
+            <th style="width: 14%;">Category</th>
+            <th style="width: 12%;">Provenance</th>
+            <th style="width: 12%; text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Populated from cards in JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <div id="empty-state" class="empty-state" hidden>
+      No applications found matching your search. Press <kbd>ESC</kbd> to clear filters.
+    </div>
+  </main>
+
+  <footer class="wrap footer">
+    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 16 creative, engineering and productivity tools compiled to WebAssembly.</p>
+    <p>Documents and libraries live directly in your browser's private local storage. Export or back up your projects from within each application.</p>
+    <p class="faint">UI styled after <a href="https://github.com/craft-launcher/craft-launcher" target="_blank" rel="noopener">ArtCraft Launcher</a> (MIT / Apache-2.0). All applications developed by <a href="https://github.com/storytold" target="_blank" rel="noopener">Storytold</a> and <a href="https://github.com/tangency-labs" target="_blank" rel="noopener">Tangency Labs</a>.</p>
+    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad and ANSYS are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
+  </footer>
 
   <script>
-    // Host-aware custom subdomain links: on apps.debarghaya.in or *.debarghaya.in, link to custom subdomains
-    const currentHost = window.location.hostname;
-    if (currentHost.endsWith('debarghaya.in')) {
-      const rootDomain = currentHost.split('.').slice(-2).join('.');
-      document.querySelectorAll('.app-link[data-app]').forEach(link => {
-        const app = link.getAttribute('data-app');
-        if (app) {
-          link.href = `https://${app}.${rootDomain}/`;
-        }
-      });
+    // Theme Management
+    const themeSelect = document.getElementById('theme');
+    const savedTheme = localStorage.getItem('craftapps-theme') || 'system';
+    themeSelect.value = savedTheme;
+    applyTheme(savedTheme);
+
+    themeSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      localStorage.setItem('craftapps-theme', val);
+      applyTheme(val);
+    });
+
+    function applyTheme(theme) {
+      if (theme === 'system') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
     }
 
-    const searchInput = document.getElementById('searchInput');
-    const appLinks = document.querySelectorAll('.app-link');
+    // View Switching (Grid vs Table)
+    const btnGrid = document.getElementById('btn-grid');
+    const btnTable = document.getElementById('btn-table');
+    const gridView = document.getElementById('grid-view');
+    const tableView = document.getElementById('table-view');
 
-    searchInput.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      appLinks.forEach(link => {
-        const name = link.getAttribute('data-name');
-        if (!q || name.includes(q)) {
-          link.style.display = 'flex';
-        } else {
-          link.style.display = 'none';
-        }
+    const savedView = localStorage.getItem('craftapps-view') || 'grid';
+    setView(savedView);
+
+    btnGrid.addEventListener('click', () => setView('grid'));
+    btnTable.addEventListener('click', () => setView('table'));
+
+    function setView(view) {
+      localStorage.setItem('craftapps-view', view);
+      if (view === 'grid') {
+        btnGrid.setAttribute('aria-pressed', 'true');
+        btnTable.setAttribute('aria-pressed', 'false');
+        gridView.hidden = false;
+        tableView.hidden = true;
+      } else {
+        btnGrid.setAttribute('aria-pressed', 'false');
+        btnTable.setAttribute('aria-pressed', 'true');
+        gridView.hidden = true;
+        tableView.hidden = false;
+      }
+    }
+
+    // Host-Aware Link Rewriting
+    const currentHost = window.location.hostname;
+    const isCustomDomain = currentHost.endsWith('debarghaya.in');
+    const rootDomain = isCustomDomain ? currentHost.split('.').slice(-2).join('.') : null;
+
+    document.querySelectorAll('[data-app]').forEach(card => {
+      const app = card.getAttribute('data-app');
+      const actionLink = card.querySelector('.app-action-link');
+      const directLinks = card.querySelectorAll('.app-direct-link');
+
+      let targetUrl = `/${app}/`;
+      if (isCustomDomain) {
+        targetUrl = `https://${app}.${rootDomain}/`;
+      }
+
+      if (actionLink) actionLink.href = targetUrl;
+      directLinks.forEach(link => { link.href = targetUrl; });
+    });
+
+    // Populate Table View dynamically from Grid Cards
+    const tableBody = document.getElementById('table-body');
+    const cards = Array.from(document.querySelectorAll('.card'));
+
+    function populateTable() {
+      tableBody.innerHTML = '';
+      cards.forEach(card => {
+        const app = card.getAttribute('data-app');
+        const category = card.getAttribute('data-category');
+        const name = card.querySelector('.name').innerText;
+        const tagline = card.querySelector('.tagline').innerText;
+        const inspiration = card.querySelector('.inspiration-badge')?.innerText.replace('Inspired by ', '') || '';
+        const byline = card.querySelector('.byline').innerText;
+        const isOfficial = card.querySelector('.byline').classList.contains('official');
+        const logoSrc = card.querySelector('.logo').src;
+        const targetUrl = card.querySelector('.app-action-link')?.href || `/${app}/`;
+        const sourceUrl = card.querySelector('.card-links a')?.href || `https://github.com/storytold/${app}`;
+
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-app', app);
+        tr.setAttribute('data-category', category);
+        tr.innerHTML = `
+          <td>
+            <div class="table-app-cell">
+              <img class="table-logo" src="${logoSrc}" alt="${name}" width="40" height="40" loading="lazy">
+              <div>
+                <div class="table-name">${name}</div>
+                <div class="byline ${isOfficial ? 'official' : 'community'}" style="margin:2px 0 0;">${byline}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="table-tagline">${tagline}</div>
+            <div class="table-equiv" style="margin-top: 3px; font-size: 11px; color: var(--faint);">${inspiration}</div>
+          </td>
+          <td>
+            <span class="table-cat">${category}</span>
+          </td>
+          <td>
+            <a href="${sourceUrl}" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:11px; text-decoration:none; color:var(--muted);">${isOfficial ? 'storytold' : 'tangency-labs'} &nearr;</a>
+          </td>
+          <td>
+            <div class="table-actions">
+              <a class="open table-open" href="${targetUrl}">OPEN</a>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+    populateTable();
+
+    // Category Tabs Filtering
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    let currentCategory = 'all';
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.getAttribute('data-category');
+        applyFilters();
       });
     });
+
+    // Search and Sort Filtering
+    const searchInput = document.getElementById('search-input');
+    const sortSelect = document.getElementById('sort-select');
+    const appCount = document.getElementById('app-count');
+    const emptyState = document.getElementById('empty-state');
+
+    // Hotkey: press '/' to focus search input, 'Escape' to clear
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+        searchInput.value = '';
+        applyFilters();
+        searchInput.blur();
+      }
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+    sortSelect.addEventListener('change', applySorting);
+
+    function applyFilters() {
+      const q = searchInput.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const cat = card.getAttribute('data-category');
+        const searchTerms = card.getAttribute('data-search') || '';
+        const name = card.querySelector('.name').innerText.toLowerCase();
+        const tagline = card.querySelector('.tagline').innerText.toLowerCase();
+
+        const matchCat = (currentCategory === 'all' || cat === currentCategory);
+        const matchSearch = (!q || searchTerms.includes(q) || name.includes(q) || tagline.includes(q));
+
+        const visible = matchCat && matchSearch;
+        card.style.display = visible ? 'flex' : 'none';
+
+        // Matching row in table
+        const row = tableBody.querySelector(`tr[data-app="${card.getAttribute('data-app')}"]`);
+        if (row) row.style.display = visible ? '' : 'none';
+
+        if (visible) visibleCount++;
+      });
+
+      appCount.textContent = `${visibleCount} APP${visibleCount === 1 ? '' : 'S'}`;
+      emptyState.hidden = (visibleCount > 0);
+    }
+
+    function applySorting() {
+      const mode = sortSelect.value;
+      const sortedCards = [...cards];
+
+      if (mode === 'name') {
+        sortedCards.sort((a, b) => a.querySelector('.name').innerText.localeCompare(b.querySelector('.name').innerText));
+      } else if (mode === 'category') {
+        sortedCards.sort((a, b) => a.getAttribute('data-category').localeCompare(b.getAttribute('data-category')));
+      } else {
+        sortedCards.sort((a, b) => parseInt(a.getAttribute('data-order')) - parseInt(b.getAttribute('data-order')));
+      }
+
+      sortedCards.forEach(card => gridView.appendChild(card));
+      populateTable();
+      applyFilters();
+    }
   </script>
 </body>
 </html>
