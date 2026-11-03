@@ -7,7 +7,7 @@
   <script>
     if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
       var seg = location.pathname.split('/').filter(Boolean)[0];
-      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft'];
+      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft','materialcraft','texturecraft','craft-anything','craftanything'];
       if (seg && apps.indexOf(seg.toLowerCase()) !== -1) {
         location.replace('https://' + seg.toLowerCase() + '.debarghaya.in' + location.pathname.replace(new RegExp('^/' + seg, 'i'), '') + location.search + location.hash);
       } else {
@@ -790,11 +790,11 @@
   <main class="wrap lineup">
     <div class="toolbar">
       <div class="toolbar-left">
-        <span id="app-count" class="hud-label faint">15 APPS</span>
+        <span id="app-count" class="hud-label faint">18 APPS</span>
         <div class="category-tabs" role="tablist">
-          <button type="button" class="tab-btn active" data-category="all">All (15)</button>
-          <button type="button" class="tab-btn" data-category="creative">Creative (8)</button>
-          <button type="button" class="tab-btn" data-category="engineering">Engineering (3)</button>
+          <button type="button" class="tab-btn active" data-category="all">All (18)</button>
+          <button type="button" class="tab-btn" data-category="creative">Creative (10)</button>
+          <button type="button" class="tab-btn" data-category="engineering">Engineering (4)</button>
           <button type="button" class="tab-btn" data-category="productivity">Productivity (4)</button>
         </div>
       </div>
@@ -1325,6 +1325,108 @@
           </div>
         </div>
       </article>
+
+      <!-- 16. MaterialCraft -->
+      <article class="card" style="--app: #178a9c;" data-app="materialcraft" data-category="creative" data-order="16" data-search="materialcraft materials pbr node procedural shader textures substance designer storytold">
+        <div class="card-head">
+          <span class="number">16</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/materialcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/materialcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/materialcraft.svg" alt="MaterialCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Material<span class="accent">Craft</span></h2>
+              <p class="tagline">Node-based PBR material designer, procedural textures, shader nodes</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Substance 3D Designer®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/materialcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/materialcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 17. TextureCraft -->
+      <article class="card" style="--app: #c2672b;" data-app="texturecraft" data-category="creative" data-order="17" data-search="texturecraft 3d texture painting uv brush layers pbr substance painter storytold">
+        <div class="card-head">
+          <span class="number">17</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/texturecraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/texturecraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/texturecraft.svg" alt="TextureCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Texture<span class="accent">Craft</span></h2>
+              <p class="tagline">3D texture painting workflow, multi-layer brush painting, PBR maps</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Substance 3D Painter®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/texturecraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/texturecraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 18. Craft Anything -->
+      <article class="card" style="--app: #4e7bfb;" data-app="craft-anything" data-category="engineering" data-order="18" data-search="craft-anything craftanything reverse engineering ai clean room inspect decompile software build agent storytold">
+        <div class="card-head">
+          <span class="number">18</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/craft-anything" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/craft-anything/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/craft-anything.svg" alt="Craft Anything" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Craft <span class="accent">Anything</span></h2>
+              <p class="tagline">Inspect any app or site, understand how it works, and craft your own</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Engineered for <strong>Software &amp; AI Crafting</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Engineering</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/craft-anything/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/craft-anything/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
     </div>
 
     <!-- Table Container (Hidden by default) -->
@@ -1351,10 +1453,10 @@
   </main>
 
   <footer class="wrap footer">
-    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 16 creative, engineering and productivity tools compiled to WebAssembly.</p>
+    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 18 creative, engineering and productivity tools compiled to WebAssembly.</p>
     <p>Documents and libraries live directly in your browser's private local storage. Export or back up your projects from within each application.</p>
     <p class="faint">UI styled after <a href="https://github.com/craft-launcher/craft-launcher" target="_blank" rel="noopener">ArtCraft Launcher</a> (MIT / Apache-2.0). All applications developed by <a href="https://github.com/storytold" target="_blank" rel="noopener">Storytold</a> and <a href="https://github.com/tangency-labs" target="_blank" rel="noopener">Tangency Labs</a>.</p>
-    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad and ANSYS are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
+    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad, Substance Designer, Substance Painter and ANSYS are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
   </footer>
 
   <script>

@@ -21,6 +21,7 @@ from pathlib import Path
 
 APPS = [
     'cadcraft',
+    'craft-anything',
     'deckcraft',
     'designcraft',
     'effectcraft',
@@ -29,10 +30,12 @@ APPS = [
     'filmcraft',
     'gridcraft',
     'lightcraft',
+    'materialcraft',
     'pdfcraft',
     'photocraft',
     'solidcraft',
     'soundcraft',
+    'texturecraft',
     'vectorcraft',
     'wordcraft'
 ]

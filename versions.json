@@ -1,5 +1,6 @@
 {
   "cadcraft": "v0.12.0",
+  "craft-anything": "v0.3.0",
   "deckcraft": "v0.10.0",
   "designcraft": "v0.12.0",
   "effectcraft": "v0.16.0",
@@ -7,10 +8,12 @@
   "filmcraft": "v0.12.0",
   "gridcraft": "v0.11.1",
   "lightcraft": "v0.13.0",
+  "materialcraft": "v0.1.0",
   "pdfcraft": "v0.13.0",
   "photocraft": "v0.15.1",
   "solidcraft": "v0.21.0",
   "soundcraft": "v0.12.1",
+  "texturecraft": "v0.3.0",
   "vectorcraft": "v0.16.0",
   "wordcraft": "v0.10.0"
 }

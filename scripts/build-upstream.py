@@ -21,6 +21,7 @@ from pathlib import Path
 
 APPS = [
     'cadcraft',
+    'craft-anything',
     'deckcraft',
     'designcraft',
     'effectcraft',
@@ -29,10 +30,12 @@ APPS = [
     'filmcraft',
     'gridcraft',
     'lightcraft',
+    'materialcraft',
     'pdfcraft',
     'photocraft',
     'solidcraft',
     'soundcraft',
+    'texturecraft',
     'vectorcraft',
     'wordcraft'
 ]
@@ -45,6 +48,7 @@ APP_REPOS = {
 # Upstream font reference commits mapped from official release workflows
 APP_FONTS = {
     'cadcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'craft-anything': ('', False),
     'deckcraft': ('37827adc41fd165f9a9234ac40f94dbad353aa69', False),
     'designcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
     'effectcraft': ('', False),
@@ -53,10 +57,12 @@ APP_FONTS = {
     'filmcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'gridcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'lightcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
+    'materialcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'pdfcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'photocraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'solidcraft': ('', False),
     'soundcraft': ('', False),
+    'texturecraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'vectorcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
     'wordcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
 }

@@ -1,6 +1,6 @@
 # CraftOS &mdash; Web Desktop Studio 🖥️🎨
 
-> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 14 creative applications in floating resizable windows on Firebase Hosting and Cloudflare Workers.**
+> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 18 creative and engineering applications in floating resizable windows on Firebase Hosting and Cloudflare Workers.**
 
 ![Rust](https://img.shields.io/badge/Language-Rust-dea584?style=flat-square&logo=rust&logoColor=white)
 ![WebAssembly](https://img.shields.io/badge/Technology-WebAssembly-654ff0?style=flat-square&logo=webassembly&logoColor=white)
@@ -28,7 +28,7 @@ Every application in the suite is compiled directly from upstream source reposit
   - 🟡 **Minimize (−):** Minimizes the application down to the taskbar pill.
   - 🟢 **Maximize (⤢):** Expands the application to occupy the full desktop screen.
 - **Frosted-Glass Taskbar / Dock:**
-  - **Start Menu ("CraftOS"):** Search and launch any of the 15 applications with instant keyboard filtering.
+  - **Start Menu ("CraftOS"):** Search and launch any of the 18 applications with instant keyboard filtering.
   - **Task Switcher:** Click running taskbar pills to focus, restore, or minimize windows.
   - **System Tray:** Live digital clock, active memory/process monitor, wallpaper switcher, and desktop fullscreen toggle.
 - **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
@@ -55,6 +55,9 @@ Every application in the suite is compiled directly from upstream source reposit
 | **WordCraft** | [`wordcraft.debarghaya.in`](https://wordcraft.debarghaya.in/) | [`/wordcraft/`](https://craftapps.web.app/wordcraft/) | [`storytold/wordcraft`](https://github.com/storytold/wordcraft) | **Microsoft Word** | Document design, typography styles, tables, citations |
 | **SolidCraft** | [`solidcraft.debarghaya.in`](https://solidcraft.debarghaya.in/) | [`/solidcraft/`](https://craftapps.web.app/solidcraft/) | [`tangency-labs/solidcraft`](https://github.com/tangency-labs/solidcraft) | **SolidWorks** | Parametric 3D CAD, feature tree, constraints, B-Rep modeling |
 | **FieldCraft** | [`fieldcraft.debarghaya.in`](https://fieldcraft.debarghaya.in/) | [`/fieldcraft/`](https://craftapps.web.app/fieldcraft/) | [`tangency-labs/fieldcraft`](https://github.com/tangency-labs/fieldcraft) | **ANSYS / Abaqus** | Multiphysics CAE, finite element analysis (FEA), hex/tet meshing, CFD |
+| **MaterialCraft** | [`materialcraft.debarghaya.in`](https://materialcraft.debarghaya.in/) | [`/materialcraft/`](https://craftapps.web.app/materialcraft/) | [`storytold/materialcraft`](https://github.com/storytold/materialcraft) | **Substance 3D Designer** | Node-based PBR material designer, procedural textures, shader nodes |
+| **TextureCraft** | [`texturecraft.debarghaya.in`](https://texturecraft.debarghaya.in/) | [`/texturecraft/`](https://craftapps.web.app/texturecraft/) | [`storytold/texturecraft`](https://github.com/storytold/texturecraft) | **Substance 3D Painter** | 3D texture painting workflow, multi-layer brush painting, PBR maps |
+| **Craft Anything** | [`craft-anything.debarghaya.in`](https://craft-anything.debarghaya.in/) | [`/craft-anything/`](https://craftapps.web.app/craft-anything/) | [`storytold/craft-anything`](https://github.com/storytold/craft-anything) | **Software & AI Crafting** | Inspect any app or site, understand how it works, and craft your own |
 | **CraftOS Portal** | [`apps.debarghaya.in`](https://apps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | &mdash; | **Web Desktop OS** | Central desktop workspace and application launcher |
 
 ---

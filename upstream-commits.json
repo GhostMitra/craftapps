@@ -1,5 +1,6 @@
 {
   "cadcraft": "b04273e8974245e1c59ec57eb5ad86cec7a200eb",
+  "craft-anything": "5ac0e2b68db49860f45899ed0f2161b0b88eb261",
   "deckcraft": "82ec8137dc39f29b0f51b18630b409d655066fce",
   "designcraft": "f1bdec7fee7a5dfb58c35b6e056b3f9c9bd5110e",
   "effectcraft": "d025b59e6d77ae038712bb9431c3a548e5c37f17",
@@ -8,10 +9,12 @@
   "filmcraft": "57dc82ea2046c2ec479ab4d4d8167d90e5500b49",
   "gridcraft": "92cdc2a975b6e014da6ff25477232b500e3c1cf6",
   "lightcraft": "389ab177db87694ce71d54a1adb9546772e483b6",
+  "materialcraft": "f1bb82e8e04e62e74736e43ff9473017cc0543c1",
   "pdfcraft": "ea353f7a598ff032e412f27352a3373357ccef50",
   "photocraft": "fd32d25270c11dd494e849c3526d955261f6da6c",
   "solidcraft": "bd2dc3fade1d89de40c82dd230f79a399b647e28",
   "soundcraft": "aa250cc1d740013cf26cc449e53a20653ed67e2e",
+  "texturecraft": "9dc33d894e9cd8e25ce84f6074fd1b476dad5698",
   "vectorcraft": "ee165faf6b8767095c637d6071fcf774869f14b9",
   "wordcraft": "051fd875efddc6794f11044ba9109aa7051999e8"
 }

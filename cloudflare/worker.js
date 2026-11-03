@@ -29,7 +29,15 @@ const CRAFT_APPS = [
   'figcraft',
   'solidcraft',
   'fieldcraft',
+  'materialcraft',
+  'texturecraft',
+  'craft-anything',
+  'craftanything',
 ];
+
+const APP_ALIASES = {
+  'craftanything': 'craft-anything',
+};
 
 export default {
   async fetch(request, env, ctx) {
@@ -44,7 +52,7 @@ export default {
     // 1. Direct App Subdomain (e.g. photocraft.debarghaya.in)
     // Silent reverse-proxy to craftapps.web.app/photocraft/ with no redirect
     if (CRAFT_APPS.includes(subdomain)) {
-      const targetApp = subdomain;
+      const targetApp = APP_ALIASES[subdomain] || subdomain;
       let targetPath = url.pathname;
       if (targetPath !== `/${targetApp}` && !targetPath.startsWith(`/${targetApp}/`)) {
         targetPath = `/${targetApp}` + (targetPath.startsWith('/') ? targetPath : `/${targetPath}`);
@@ -87,9 +95,10 @@ export default {
     const firstSegment = pathParts[0]?.toLowerCase();
 
     if (CRAFT_APPS.includes(firstSegment)) {
+      const canonicalApp = APP_ALIASES[firstSegment] || firstSegment;
       const remainingSegments = pathParts.slice(1);
       const remainingPath = remainingSegments.length > 0 ? '/' + remainingSegments.join('/') : '/';
-      const redirectUrl = `https://${firstSegment}.${rootDomain}${remainingPath}${url.search}`;
+      const redirectUrl = `https://${canonicalApp}.${rootDomain}${remainingPath}${url.search}`;
       return Response.redirect(redirectUrl, 301);
     }
 

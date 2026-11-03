@@ -19,6 +19,7 @@ COMMITS_FILE = ROOT_DIR / "upstream-commits.json"
 
 APP_METADATA = {
     'cadcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'craft-anything': {'fonts_ref': '', 'web_fonts': False},
     'deckcraft': {'fonts_ref': '37827adc41fd165f9a9234ac40f94dbad353aa69', 'web_fonts': False},
     'designcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
     'effectcraft': {'fonts_ref': '', 'web_fonts': False},
@@ -27,10 +28,12 @@ APP_METADATA = {
     'filmcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'gridcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'lightcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
+    'materialcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'pdfcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'photocraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'solidcraft': {'repo': 'tangency-labs/solidcraft', 'fonts_ref': '', 'web_fonts': False},
     'soundcraft': {'fonts_ref': '', 'web_fonts': False},
+    'texturecraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'vectorcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
     'wordcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
 }
