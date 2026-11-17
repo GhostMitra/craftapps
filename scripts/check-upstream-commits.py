@@ -18,6 +18,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 COMMITS_FILE = ROOT_DIR / "upstream-commits.json"
 
 APP_METADATA = {
+    'anicraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'cadcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'craft-anything': {'fonts_ref': '', 'web_fonts': False},
     'deckcraft': {'fonts_ref': '37827adc41fd165f9a9234ac40f94dbad353aa69', 'web_fonts': False},
@@ -28,9 +29,13 @@ APP_METADATA = {
     'filmcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'gridcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'lightcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': True},
+    'mailcraft': {'repo': 'UCS-Care-Group/mailcraft', 'fonts_ref': '', 'web_fonts': False},
     'materialcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'metriccraft': {'repo': 'UCS-Care-Group/metriccraft', 'fonts_ref': '', 'web_fonts': False},
+    'pcbcraft': {'repo': 'tangency-labs/pcbcraft', 'fonts_ref': '', 'web_fonts': False},
     'pdfcraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
     'photocraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},
+    'projectcraft': {'repo': 'UCS-Care-Group/projectcraft', 'fonts_ref': '', 'web_fonts': False},
     'solidcraft': {'repo': 'tangency-labs/solidcraft', 'fonts_ref': '', 'web_fonts': False},
     'soundcraft': {'fonts_ref': '', 'web_fonts': False},
     'texturecraft': {'fonts_ref': 'b076417b5880bd4154bd22f00695b1d28c6bea83', 'web_fonts': False},

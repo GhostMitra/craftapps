@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- MetricCraft application icon (UCS Care Group): Business Intelligence, telemetry analytics, interactive charts & DAX metrics.
+       Palette: Power BI Gold #eab308 / #ca8a04, ink #0b0b0c, paper #efe9dc, telemetry blue #0284c7 -->
+  <defs>
+    <clipPath id="tile-metric"><rect width="512" height="512" rx="112"/></clipPath>
+    <linearGradient id="metric-bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#tile-metric)">
+    <rect width="512" height="512" fill="url(#metric-bg)"/>
+
+    <g transform="rotate(-5 256 256)" stroke="#0b0b0c" stroke-linejoin="round" stroke-linecap="round">
+      <!-- BI Dashboard Canvas Board -->
+      <rect x="96" y="80" width="320" height="352" rx="20" fill="#efe9dc" stroke-width="14"/>
+
+      <!-- Dashboard title bar -->
+      <path d="M 96 80 H 416 V 132 H 96 Z" fill="#ca8a04" stroke="none"/>
+      <circle cx="126" cy="106" r="8" fill="#efe9dc" stroke="none"/>
+      <circle cx="150" cy="106" r="8" fill="#efe9dc" stroke="none"/>
+      <line x1="184" y1="106" x2="280" y2="106" stroke="#efe9dc" stroke-width="8"/>
+
+      <!-- Card KPI Metric Widget (Top Right) -->
+      <rect x="270" y="152" width="126" height="66" rx="8" fill="#ffffff" stroke-width="8"/>
+      <text x="333" y="196" font-family="'Geist Mono', monospace" font-size="24" font-weight="bold" fill="#0b0b0c" text-anchor="middle" stroke="none">+94.8%</text>
+
+      <!-- Donut Chart Widget (Top Left) -->
+      <circle cx="176" cy="185" r="30" fill="none" stroke="#0284c7" stroke-width="16"/>
+      <circle cx="176" cy="185" r="30" fill="none" stroke="#e11d48" stroke-width="16" stroke-dasharray="45 150"/>
+      <circle cx="176" cy="185" r="30" fill="none" stroke="#ca8a04" stroke-width="16" stroke-dasharray="35 150" stroke-dashoffset="-45"/>
+
+      <!-- Metric Bar Chart Columns (Bottom) -->
+      <!-- Axis lines -->
+      <line x1="130" y1="390" x2="384" y2="390" stroke-width="10"/>
+      <line x1="130" y1="240" x2="130" y2="390" stroke-width="10"/>
+
+      <!-- Bar 1 -->
+      <rect x="150" y="320" width="34" height="70" rx="4" fill="#0284c7" stroke-width="7"/>
+      <!-- Bar 2 -->
+      <rect x="200" y="280" width="34" height="110" rx="4" fill="#ca8a04" stroke-width="7"/>
+      <!-- Bar 3 -->
+      <rect x="250" y="250" width="34" height="140" rx="4" fill="#059669" stroke-width="7"/>
+      <!-- Bar 4 -->
+      <rect x="300" y="210" width="34" height="180" rx="4" fill="#e11d48" stroke-width="7"/>
+      <!-- Bar 5 -->
+      <rect x="350" y="170" width="34" height="220" rx="4" fill="#0b0b0c" stroke-width="7"/>
+
+      <!-- Trend / Forecast Spline Curve -->
+      <path d="M 167 305 Q 217 265, 267 235 T 367 150" fill="none" stroke="#1d4ed8" stroke-width="10"/>
+      <circle cx="367" cy="150" r="10" fill="#1d4ed8" stroke="#efe9dc" stroke-width="5"/>
+    </g>
+  </g>
+</svg>

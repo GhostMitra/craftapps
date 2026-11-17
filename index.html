@@ -7,7 +7,7 @@
   <script>
     if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
       var seg = location.pathname.split('/').filter(Boolean)[0];
-      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft','materialcraft','texturecraft','craft-anything','craftanything'];
+      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft','materialcraft','texturecraft','craft-anything','craftanything','anicraft','pcbcraft','mailcraft','metriccraft','projectcraft'];
       if (seg && apps.indexOf(seg.toLowerCase()) !== -1) {
         location.replace('https://' + seg.toLowerCase() + '.debarghaya.in' + location.pathname.replace(new RegExp('^/' + seg, 'i'), '') + location.search + location.hash);
       } else {
@@ -790,12 +790,12 @@
   <main class="wrap lineup">
     <div class="toolbar">
       <div class="toolbar-left">
-        <span id="app-count" class="hud-label faint">18 APPS</span>
+        <span id="app-count" class="hud-label faint">23 APPS</span>
         <div class="category-tabs" role="tablist">
-          <button type="button" class="tab-btn active" data-category="all">All (18)</button>
-          <button type="button" class="tab-btn" data-category="creative">Creative (10)</button>
-          <button type="button" class="tab-btn" data-category="engineering">Engineering (4)</button>
-          <button type="button" class="tab-btn" data-category="productivity">Productivity (4)</button>
+          <button type="button" class="tab-btn active" data-category="all">All (23)</button>
+          <button type="button" class="tab-btn" data-category="creative">Creative (11)</button>
+          <button type="button" class="tab-btn" data-category="engineering">Engineering (5)</button>
+          <button type="button" class="tab-btn" data-category="productivity">Productivity (7)</button>
         </div>
       </div>
       <div class="search-sort">
@@ -1427,6 +1427,176 @@
           </div>
         </div>
       </article>
+
+      <!-- 19. AniCraft -->
+      <article class="card" style="--app: #e11d48;" data-app="anicraft" data-category="creative" data-order="19" data-search="anicraft animation 2d keyframes timeline onion skin vector storytold">
+        <div class="card-head">
+          <span class="number">19</span>
+          <div class="card-links">
+            <a href="https://github.com/storytold/anicraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/anicraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/anicraft.svg" alt="AniCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Ani<span class="accent">Craft</span></h2>
+              <p class="tagline">2D vector animation editor, keyframe timeline, sprite rigging</p>
+              <p class="byline official">by ArtCraft</p>
+              <div class="inspiration-badge">Inspired by <strong>Adobe Animate® / OpenToonz®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Creative</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/anicraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/anicraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 20. PcbCraft -->
+      <article class="card" style="--app: #059669;" data-app="pcbcraft" data-category="engineering" data-order="20" data-search="pcbcraft pcb kicad altium electronics circuit board schematic routing eda gerber tangency labs">
+        <div class="card-head">
+          <span class="number">20</span>
+          <div class="card-links">
+            <a href="https://github.com/tangency-labs/pcbcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/pcbcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/pcbcraft.svg" alt="PcbCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Pcb<span class="accent">Craft</span></h2>
+              <p class="tagline">Schematic capture, multi-layer PCB layout, autorouter, DRC, Gerber/KiCad export</p>
+              <p class="byline community">by Tangency Labs</p>
+              <div class="inspiration-badge">Inspired by <strong>KiCad® / Altium Designer®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Engineering</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/pcbcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/pcbcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 21. MailCraft -->
+      <article class="card" style="--app: #0078d4;" data-app="mailcraft" data-category="productivity" data-order="21" data-search="mailcraft outlook email mail calendar contacts imap exchange m365 ucs care group">
+        <div class="card-head">
+          <span class="number">21</span>
+          <div class="card-links">
+            <a href="https://github.com/UCS-Care-Group/mailcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/mailcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/mailcraft.svg" alt="MailCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Mail<span class="accent">Craft</span></h2>
+              <p class="tagline">Clean-room email, shared calendar, contacts, IMAP/M365 client</p>
+              <p class="byline community">by UCS Care Group</p>
+              <div class="inspiration-badge">Inspired by <strong>Microsoft Outlook®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/mailcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/mailcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 22. MetricCraft -->
+      <article class="card" style="--app: #eab308;" data-app="metriccraft" data-category="productivity" data-order="22" data-search="metriccraft power bi bi business intelligence analytics dax dashboards telemetry charts ucs care group">
+        <div class="card-head">
+          <span class="number">22</span>
+          <div class="card-links">
+            <a href="https://github.com/UCS-Care-Group/metriccraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/metriccraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/metriccraft.svg" alt="MetricCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Metric<span class="accent">Craft</span></h2>
+              <p class="tagline">Business intelligence authoring, interactive DAX analytics, report dashboards</p>
+              <p class="byline community">by UCS Care Group</p>
+              <div class="inspiration-badge">Inspired by <strong>Microsoft Power BI®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/metriccraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/metriccraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 23. ProjectCraft -->
+      <article class="card" style="--app: #317256;" data-app="projectcraft" data-category="productivity" data-order="23" data-search="projectcraft ms project project management gantt pert timeline critical path schedule cpm ucs care group">
+        <div class="card-head">
+          <span class="number">23</span>
+          <div class="card-links">
+            <a href="https://github.com/UCS-Care-Group/projectcraft" target="_blank" rel="noopener">SOURCE</a>
+            <a href="/projectcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="identity">
+            <img class="logo" src="/icons/projectcraft.svg" alt="ProjectCraft" width="56" height="56" loading="lazy">
+            <div class="identity-text">
+              <h2 class="name">Project<span class="accent">Craft</span></h2>
+              <p class="tagline">Project scheduling, Gantt & PERT charts, critical path method (CPM), resource leveling</p>
+              <p class="byline community">by UCS Care Group</p>
+              <div class="inspiration-badge">Inspired by <strong>Microsoft Project®</strong></div>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span class="hud-label faint">Productivity</span>
+          </div>
+          <div class="actions">
+            <a class="open app-action-link" href="/projectcraft/">
+              <span>OPEN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+            </a>
+            <a class="popout-link app-direct-link" href="/projectcraft/" target="_blank" rel="noopener" title="Open in new window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
     </div>
 
     <!-- Table Container (Hidden by default) -->
@@ -1453,10 +1623,10 @@
   </main>
 
   <footer class="wrap footer">
-    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 18 creative, engineering and productivity tools compiled to WebAssembly.</p>
+    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 23 creative, engineering and productivity tools compiled to WebAssembly.</p>
     <p>Documents and libraries live directly in your browser's private local storage. Export or back up your projects from within each application.</p>
-    <p class="faint">UI styled after <a href="https://github.com/craft-launcher/craft-launcher" target="_blank" rel="noopener">ArtCraft Launcher</a> (MIT / Apache-2.0). All applications developed by <a href="https://github.com/storytold" target="_blank" rel="noopener">Storytold</a> and <a href="https://github.com/tangency-labs" target="_blank" rel="noopener">Tangency Labs</a>.</p>
-    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad, Substance Designer, Substance Painter and ANSYS are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
+    <p class="faint">UI styled after <a href="https://github.com/craft-launcher/craft-launcher" target="_blank" rel="noopener">ArtCraft Launcher</a> (MIT / Apache-2.0). All applications developed by <a href="https://github.com/storytold" target="_blank" rel="noopener">Storytold</a>, <a href="https://github.com/tangency-labs" target="_blank" rel="noopener">Tangency Labs</a>, and <a href="https://github.com/UCS-Care-Group" target="_blank" rel="noopener">UCS Care Group</a>.</p>
+    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad, Substance Designer, Substance Painter, ANSYS, Adobe Animate, OpenToonz, Microsoft Outlook, Power BI, and Microsoft Project are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
   </footer>
 
   <script>
@@ -1567,7 +1737,7 @@
             <span class="table-cat">${category}</span>
           </td>
           <td>
-            <a href="${sourceUrl}" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:11px; text-decoration:none; color:var(--muted);">${isOfficial ? 'storytold' : 'tangency-labs'} &nearr;</a>
+            <a href="${sourceUrl}" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:11px; text-decoration:none; color:var(--muted);">${sourceUrl.includes('UCS-Care-Group') ? 'ucs-care-group' : (isOfficial ? 'storytold' : 'tangency-labs')} &nearr;</a>
           </td>
           <td>
             <div class="table-actions">

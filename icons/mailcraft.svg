@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- MailCraft application icon (UCS Care Group): Modern clean-room email, calendar, and unified contacts workspace.
+       Palette: Outlook blue #0078d4 / #0284c7, paper #efe9dc, ink #0b0b0c, seal red #e11d48 -->
+  <defs>
+    <clipPath id="tile-mail"><rect width="512" height="512" rx="112"/></clipPath>
+    <linearGradient id="mail-bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#tile-mail)">
+    <rect width="512" height="512" fill="url(#mail-bg)"/>
+
+    <g transform="rotate(-5 256 256)" stroke="#0b0b0c" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Calendar Backsheet -->
+      <rect x="130" y="70" width="280" height="240" rx="16" fill="#efe9dc" stroke-width="12"/>
+      <!-- Calendar header band -->
+      <path d="M 130 70 H 410 V 120 H 130 Z" fill="#0284c7" stroke="none"/>
+      <!-- Calendar ring binder tabs -->
+      <rect x="180" y="54" width="20" height="32" rx="6" fill="#0b0b0c" stroke="none"/>
+      <rect x="260" y="54" width="20" height="32" rx="6" fill="#0b0b0c" stroke="none"/>
+      <rect x="340" y="54" width="20" height="32" rx="6" fill="#0b0b0c" stroke="none"/>
+      <!-- Calendar grid dots -->
+      <g fill="#0284c7" stroke="none">
+        <circle cx="180" cy="155" r="8"/>
+        <circle cx="230" cy="155" r="8"/>
+        <circle cx="280" cy="155" r="8"/>
+        <circle cx="330" cy="155" r="8"/>
+        <circle cx="370" cy="155" r="8"/>
+        <circle cx="180" cy="195" r="8"/>
+        <circle cx="230" cy="195" r="8"/>
+        <circle cx="280" cy="195" r="8"/>
+        <circle cx="330" cy="195" r="8"/>
+        <circle cx="370" cy="195" r="8"/>
+      </g>
+
+      <!-- Main Open Mail Envelope -->
+      <!-- Envelope Body -->
+      <rect x="90" y="190" width="332" height="230" rx="18" fill="#efe9dc" stroke-width="14"/>
+
+      <!-- Letter emerging from envelope -->
+      <path d="M 120 125 H 392 V 230 H 120 Z" fill="#ffffff" stroke-width="12"/>
+      <!-- Letter text lines -->
+      <g stroke="#0284c7" stroke-width="8" stroke-linecap="round">
+        <line x1="150" y1="155" x2="310" y2="155"/>
+        <line x1="150" y1="180" x2="360" y2="180"/>
+        <line x1="150" y1="205" x2="270" y2="205"/>
+      </g>
+      <!-- Postage stamp -->
+      <rect x="330" y="135" width="45" height="50" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="4"/>
+      <circle cx="352" cy="160" r="12" fill="#0284c7" stroke="none"/>
+
+      <!-- Envelope folded front flaps -->
+      <path d="M 90 190 L 256 310 L 422 190" fill="none" stroke="#0b0b0c" stroke-width="14"/>
+      <path d="M 90 420 L 220 290" fill="none" stroke="#0b0b0c" stroke-width="12"/>
+      <path d="M 422 420 L 292 290" fill="none" stroke="#0b0b0c" stroke-width="12"/>
+
+      <!-- Postage wax seal stamp -->
+      <circle cx="256" cy="310" r="30" fill="#e11d48" stroke="#0b0b0c" stroke-width="8"/>
+      <path d="M 246 300 L 256 292 L 266 300 V 322 H 246 Z" fill="#ffffff" stroke="none"/>
+    </g>
+  </g>
+</svg>

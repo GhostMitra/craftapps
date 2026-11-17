@@ -20,6 +20,7 @@ import stat
 from pathlib import Path
 
 APPS = [
+    'anicraft',
     'cadcraft',
     'craft-anything',
     'deckcraft',
@@ -30,9 +31,13 @@ APPS = [
     'filmcraft',
     'gridcraft',
     'lightcraft',
+    'mailcraft',
     'materialcraft',
+    'metriccraft',
+    'pcbcraft',
     'pdfcraft',
     'photocraft',
+    'projectcraft',
     'solidcraft',
     'soundcraft',
     'texturecraft',
@@ -43,6 +48,10 @@ APPS = [
 APP_REPOS = {
     'solidcraft': 'tangency-labs/solidcraft',
     'fieldcraft': 'tangency-labs/fieldcraft',
+    'pcbcraft': 'tangency-labs/pcbcraft',
+    'mailcraft': 'UCS-Care-Group/mailcraft',
+    'metriccraft': 'UCS-Care-Group/metriccraft',
+    'projectcraft': 'UCS-Care-Group/projectcraft',
 }
 
 ROOT_DIR = Path(__file__).resolve().parent.parent

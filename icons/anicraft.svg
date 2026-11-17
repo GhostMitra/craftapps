@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- AniCraft official application icon: 2D animation timeline, onion-skin keyframes & motion curve.
+       Palette: ink #0b0b0c, paper #efe9dc, app accent #e11d48, canvas #1e1e24 -->
+  <defs>
+    <clipPath id="tile-ani"><rect width="512" height="512" rx="112"/></clipPath>
+    <linearGradient id="ani-bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#be123c"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#tile-ani)">
+    <rect width="512" height="512" fill="url(#ani-bg)"/>
+    <!-- Animation filmstrip & onion skinning frames -->
+    <g transform="rotate(-5 256 256)" stroke="#0b0b0c" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Background frame (onion skin 1) -->
+      <rect x="100" y="86" width="280" height="210" rx="16" fill="#efe9dc" fill-opacity="0.35" stroke-width="10"/>
+      <!-- Mid frame (onion skin 2) -->
+      <rect x="120" y="106" width="280" height="210" rx="16" fill="#efe9dc" fill-opacity="0.65" stroke-width="12"/>
+      <!-- Active keyframe canvas -->
+      <rect x="140" y="126" width="280" height="210" rx="16" fill="#efe9dc" stroke-width="14"/>
+
+      <!-- Vector drawing / animated character gesture inside canvas -->
+      <!-- Motion arc path -->
+      <path d="M 180 260 C 210 170, 310 160, 360 210" fill="none" stroke="#e11d48" stroke-width="12" stroke-dasharray="6 8"/>
+      <!-- Keyframe pose circle (character head) -->
+      <circle cx="340" cy="180" r="32" fill="#0b0b0c" stroke="none"/>
+      <!-- Body pose stick -->
+      <path d="M 330 210 L 290 270 M 290 270 L 250 290 M 290 270 L 320 300" fill="none" stroke="#0b0b0c" stroke-width="14"/>
+      <!-- Arm in motion -->
+      <path d="M 315 235 L 265 220 L 245 185" fill="none" stroke="#0b0b0c" stroke-width="12"/>
+
+      <!-- Sparkle / animation burst -->
+      <path d="M 380 145 L 392 130 M 398 152 L 415 152 M 388 168 L 405 180" fill="none" stroke="#e11d48" stroke-width="8"/>
+
+      <!-- Timeline & Playhead at bottom -->
+      <rect x="80" y="360" width="360" height="74" rx="12" fill="#0b0b0c" stroke="#efe9dc" stroke-width="8"/>
+      <!-- Frame tick marks -->
+      <path d="M 110 375 V 420 M 140 385 V 410 M 170 385 V 410 M 200 375 V 420 M 230 385 V 410 M 260 375 V 420 M 290 385 V 410 M 320 375 V 420 M 350 385 V 410 M 380 375 V 420 M 410 385 V 410" fill="none" stroke="#efe9dc" stroke-width="5" stroke-linecap="round"/>
+      <!-- Playhead cursor -->
+      <polygon points="260,350 272,366 248,366" fill="#ffe4e6"/>
+      <line x1="260" y1="366" x2="260" y2="434" stroke="#ff4d6d" stroke-width="7"/>
+    </g>
+  </g>
+</svg>

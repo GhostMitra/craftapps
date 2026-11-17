@@ -24,5 +24,10 @@ routes = [
   { pattern = "texturecraft.debarghaya.in", custom_domain = true },
   { pattern = "craft-anything.debarghaya.in", custom_domain = true },
   { pattern = "craftanything.debarghaya.in", custom_domain = true },
+  { pattern = "anicraft.debarghaya.in", custom_domain = true },
+  { pattern = "pcbcraft.debarghaya.in", custom_domain = true },
+  { pattern = "mailcraft.debarghaya.in", custom_domain = true },
+  { pattern = "metriccraft.debarghaya.in", custom_domain = true },
+  { pattern = "projectcraft.debarghaya.in", custom_domain = true },
   { pattern = "apps.debarghaya.in", custom_domain = true }
 ]

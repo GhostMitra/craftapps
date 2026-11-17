@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- PcbCraft application icon (Tangency Labs): Multi-layer PCB substrate, copper circuit traces, SMD IC package & test vias.
+       Palette: PCB substrate #059669 / #064e3b, copper #fbbf24 / #d97706, solder mask #efe9dc, silicon IC #111827 -->
+  <defs>
+    <clipPath id="tile-pcb"><rect width="512" height="512" rx="112"/></clipPath>
+    <linearGradient id="pcb-substrate" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#tile-pcb)">
+    <rect width="512" height="512" fill="url(#pcb-substrate)"/>
+
+    <!-- Subtle PCB silkscreen grid lines -->
+    <g stroke="#ffffff" stroke-opacity="0.12" stroke-width="2">
+      <line x1="64" y1="0" x2="64" y2="512"/>
+      <line x1="128" y1="0" x2="128" y2="512"/>
+      <line x1="192" y1="0" x2="192" y2="512"/>
+      <line x1="256" y1="0" x2="256" y2="512"/>
+      <line x1="320" y1="0" x2="320" y2="512"/>
+      <line x1="384" y1="0" x2="384" y2="512"/>
+      <line x1="448" y1="0" x2="448" y2="512"/>
+      <line x1="0" y1="64" x2="512" y2="64"/>
+      <line x1="0" y1="128" x2="512" y2="128"/>
+      <line x1="0" y1="192" x2="512" y2="192"/>
+      <line x1="0" y1="256" x2="512" y2="256"/>
+      <line x1="0" y1="320" x2="512" y2="320"/>
+      <line x1="0" y1="384" x2="512" y2="384"/>
+      <line x1="0" y1="448" x2="512" y2="448"/>
+    </g>
+
+    <!-- Copper Circuit Traces (45-degree angle EDA routing standard) -->
+    <g stroke="#fef08a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <!-- Trace 1: Top-Left to IC Pin -->
+      <path d="M 80 120 L 160 120 L 200 160 L 200 200"/>
+      <!-- Trace 2: Top to IC Pin -->
+      <path d="M 230 70 L 230 180"/>
+      <!-- Trace 3: Top-Right to IC Pin -->
+      <path d="M 430 110 L 330 110 L 280 160 L 280 200"/>
+      <!-- Trace 4: Right bus -->
+      <path d="M 450 256 L 360 256"/>
+      <!-- Trace 5: Bottom-Right to IC Pin -->
+      <path d="M 430 400 L 350 400 L 300 350 L 300 310"/>
+      <!-- Trace 6: Bottom to IC Pin -->
+      <path d="M 256 450 L 256 340"/>
+      <!-- Trace 7: Bottom-Left to IC Pin -->
+      <path d="M 80 390 L 170 390 L 210 350 L 210 310"/>
+      <!-- Trace 8: Left bus -->
+      <path d="M 60 256 L 150 256"/>
+    </g>
+
+    <!-- Annular Vias (Plated through-holes) -->
+    <g fill="#fef08a" stroke="#047857" stroke-width="5">
+      <circle cx="80" cy="120" r="16"/>
+      <circle cx="230" cy="70" r="16"/>
+      <circle cx="430" cy="110" r="16"/>
+      <circle cx="450" cy="256" r="16"/>
+      <circle cx="430" cy="400" r="16"/>
+      <circle cx="256" cy="450" r="16"/>
+      <circle cx="80" cy="390" r="16"/>
+      <circle cx="60" cy="256" r="16"/>
+    </g>
+    <!-- Via drill holes -->
+    <g fill="#022c22">
+      <circle cx="80" cy="120" r="7"/>
+      <circle cx="230" cy="70" r="7"/>
+      <circle cx="430" cy="110" r="7"/>
+      <circle cx="450" cy="256" r="7"/>
+      <circle cx="430" cy="400" r="7"/>
+      <circle cx="256" cy="450" r="7"/>
+      <circle cx="80" cy="390" r="7"/>
+      <circle cx="60" cy="256" r="7"/>
+    </g>
+
+    <!-- QFP / SMD Silicon IC Package in center -->
+    <!-- IC Ground Pad / Silkscreen border -->
+    <rect x="164" y="164" width="184" height="184" rx="16" fill="none" stroke="#ffffff" stroke-width="6" stroke-dasharray="14 10"/>
+    <!-- IC Body -->
+    <rect x="180" y="180" width="152" height="152" rx="12" fill="#0f172a" stroke="#334155" stroke-width="6"/>
+    <!-- IC Index / Pin 1 notch -->
+    <circle cx="206" cy="206" r="8" fill="#64748b"/>
+    <!-- IC Text / Silkscreen markings -->
+    <text x="256" y="252" font-family="'Courier New', monospace" font-size="16" font-weight="bold" fill="#e2e8f0" text-anchor="middle" letter-spacing="1">PCB-CRAFT</text>
+    <text x="256" y="274" font-family="'Courier New', monospace" font-size="12" fill="#94a3b8" text-anchor="middle" letter-spacing="1">RUST &bull; EDA</text>
+
+    <!-- IC Pins / Solder Pads -->
+    <g fill="#fef08a" stroke="#d97706" stroke-width="2">
+      <!-- Top pins -->
+      <rect x="206" y="166" width="12" height="20" rx="3"/>
+      <rect x="234" y="166" width="12" height="20" rx="3"/>
+      <rect x="266" y="166" width="12" height="20" rx="3"/>
+      <rect x="294" y="166" width="12" height="20" rx="3"/>
+      <!-- Bottom pins -->
+      <rect x="206" y="326" width="12" height="20" rx="3"/>
+      <rect x="234" y="326" width="12" height="20" rx="3"/>
+      <rect x="266" y="326" width="12" height="20" rx="3"/>
+      <rect x="294" y="326" width="12" height="20" rx="3"/>
+      <!-- Left pins -->
+      <rect x="166" y="206" width="20" height="12" rx="3"/>
+      <rect x="166" y="234" width="20" height="12" rx="3"/>
+      <rect x="166" y="266" width="20" height="12" rx="3"/>
+      <rect x="166" y="294" width="20" height="12" rx="3"/>
+      <!-- Right pins -->
+      <rect x="326" y="206" width="20" height="12" rx="3"/>
+      <rect x="326" y="234" width="20" height="12" rx="3"/>
+      <rect x="326" y="266" width="20" height="12" rx="3"/>
+      <rect x="326" y="294" width="20" height="12" rx="3"/>
+    </g>
+  </g>
+</svg>

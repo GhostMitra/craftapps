@@ -20,6 +20,7 @@ import datetime
 from pathlib import Path
 
 APPS = [
+    'anicraft',
     'cadcraft',
     'craft-anything',
     'deckcraft',
@@ -30,9 +31,13 @@ APPS = [
     'filmcraft',
     'gridcraft',
     'lightcraft',
+    'mailcraft',
     'materialcraft',
+    'metriccraft',
+    'pcbcraft',
     'pdfcraft',
     'photocraft',
+    'projectcraft',
     'solidcraft',
     'soundcraft',
     'texturecraft',
@@ -43,10 +48,15 @@ APPS = [
 APP_REPOS = {
     'solidcraft': 'tangency-labs/solidcraft',
     'fieldcraft': 'tangency-labs/fieldcraft',
+    'pcbcraft': 'tangency-labs/pcbcraft',
+    'mailcraft': 'UCS-Care-Group/mailcraft',
+    'metriccraft': 'UCS-Care-Group/metriccraft',
+    'projectcraft': 'UCS-Care-Group/projectcraft',
 }
 
 # Upstream font reference commits mapped from official release workflows
 APP_FONTS = {
+    'anicraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'cadcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'craft-anything': ('', False),
     'deckcraft': ('37827adc41fd165f9a9234ac40f94dbad353aa69', False),
@@ -57,9 +67,13 @@ APP_FONTS = {
     'filmcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'gridcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'lightcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
+    'mailcraft': ('', False),
     'materialcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'metriccraft': ('', False),
+    'pcbcraft': ('', False),
     'pdfcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'photocraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
+    'projectcraft': ('', False),
     'solidcraft': ('', False),
     'soundcraft': ('', False),
     'texturecraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
