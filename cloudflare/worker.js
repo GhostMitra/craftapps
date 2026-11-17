@@ -36,8 +36,6 @@ const CRAFT_APPS = [
   'anicraft',
   'pcbcraft',
   'mailcraft',
-  'metriccraft',
-  'projectcraft',
 ];
 
 const APP_ALIASES = {

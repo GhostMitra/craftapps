@@ -7,7 +7,7 @@
   <script>
     if (location.hostname.endsWith('.web.app') || location.hostname.endsWith('.firebaseapp.com')) {
       var seg = location.pathname.split('/').filter(Boolean)[0];
-      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft','materialcraft','texturecraft','craft-anything','craftanything','anicraft','pcbcraft','mailcraft','metriccraft','projectcraft'];
+      var apps = ['wordcraft','photocraft','vectorcraft','cadcraft','designcraft','filmcraft','effectcraft','soundcraft','lightcraft','pdfcraft','deckcraft','gridcraft','figcraft','solidcraft','fieldcraft','materialcraft','texturecraft','craft-anything','craftanything','anicraft','pcbcraft','mailcraft'];
       if (seg && apps.indexOf(seg.toLowerCase()) !== -1) {
         location.replace('https://' + seg.toLowerCase() + '.debarghaya.in' + location.pathname.replace(new RegExp('^/' + seg, 'i'), '') + location.search + location.hash);
       } else {
@@ -790,12 +790,12 @@
   <main class="wrap lineup">
     <div class="toolbar">
       <div class="toolbar-left">
-        <span id="app-count" class="hud-label faint">23 APPS</span>
+        <span id="app-count" class="hud-label faint">21 APPS</span>
         <div class="category-tabs" role="tablist">
-          <button type="button" class="tab-btn active" data-category="all">All (23)</button>
+          <button type="button" class="tab-btn active" data-category="all">All (21)</button>
           <button type="button" class="tab-btn" data-category="creative">Creative (11)</button>
           <button type="button" class="tab-btn" data-category="engineering">Engineering (5)</button>
-          <button type="button" class="tab-btn" data-category="productivity">Productivity (7)</button>
+          <button type="button" class="tab-btn" data-category="productivity">Productivity (5)</button>
         </div>
       </div>
       <div class="search-sort">
@@ -1529,74 +1529,6 @@
           </div>
         </div>
       </article>
-
-      <!-- 22. MetricCraft -->
-      <article class="card" style="--app: #eab308;" data-app="metriccraft" data-category="productivity" data-order="22" data-search="metriccraft power bi bi business intelligence analytics dax dashboards telemetry charts ucs care group">
-        <div class="card-head">
-          <span class="number">22</span>
-          <div class="card-links">
-            <a href="https://github.com/UCS-Care-Group/metriccraft" target="_blank" rel="noopener">SOURCE</a>
-            <a href="/metriccraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="identity">
-            <img class="logo" src="/icons/metriccraft.svg" alt="MetricCraft" width="56" height="56" loading="lazy">
-            <div class="identity-text">
-              <h2 class="name">Metric<span class="accent">Craft</span></h2>
-              <p class="tagline">Business intelligence authoring, interactive DAX analytics, report dashboards</p>
-              <p class="byline community">by UCS Care Group</p>
-              <div class="inspiration-badge">Inspired by <strong>Microsoft Power BI®</strong></div>
-            </div>
-          </div>
-          <div class="status-bar">
-            <span class="hud-label faint">Productivity</span>
-          </div>
-          <div class="actions">
-            <a class="open app-action-link" href="/metriccraft/">
-              <span>OPEN</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </a>
-            <a class="popout-link app-direct-link" href="/metriccraft/" target="_blank" rel="noopener" title="Open in new window">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <!-- 23. ProjectCraft -->
-      <article class="card" style="--app: #317256;" data-app="projectcraft" data-category="productivity" data-order="23" data-search="projectcraft ms project project management gantt pert timeline critical path schedule cpm ucs care group">
-        <div class="card-head">
-          <span class="number">23</span>
-          <div class="card-links">
-            <a href="https://github.com/UCS-Care-Group/projectcraft" target="_blank" rel="noopener">SOURCE</a>
-            <a href="/projectcraft/" class="app-direct-link" target="_blank" rel="noopener">STANDALONE</a>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="identity">
-            <img class="logo" src="/icons/projectcraft.svg" alt="ProjectCraft" width="56" height="56" loading="lazy">
-            <div class="identity-text">
-              <h2 class="name">Project<span class="accent">Craft</span></h2>
-              <p class="tagline">Project scheduling, Gantt & PERT charts, critical path method (CPM), resource leveling</p>
-              <p class="byline community">by UCS Care Group</p>
-              <div class="inspiration-badge">Inspired by <strong>Microsoft Project®</strong></div>
-            </div>
-          </div>
-          <div class="status-bar">
-            <span class="hud-label faint">Productivity</span>
-          </div>
-          <div class="actions">
-            <a class="open app-action-link" href="/projectcraft/">
-              <span>OPEN</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </a>
-            <a class="popout-link app-direct-link" href="/projectcraft/" target="_blank" rel="noopener" title="Open in new window">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
     </div>
 
     <!-- Table Container (Hidden by default) -->
@@ -1623,10 +1555,10 @@
   </main>
 
   <footer class="wrap footer">
-    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 23 creative, engineering and productivity tools compiled to WebAssembly.</p>
+    <p><strong>CraftApps Suite</strong> &bull; Complete suite of 21 creative, engineering and productivity tools compiled to WebAssembly.</p>
     <p>Documents and libraries live directly in your browser's private local storage. Export or back up your projects from within each application.</p>
     <p class="faint">UI styled after <a href="https://github.com/craft-launcher/craft-launcher" target="_blank" rel="noopener">ArtCraft Launcher</a> (MIT / Apache-2.0). All applications developed by <a href="https://github.com/storytold" target="_blank" rel="noopener">Storytold</a>, <a href="https://github.com/tangency-labs" target="_blank" rel="noopener">Tangency Labs</a>, and <a href="https://github.com/UCS-Care-Group" target="_blank" rel="noopener">UCS Care Group</a>.</p>
-    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad, Substance Designer, Substance Painter, ANSYS, Adobe Animate, OpenToonz, Microsoft Outlook, Power BI, and Microsoft Project are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
+    <p class="faint">Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects, InDesign, Word, PowerPoint, Excel, AutoCAD, SolidWorks, KiCad, Substance Designer, Substance Painter, ANSYS, Adobe Animate, OpenToonz, and Microsoft Outlook are trademarks or registered trademarks of their respective owners. These names are used solely to describe functional equivalents.</p>
   </footer>
 
   <script>

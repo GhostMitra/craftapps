@@ -33,11 +33,9 @@ APPS = [
     'lightcraft',
     'mailcraft',
     'materialcraft',
-    'metriccraft',
     'pcbcraft',
     'pdfcraft',
     'photocraft',
-    'projectcraft',
     'solidcraft',
     'soundcraft',
     'texturecraft',
@@ -50,8 +48,6 @@ APP_REPOS = {
     'fieldcraft': 'tangency-labs/fieldcraft',
     'pcbcraft': 'tangency-labs/pcbcraft',
     'mailcraft': 'UCS-Care-Group/mailcraft',
-    'metriccraft': 'UCS-Care-Group/metriccraft',
-    'projectcraft': 'UCS-Care-Group/projectcraft',
 }
 
 # Upstream font reference commits mapped from official release workflows
@@ -69,11 +65,9 @@ APP_FONTS = {
     'lightcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', True),
     'mailcraft': ('', False),
     'materialcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
-    'metriccraft': ('', False),
     'pcbcraft': ('', False),
     'pdfcraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
     'photocraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),
-    'projectcraft': ('', False),
     'solidcraft': ('', False),
     'soundcraft': ('', False),
     'texturecraft': ('b076417b5880bd4154bd22f00695b1d28c6bea83', False),

@@ -1,6 +1,6 @@
 # CraftOS &mdash; Web Desktop Studio 🖥️🎨
 
-> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 23 creative, engineering, and productivity applications in floating resizable windows on Firebase Hosting and Cloudflare Workers.**
+> **A desktop-grade Web OS and creative workspace powered by Rust and WebAssembly, running 21 creative, engineering, and productivity applications in floating resizable windows on Firebase Hosting and Cloudflare Workers.**
 
 ![Rust](https://img.shields.io/badge/Language-Rust-dea584?style=flat-square&logo=rust&logoColor=white)
 ![WebAssembly](https://img.shields.io/badge/Technology-WebAssembly-654ff0?style=flat-square&logo=webassembly&logoColor=white)
@@ -28,7 +28,7 @@ Every application in the suite is compiled directly from upstream source reposit
   - 🟡 **Minimize (−):** Minimizes the application down to the taskbar pill.
   - 🟢 **Maximize (⤢):** Expands the application to occupy the full desktop screen.
 - **Frosted-Glass Taskbar / Dock:**
-  - **Start Menu ("CraftOS"):** Search and launch any of the 23 applications with instant keyboard filtering.
+  - **Start Menu ("CraftOS"):** Search and launch any of the 21 applications with instant keyboard filtering.
   - **Task Switcher:** Click running taskbar pills to focus, restore, or minimize windows.
   - **System Tray:** Live digital clock, active memory/process monitor, wallpaper switcher, and desktop fullscreen toggle.
 - **Strictly On-Demand Lazy Loading (0 MB idle):** Zero heavy WebAssembly binaries (12–56 MB each) are loaded on startup. An application is only fetched when you open its window.
@@ -61,8 +61,6 @@ Every application in the suite is compiled directly from upstream source reposit
 | **AniCraft** | [`anicraft.debarghaya.in`](https://anicraft.debarghaya.in/) | [`/anicraft/`](https://craftapps.web.app/anicraft/) | [`storytold/anicraft`](https://github.com/storytold/anicraft) | **Adobe Animate / OpenToonz** | 2D vector animation editor, keyframe timeline, sprite rigging |
 | **PcbCraft** | [`pcbcraft.debarghaya.in`](https://pcbcraft.debarghaya.in/) | [`/pcbcraft/`](https://craftapps.web.app/pcbcraft/) | [`tangency-labs/pcbcraft`](https://github.com/tangency-labs/pcbcraft) | **KiCad / Altium Designer** | Schematic capture, multi-layer PCB layout, autorouter, DRC, Gerber/KiCad export |
 | **MailCraft** | [`mailcraft.debarghaya.in`](https://mailcraft.debarghaya.in/) | [`/mailcraft/`](https://craftapps.web.app/mailcraft/) | [`UCS-Care-Group/mailcraft`](https://github.com/UCS-Care-Group/mailcraft) | **Microsoft Outlook** | Clean-room email, shared calendar, contacts, IMAP/M365 client |
-| **MetricCraft** | [`metriccraft.debarghaya.in`](https://metriccraft.debarghaya.in/) | [`/metriccraft/`](https://craftapps.web.app/metriccraft/) | [`UCS-Care-Group/metriccraft`](https://github.com/UCS-Care-Group/metriccraft) | **Microsoft Power BI** | Business intelligence authoring, interactive DAX analytics, report dashboards |
-| **ProjectCraft** | [`projectcraft.debarghaya.in`](https://projectcraft.debarghaya.in/) | [`/projectcraft/`](https://craftapps.web.app/projectcraft/) | [`UCS-Care-Group/projectcraft`](https://github.com/UCS-Care-Group/projectcraft) | **Microsoft Project** | Project scheduling, Gantt & PERT charts, critical path method (CPM), resource leveling |
 | **CraftOS Portal** | [`apps.debarghaya.in`](https://apps.debarghaya.in/) | [`/`](https://craftapps.web.app/) | &mdash; | **Web Desktop OS** | Central desktop workspace and application launcher |
 
 ---

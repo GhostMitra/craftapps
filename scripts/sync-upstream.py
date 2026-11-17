@@ -33,11 +33,9 @@ APPS = [
     'lightcraft',
     'mailcraft',
     'materialcraft',
-    'metriccraft',
     'pcbcraft',
     'pdfcraft',
     'photocraft',
-    'projectcraft',
     'solidcraft',
     'soundcraft',
     'texturecraft',
@@ -50,8 +48,6 @@ APP_REPOS = {
     'fieldcraft': 'tangency-labs/fieldcraft',
     'pcbcraft': 'tangency-labs/pcbcraft',
     'mailcraft': 'UCS-Care-Group/mailcraft',
-    'metriccraft': 'UCS-Care-Group/metriccraft',
-    'projectcraft': 'UCS-Care-Group/projectcraft',
 }
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
