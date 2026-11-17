@@ -96,11 +96,19 @@ Configured in [`cloudflare/wrangler.toml`](cloudflare/wrangler.toml):
 - Sub-route normalizations cleanly 301-redirect `/photocraft` to `/photocraft/`.
 - Edge headers enforce CORS and security policies.
 
-### 3. WebAssembly MIME & Caching Headers (`firebase.json`)
-- `.wasm` files are served with `Content-Type: application/wasm` and long-term immutable caching (`public, max-age=31536000, immutable`).
-- `index.html` files are configured with `Cache-Control: no-cache` for instant portal and launcher updates.
-- Security headers enforce `X-Content-Type-Options: nosniff`.
-- Production deployment ignores all development scripts, compiler build caches, and metadata.
+### 3. Edge CDN & Browser Caching Architecture
+- **Persistent Asset Caching:**
+  - Content-hashed WebAssembly and JavaScript binaries (e.g. `*-fc25e1aa1ee3b046_bg.wasm`) are cached in both Cloudflare Edge CDN and client browser cache with `public, max-age=31536000, immutable`.
+  - Unhashed assets (`icons/**`, favicons) and entrypoint HTML files (`index.html`) use `public, no-cache, must-revalidate` with strong `ETag` validation. Browsers serve cached copies instantly and execute lightweight 304 revalidation without re-downloading until a new build is deployed.
+  - `Clear-Site-Data: "cache"` is explicitly omitted so client browsers preserve cached binaries and application states across sessions and reloads.
+- **Edge Cache Invalidation on New Builds:**
+  - Cloudflare Edge CDN caches static assets using a segmented cache key incorporating `BUILD_ID` (`?b=${BUILD_ID}`).
+  - Every GitHub Actions deployment automatically updates the Cloudflare Worker with the latest git commit SHA (`--var BUILD_ID:${{ github.sha }}`), instantly refreshing the edge cache globally when a new build is pushed.
+  - Responses include `X-CraftApps-Build: <sha>` for live provenance verification in browser DevTools.
+- **WebAssembly MIME & Security Headers:**
+  - `.wasm` files are served with `Content-Type: application/wasm`.
+  - Security headers enforce `X-Content-Type-Options: nosniff`.
+  - Production deployment ignores all development scripts, compiler build caches, and metadata.
 
 ---
 

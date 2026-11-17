@@ -42,12 +42,21 @@ jobs:
           echo "Installed portal shell to dist/index.html and dist/icons/"
 
       - name: Deploy to Firebase Hosting
+        id: firebase-deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS }}
           projectId: craftapps
           channelId: live
+
+      - name: Update Cloudflare Edge Cache with New Build ID
+        if: steps.firebase-deploy.outcome == 'success'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: 'cloudflare'
+          command: 'deploy --var BUILD_ID:${{ github.sha }}'
 
       - name: Save Persistent Web Distribution Cache
         uses: actions/cache/save@v4

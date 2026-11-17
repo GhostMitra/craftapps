@@ -48,6 +48,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const targetOrigin = "https://craftapps.web.app";
+    const buildId = env?.BUILD_ID || "main";
 
     // Extract subdomain (e.g. "photocraft", "apps")
     const hostParts = url.hostname.split('.');
@@ -62,14 +63,14 @@ export default {
       if (targetPath !== `/${targetApp}` && !targetPath.startsWith(`/${targetApp}/`)) {
         targetPath = `/${targetApp}` + (targetPath.startsWith('/') ? targetPath : `/${targetPath}`);
       }
-      let response = await proxyUpstream(request, new URL(targetPath + url.search, targetOrigin));
+      let response = await proxyUpstream(request, new URL(targetPath + url.search, targetOrigin), buildId);
 
       // Snippet resolution fallback: handle /app/snippets vs /snippets differences
       if (response.status === 404 && targetPath.includes('/snippets/')) {
         const altPath = targetPath.includes('/app/snippets/')
           ? targetPath.replace('/app/snippets/', '/snippets/')
           : targetPath.replace('/snippets/', '/app/snippets/');
-        const altResp = await proxyUpstream(request, new URL(altPath + url.search, targetOrigin));
+        const altResp = await proxyUpstream(request, new URL(altPath + url.search, targetOrigin), buildId);
         if (altResp.ok) {
           response = altResp;
         }
@@ -109,7 +110,7 @@ export default {
 
     // 3. Portal Root & Assets (e.g. apps.debarghaya.in/)
     const upstreamUrl = new URL(url.pathname + url.search, targetOrigin);
-    const response = await proxyUpstream(request, upstreamUrl);
+    const response = await proxyUpstream(request, upstreamUrl, buildId);
 
     // If serving HTML dashboard on a portal domain, rewrite app links to custom subdomains and strip SRI integrity tags
     const contentType = response.headers.get("content-type") || "";
@@ -140,7 +141,7 @@ export default {
   }
 };
 
-async function proxyUpstream(request, upstreamUrl) {
+async function proxyUpstream(request, upstreamUrl, buildId = "main") {
   const newHeaders = new Headers(request.headers);
   newHeaders.set("Host", "craftapps.web.app");
   newHeaders.set("X-Forwarded-Host", new URL(request.url).hostname);
@@ -148,6 +149,8 @@ async function proxyUpstream(request, upstreamUrl) {
 
   const isPartAsset = upstreamUrl.pathname.includes('.part-');
   const isStaticAsset = isPartAsset || /\.(wasm|js|png|jpg|jpeg|svg|css|woff2|ico|zip|txt)$/i.test(upstreamUrl.pathname);
+  // Detect content-hashed assets (e.g. *-fc25e1aa1ee3b046.js, *-fc25e1aa1ee3b046_bg.wasm, or .part-*)
+  const isContentHashed = isPartAsset || /[-._][a-f0-9]{8,32}[_.]/i.test(upstreamUrl.pathname);
 
   const fetchOptions = {
     method: request.method,
@@ -157,12 +160,15 @@ async function proxyUpstream(request, upstreamUrl) {
   };
 
   // Cache static WebAssembly binaries, JS glue, and media assets at Cloudflare's Edge CDN.
-  // This drastically reduces Firebase Hosting download bandwidth quota by serving static assets from edge cache.
+  // The cache key is segmented by buildId so that when a new build is deployed,
+  // Cloudflare's Edge CDN immediately fetches and caches the new build assets.
   if (isStaticAsset) {
+    const cacheKey = `${upstreamUrl.origin}${upstreamUrl.pathname}?b=${buildId}`;
     fetchOptions.cf = {
       cacheEverything: true,
+      cacheKey: cacheKey,
       cacheTtlByStatus: {
-        "200-299": 31536000, // 1 year edge cache for successful assets
+        "200-299": 31536000, // 1 year edge cache for active build assets
         "404": 0,            // Do NOT cache 404 responses
         "500-599": 0         // Do NOT cache 5xx server errors
       }
@@ -174,6 +180,7 @@ async function proxyUpstream(request, upstreamUrl) {
 
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Access-Control-Allow-Origin", "*");
+  responseHeaders.set("X-CraftApps-Build", buildId);
 
   // Ensure correct MIME types for WebAssembly, JavaScript, and binary parts
   if (upstreamUrl.pathname.endsWith(".wasm") && response.ok) {
@@ -190,11 +197,18 @@ async function proxyUpstream(request, upstreamUrl) {
   const isHtml = rawContentType.includes("text/html") || upstreamUrl.pathname.endsWith(".html") || upstreamUrl.pathname.endsWith("/");
 
   if (isHtml) {
-    // Clear site HTTP cache so client browsers purge stale 0-byte or corrupted subresources
-    responseHeaders.set("Clear-Site-Data", '"cache"');
-    responseHeaders.set("Cache-Control", "no-cache, no-store, must-revalidate");
-  } else if (isStaticAsset && response.ok) {
+    // HTML is cached with conditional ETag revalidation.
+    // Client browsers cache the HTML locally, but send a lightweight 304 revalidation check.
+    // When a new build is pushed, the HTML updates and delivers new asset references.
+    // Clear-Site-Data is explicitly omitted so client browsers retain cached assets across sessions.
+    responseHeaders.set("Cache-Control", "public, no-cache, must-revalidate");
+  } else if (isContentHashed && response.ok) {
+    // Content-hashed assets have unique fingerprints in their filenames (e.g. Trunk wasm/js hashes).
+    // Safe to cache immutably in the browser for maximum performance until a new build references new hashes.
     responseHeaders.set("Cache-Control", "public, max-age=31536000, immutable");
+  } else if (isStaticAsset && response.ok) {
+    // Unhashed static assets (e.g. /icons/*.svg, favicon.ico) are cached locally and revalidated with ETag.
+    responseHeaders.set("Cache-Control", "public, no-cache, must-revalidate");
   } else if (!response.ok) {
     responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate");
   }

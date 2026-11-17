@@ -96,6 +96,15 @@
         ]
       },
       {
+        "source": "icons/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, no-cache, must-revalidate"
+          }
+        ]
+      },
+      {
         "source": "**/*.@(png|jpg|jpeg|svg|ico|woff2)",
         "headers": [
           {
@@ -109,7 +118,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "no-cache"
+            "value": "public, no-cache, must-revalidate"
           }
         ]
       },

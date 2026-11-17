@@ -2,6 +2,9 @@ name = "craftapps-proxy"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
+[vars]
+BUILD_ID = "main"
+
 # Automatically bind Custom Domains for all CraftApps on debarghaya.in
 # Cloudflare automatically creates DNS records and provisions SSL certificates
 routes = [
