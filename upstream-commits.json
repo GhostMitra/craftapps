@@ -1,7 +1,7 @@
 {
-  "anicraft": "837c3edfd69956a41c1bda21db2718a67dfb5ee6",
+  "anicraft": "6e068c68aa9c083455507c4e001457e839ec61a7",
   "cadcraft": "ddb9a424ef4af8191e668009cf930c9f4a8435f3",
-  "craft-anything": "c98e7d04c3b974c6bbe9bd0ea5774978eefeaabf",
+  "craft-anything": "572877eded9911e523a0d70ffc6207a1d4c31ba6",
   "deckcraft": "9db2fa0ca994ad8ae8d9cc5032d860ae985477d5",
   "designcraft": "39651f6603ee2aec709c676e4a7b76e350ea1dcc",
   "effectcraft": "86af5cba7f6976fe2b4561df4e8021ba807591f5",
@@ -9,15 +9,15 @@
   "figcraft": "c01d391df75cc7a9f04bf3879722770727d89f8d",
   "filmcraft": "ba6fe10529c7bf5d2a9283f9de2e35c0ccff926c",
   "gridcraft": "1b92ec071e407895f4245b238bf4063ef1efdb68",
-  "lightcraft": "5a29fe602b5a2680d6771890a43380cd6bc34558",
+  "lightcraft": "d3f828fce28f7394cd97a02cd12c8afb6c49a0dc",
   "mailcraft": "37b6f27e45711e3b5c89ee9e18c9a68a80dd407c",
-  "materialcraft": "356c066e838c1f8ae31dce8a0ab370d889c8f868",
-  "pcbcraft": "8aefc2adc2aa0935aa0f10ee7782828cd9bf9528",
+  "materialcraft": "69e1baf325efe83e9b449bd41e41a3614462cdb4",
+  "pcbcraft": "c580577a0f65f9322a786116111956e392ef5899",
   "pdfcraft": "6e910675c68dd5092e889065cfe8d0274c1b2742",
-  "photocraft": "b609bc7d3c6bae486d80a21bfb32d25c990bd954",
+  "photocraft": "9280edf89f5a1f81bbc51a6f1176543611e998fb",
   "solidcraft": "e34d772cb63ba509d7b957f42d28f1e419ce8d6d",
-  "soundcraft": "7391fc7465b45f0159c8044a521d77b0a309de7f",
+  "soundcraft": "0c9c1b8ef61ae60481ead295122f3962343e1f66",
   "texturecraft": "fc21815f50447c47852d7667a389dddad42a3046",
-  "vectorcraft": "951aa208aec538a46fb0cb15fe2e770ac7064ec9",
-  "wordcraft": "bf2be3cad86d6c6a72d604676ab6ff3f0aa9478d"
+  "vectorcraft": "825cf29a88f99b8ff101bc9b82778e023601c1ab",
+  "wordcraft": "4d7100a7f8ad39d4ccdb22311fa89db8e0ccfc6a"
 }
