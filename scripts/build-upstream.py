@@ -212,29 +212,85 @@ def patch_upstream_sources(repo_path, app_name):
         frame_rs = repo_path / "crates" / "ui-egui" / "src" / "app" / "frame.rs"
         if frame_rs.exists():
             content = frame_rs.read_text(encoding="utf-8")
-            if "prefs_ui::tick(self, ctx, std::time::Instant::now());" in content:
-                content = content.replace(
-                    "prefs_ui::tick(self, ctx, std::time::Instant::now());",
-                    "prefs_ui::tick(self, ctx, web_time::Instant::now());"
-                )
+            target = "prefs_ui::tick(self, ctx, std::time::Instant::now());"
+            replacement = (
+                "#[cfg(not(target_arch = \"wasm32\"))]\n"
+                "        prefs_ui::tick(self, ctx, std::time::Instant::now());\n"
+                "        #[cfg(target_arch = \"wasm32\")]\n"
+                "        prefs_ui::tick(self, ctx);"
+            )
+            if target in content:
+                content = content.replace(target, replacement)
                 frame_rs.write_text(content, encoding="utf-8")
-                print("[photocraft] Patched frame.rs to use web_time::Instant::now() instead of std::time")
+                print("[photocraft] Patched frame.rs to omit Instant::now() on wasm32")
 
         save_rs = repo_path / "crates" / "ui-egui" / "src" / "prefs" / "prefs_ui" / "save.rs"
         if save_rs.exists():
             content = save_rs.read_text(encoding="utf-8")
-            if "use std::time::Instant;" in content:
-                content = content.replace("use std::time::Instant;", "use web_time::Instant;")
-                save_rs.write_text(content, encoding="utf-8")
-                print("[photocraft] Patched save.rs to use web_time::Instant")
+            old_fn = "pub fn tick(app: &mut PhotocraftApp, ctx: &egui::Context, now: Instant) {"
+            if old_fn in content and '#[cfg(target_arch = "wasm32")]\npub fn tick' not in content:
+                wasm_tick = (
+                    "#[cfg(not(target_arch = \"wasm32\"))]\n"
+                    "pub fn tick(app: &mut PhotocraftApp, ctx: &egui::Context, now: Instant) {\n"
+                )
+                wasm_tick_body = (
+                    "\n#[cfg(target_arch = \"wasm32\")]\n"
+                    "pub fn tick(app: &mut PhotocraftApp, ctx: &egui::Context) {\n"
+                    "    if !app.prefs_rt.loaded {\n"
+                    "        load(app);\n"
+                    "    }\n"
+                    "    recovery(app);\n"
+                    "    sync_rulers(app);\n"
+                    "    sync_display_scale(app, ctx);\n"
+                    "    sync_appearance(app, ctx);\n"
+                    "    crate::theme::set_ui_font_size(ctx, app.session.prefs().interface.ui_font_size);\n"
+                    "    presets_store(app);\n"
+                    "    sync_tooltips(app, ctx);\n"
+                    "    app.sync_recent();\n"
+                    "    let style = canvas_style(app);\n"
+                    "    if let Some(gpu) = app.gpu.as_ref()\n"
+                    "        && app.prefs_rt.gpu_style != Some(style)\n"
+                    "    {\n"
+                    "        gpu.set_style(style);\n"
+                    "        app.prefs_rt.gpu_style = Some(style);\n"
+                    "    }\n"
+                    "    let rev = app.session.prefs.rev();\n"
+                    "    if rev != app.prefs_rt.saved_rev {\n"
+                    "        match write_browser_preferences(app) {\n"
+                    "            Ok(()) => {\n"
+                    "                app.prefs_rt.saved_rev = rev;\n"
+                    "                saved(app);\n"
+                    "            }\n"
+                    "            Err(e) => save_failed(app, &e),\n"
+                    "        }\n"
+                    "    }\n"
+                    "    history_log(app);\n"
+                    "}\n"
+                )
+                content = content.replace(old_fn, wasm_tick)
+                anchor = "    history_log(app);\n}"
+                if anchor in content:
+                    content = content.replace(anchor, anchor + "\n" + wasm_tick_body, 1)
+                    save_rs.write_text(content, encoding="utf-8")
+                    print("[photocraft] Patched save.rs with wasm32 prefs_ui::tick")
 
         gpu_rs = repo_path / "crates" / "ui-egui" / "src" / "app" / "gpu.rs"
         if gpu_rs.exists():
             content = gpu_rs.read_text(encoding="utf-8")
-            if "std::time::SystemTime::now()" in content:
-                content = content.replace("std::time::SystemTime::now()", "web_time::SystemTime::now()")
+            old_gpu = "let now: chrono::DateTime<chrono::Utc> = std::time::SystemTime::now().into();"
+            new_gpu = (
+                "#[cfg(not(target_arch = \"wasm32\"))]\n"
+                "                let now: chrono::DateTime<chrono::Utc> = std::time::SystemTime::now().into();\n"
+                "                #[cfg(target_arch = \"wasm32\")]\n"
+                "                let now: chrono::DateTime<chrono::Utc> = {\n"
+                "                    let d = web_time::SystemTime::now().duration_since(web_time::SystemTime::UNIX_EPOCH).unwrap_or_default();\n"
+                "                    (std::time::UNIX_EPOCH + d).into()\n"
+                "                };"
+            )
+            if old_gpu in content:
+                content = content.replace(old_gpu, new_gpu)
                 gpu_rs.write_text(content, encoding="utf-8")
-                print("[photocraft] Patched gpu.rs to use web_time::SystemTime::now()")
+                print("[photocraft] Patched gpu.rs to safely convert web_time to chrono on wasm32")
 
 def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=None):
     # Patch known upstream bugs before compilation
