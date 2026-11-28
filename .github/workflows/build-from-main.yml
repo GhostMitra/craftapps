@@ -182,8 +182,12 @@ jobs:
         env:
           CRAFT_FONTS_DIR: ${{ matrix.fonts_ref != '' && format('{0}/craft-fonts', github.workspace) || '' }}
           CRAFT_FONTS_REQUIRED: ${{ matrix.web_fonts && '1' || '' }}
+          PHOTOCRAFT_WEB_FONTS_DIR: ${{ matrix.fonts_ref != '' && format('{0}/craft-fonts', github.workspace) || '' }}
           FIGCRAFT_WASM_MAX_BYTES: '52428800'
           PHOTOCRAFT_WEB_MAX_FILE_BYTES: '52428800'
+          TEXTURECRAFT_WEB_MAX_FILE_BYTES: '52428800'
+          MATERIALCRAFT_WEB_MAX_FILE_BYTES: '52428800'
+          MAX_FILE_BYTES: '52428800'
         run: |
           python craftapps/scripts/build-upstream.py \
             --app ${{ matrix.app }} \

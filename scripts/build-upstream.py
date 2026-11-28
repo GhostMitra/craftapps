@@ -203,18 +203,60 @@ def detect_upstream_fonts_config(repo_path, app_name):
             pass
     return None, None
 
+def patch_upstream_sources(repo_path, app_name):
+    """
+    Patch known upstream bugs for wasm32 compilation before building.
+    """
+    # 1. PhotoCraft: Fix std::time::Instant and std::time::SystemTime panics on wasm32
+    if app_name == "photocraft":
+        frame_rs = repo_path / "crates" / "ui-egui" / "src" / "app" / "frame.rs"
+        if frame_rs.exists():
+            content = frame_rs.read_text(encoding="utf-8")
+            if "prefs_ui::tick(self, ctx, std::time::Instant::now());" in content:
+                content = content.replace(
+                    "prefs_ui::tick(self, ctx, std::time::Instant::now());",
+                    "prefs_ui::tick(self, ctx, web_time::Instant::now());"
+                )
+                frame_rs.write_text(content, encoding="utf-8")
+                print("[photocraft] Patched frame.rs to use web_time::Instant::now() instead of std::time")
+
+        save_rs = repo_path / "crates" / "ui-egui" / "src" / "prefs" / "prefs_ui" / "save.rs"
+        if save_rs.exists():
+            content = save_rs.read_text(encoding="utf-8")
+            if "use std::time::Instant;" in content:
+                content = content.replace("use std::time::Instant;", "use web_time::Instant;")
+                save_rs.write_text(content, encoding="utf-8")
+                print("[photocraft] Patched save.rs to use web_time::Instant")
+
+        gpu_rs = repo_path / "crates" / "ui-egui" / "src" / "app" / "gpu.rs"
+        if gpu_rs.exists():
+            content = gpu_rs.read_text(encoding="utf-8")
+            if "std::time::SystemTime::now()" in content:
+                content = content.replace("std::time::SystemTime::now()", "web_time::SystemTime::now()")
+                gpu_rs.write_text(content, encoding="utf-8")
+                print("[photocraft] Patched gpu.rs to use web_time::SystemTime::now()")
+
 def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=None):
+    # Patch known upstream bugs before compilation
+    patch_upstream_sources(repo_path, app_name)
+
     # Inject commit SHA into Cargo.toml so WebAssembly About dialog renders commit version
     sha, new_ver = inject_commit_version(repo_path, commit_sha, app_name)
 
     env = os.environ.copy()
     env["CI"] = "true"
     # Allow larger WebAssembly binaries for Firebase Hosting (default Cloudflare limit is 24 MiB)
+    app_upper = app_name.upper().replace('-', '_')
+    env[f"{app_upper}_WASM_MAX_BYTES"] = "52428800"
+    env[f"{app_upper}_WEB_MAX_FILE_BYTES"] = "52428800"
+    env[f"{app_upper}_MAX_FILE_BYTES"] = "52428800"
     env["FIGCRAFT_WASM_MAX_BYTES"] = "52428800"
     env["PHOTOCRAFT_WEB_MAX_FILE_BYTES"] = "52428800"
+    env["TEXTURECRAFT_WEB_MAX_FILE_BYTES"] = "52428800"
+    env["MATERIALCRAFT_WEB_MAX_FILE_BYTES"] = "52428800"
+    env["MAX_FILE_BYTES"] = "52428800"
 
     # Bake commit SHA provenance into environment variables
-    app_upper = app_name.upper()
     if sha:
         env[f"{app_upper}_BUILD_SHA"] = sha
         env[f"{app_upper}_BUILD_DATE"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
@@ -230,11 +272,15 @@ def build_app(app_name, repo_path, fonts_dir=None, skip_build=False, commit_sha=
         needs_web_fonts = dyn_web
 
     if fonts_dir and Path(fonts_dir).exists():
-        env["CRAFT_FONTS_DIR"] = str(Path(fonts_dir).resolve())
+        fdir = str(Path(fonts_dir).resolve())
+        env["CRAFT_FONTS_DIR"] = fdir
+        env["PHOTOCRAFT_WEB_FONTS_DIR"] = fdir
         if needs_web_fonts:
             env["CRAFT_FONTS_REQUIRED"] = "1"
     elif "CRAFT_FONTS_DIR" in os.environ:
-        env["CRAFT_FONTS_DIR"] = os.environ["CRAFT_FONTS_DIR"]
+        fdir = os.environ["CRAFT_FONTS_DIR"]
+        env["CRAFT_FONTS_DIR"] = fdir
+        env["PHOTOCRAFT_WEB_FONTS_DIR"] = fdir
         if needs_web_fonts:
             env["CRAFT_FONTS_REQUIRED"] = "1"
 

@@ -74,7 +74,27 @@ export default {
         }
       }
 
-      // Strip SRI integrity hashes from HTML to prevent browser false-positives on cached or proxied assets
+      // Favicon fallback: if /favicon.ico is requested and 404s, serve the app's SVG icon from /icons/${targetApp}.svg
+      if (response.status === 404 && targetPath.endsWith('/favicon.ico')) {
+        const iconResp = await proxyUpstream(request, new URL(`/icons/${targetApp}.svg`, targetOrigin), buildId);
+        if (iconResp.ok) {
+          response = iconResp;
+        }
+      }
+
+      // Font manifest fallback: if /fonts/manifest.txt is requested and 404s, return 200 with comment so browser does not 404
+      if (response.status === 404 && targetPath.endsWith('/fonts/manifest.txt')) {
+        response = new Response('# No served fonts\n', {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=86400',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
+      }
+
+      // Strip SRI integrity hashes and Cloudflare insights scripts from HTML to prevent browser false-positives on cached or proxied assets
       const contentType = response.headers.get("content-type") || "";
       if (contentType.includes("text/html")) {
         const rewriter = new HTMLRewriter()
@@ -86,6 +106,14 @@ export default {
           .on('script[integrity]', {
             element(element) {
               element.removeAttribute('integrity');
+            }
+          })
+          .on('script', {
+            element(element) {
+              const src = element.getAttribute('src') || '';
+              if (src.includes('cloudflareinsights') || src.includes('beacon.min.js')) {
+                element.remove();
+              }
             }
           });
         return rewriter.transform(response);
@@ -130,6 +158,14 @@ export default {
         .on('script[integrity]', {
           element(element) {
             element.removeAttribute('integrity');
+          }
+        })
+        .on('script', {
+          element(element) {
+            const src = element.getAttribute('src') || '';
+            if (src.includes('cloudflareinsights') || src.includes('beacon.min.js')) {
+              element.remove();
+            }
           }
         });
       return rewriter.transform(response);
