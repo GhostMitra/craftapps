@@ -425,6 +425,23 @@ def extract_and_install(app_name, repo_path, output_dir):
 
     # Patch index.html with canonical & domain routing
     patch_index_html(out_path, app_name)
+
+    # 6. Fallback favicon.ico if missing
+    favicon_path = out_path / "favicon.ico"
+    if not favicon_path.exists():
+        icon_svg = ROOT_DIR / "icons" / f"{app_name}.svg"
+        if icon_svg.exists():
+            shutil.copy2(icon_svg, favicon_path)
+            print(f"[{app_name}] Created fallback favicon.ico from {icon_svg.name}")
+
+    # 7. Fallback fonts/manifest.txt if missing
+    fonts_dir = out_path / "fonts"
+    manifest_path = fonts_dir / "manifest.txt"
+    if not manifest_path.exists():
+        fonts_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text("# No served fonts\n", encoding="utf-8")
+        print(f"[{app_name}] Created fallback fonts/manifest.txt")
+
     print(f"[{app_name}] Successfully installed web application to {out_path}")
 
 def main():

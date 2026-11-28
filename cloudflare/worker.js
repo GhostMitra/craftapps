@@ -57,6 +57,19 @@ export default {
     // Silent reverse-proxy to craftapps.web.app/photocraft/ with no redirect
     if (CRAFT_APPS.includes(subdomain)) {
       const targetApp = APP_ALIASES[subdomain] || subdomain;
+
+      // Font manifest: immediately return 200 with comment so browser does not 404 or make redundant upstream request
+      if (url.pathname === '/fonts/manifest.txt' || url.pathname.endsWith('/fonts/manifest.txt')) {
+        return new Response('# No served fonts\n', {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
+      }
+
       let targetPath = url.pathname;
       if (targetPath !== `/${targetApp}` && !targetPath.startsWith(`/${targetApp}/`)) {
         targetPath = `/${targetApp}` + (targetPath.startsWith('/') ? targetPath : `/${targetPath}`);
@@ -82,22 +95,15 @@ export default {
         }
       }
 
-      // Font manifest fallback: if /fonts/manifest.txt is requested and 404s, return 200 with comment so browser does not 404
-      if (response.status === 404 && targetPath.endsWith('/fonts/manifest.txt')) {
-        response = new Response('# No served fonts\n', {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'Cache-Control': 'public, max-age=86400',
-            'Access-Control-Allow-Origin': '*'
-          }
-        });
-      }
-
       // Strip SRI integrity hashes and Cloudflare insights scripts from HTML to prevent browser false-positives on cached or proxied assets
       const contentType = response.headers.get("content-type") || "";
       if (contentType.includes("text/html")) {
         const rewriter = new HTMLRewriter()
+          .on('head', {
+            element(element) {
+              element.append('<script>window.__cfBeacon = false;</script>', { html: true });
+            }
+          })
           .on('link[integrity]', {
             element(element) {
               element.removeAttribute('integrity');
@@ -142,6 +148,11 @@ export default {
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("text/html")) {
       const rewriter = new HTMLRewriter()
+        .on('head', {
+          element(element) {
+            element.append('<script>window.__cfBeacon = false;</script>', { html: true });
+          }
+        })
         .on('a.app-link[data-app]', {
           element(element) {
             const app = element.getAttribute('data-app');
@@ -235,7 +246,8 @@ async function proxyUpstream(request, upstreamUrl, buildId = "main") {
     // Client browsers cache the HTML locally, but send a lightweight 304 revalidation check.
     // When a new build is pushed, the HTML updates and delivers new asset references.
     // Clear-Site-Data is explicitly omitted so client browsers retain cached assets across sessions.
-    responseHeaders.set("Cache-Control", "public, no-cache, must-revalidate");
+    // no-transform strictly prevents Cloudflare Edge from injecting beacon.min.js or altering body.
+    responseHeaders.set("Cache-Control", "public, no-cache, no-transform, must-revalidate");
   } else if (isContentHashed && response.ok) {
     // Content-hashed assets have unique fingerprints in their filenames (e.g. Trunk wasm/js hashes).
     // Safe to cache immutably in the browser for maximum performance until a new build references new hashes.

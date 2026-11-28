@@ -194,6 +194,23 @@ def download_and_extract_app(app_name, download_url, target_dir):
 
         # Patch index.html
         patch_index_html(target_dir, app_name)
+
+        # Ensure fallback favicon.ico exists
+        favicon_path = target_dir / "favicon.ico"
+        if not favicon_path.exists():
+            icon_svg = ROOT_DIR / "icons" / f"{app_name}.svg"
+            if icon_svg.exists():
+                shutil.copy2(icon_svg, favicon_path)
+                print(f"[{app_name}] Created fallback favicon.ico from {icon_svg.name}")
+
+        # Ensure fallback fonts/manifest.txt exists so browser never 404s
+        fonts_dir = target_dir / "fonts"
+        manifest_path = fonts_dir / "manifest.txt"
+        if not manifest_path.exists():
+            fonts_dir.mkdir(parents=True, exist_ok=True)
+            manifest_path.write_text("# No served fonts\n", encoding="utf-8")
+            print(f"[{app_name}] Created fallback fonts/manifest.txt")
+
         print(f"[{app_name}] Extracted and installed into {target_dir.relative_to(ROOT_DIR)}")
 
     finally:
@@ -215,6 +232,18 @@ def prepare_portal():
             shutil.rmtree(icons_dst)
         shutil.copytree(icons_src, icons_dst)
         print("[portal] Installed icons to dist/icons/")
+
+    # Root portal favicon fallback
+    portal_favicon = DIST_DIR / "favicon.ico"
+    if not portal_favicon.exists() and (ROOT_DIR / "icons" / "cadcraft.svg").exists():
+        shutil.copy2(ROOT_DIR / "icons" / "cadcraft.svg", portal_favicon)
+
+    # Root portal fonts fallback
+    portal_fonts_dir = DIST_DIR / "fonts"
+    portal_manifest = portal_fonts_dir / "manifest.txt"
+    if not portal_manifest.exists():
+        portal_fonts_dir.mkdir(parents=True, exist_ok=True)
+        portal_manifest.write_text("# No served fonts\n", encoding="utf-8")
 
 def main():
     force = "--force" in sys.argv
