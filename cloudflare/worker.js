@@ -33,6 +33,7 @@ const CRAFT_APPS = [
   'texturecraft',
   'craft-anything',
   'craftanything',
+  'feildcraft',
   'anicraft',
   'pcbcraft',
   'mailcraft',
@@ -40,6 +41,7 @@ const CRAFT_APPS = [
 
 const APP_ALIASES = {
   'craftanything': 'craft-anything',
+  'feildcraft': 'fieldcraft',
 };
 
 export default {

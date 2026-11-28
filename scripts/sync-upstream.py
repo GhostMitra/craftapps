@@ -13,6 +13,7 @@ import sys
 import json
 import re
 import urllib.request
+from urllib.parse import urlparse
 import zipfile
 import tempfile
 import shutil
@@ -54,8 +55,34 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT_DIR / "dist"
 VERSIONS_FILE = ROOT_DIR / "versions.json"
 
+class GitHubRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Avoid sending GitHub Authorization headers when redirected to Azure/S3 storage."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req:
+            dest_host = urlparse(newurl).netloc.lower()
+            if not dest_host.endswith("github.com"):
+                for k in list(new_req.headers.keys()):
+                    if k.lower() == "authorization":
+                        del new_req.headers[k]
+                for k in list(new_req.unredirected_hdrs.keys()):
+                    if k.lower() == "authorization":
+                        del new_req.unredirected_hdrs[k]
+        return new_req
+
+def get_opener():
+    return urllib.request.build_opener(GitHubRedirectHandler())
+
 def get_headers():
     token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        try:
+            import subprocess
+            res = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, check=False)
+            if res.returncode == 0 and res.stdout.strip():
+                token = res.stdout.strip()
+        except Exception:
+            pass
     headers = {
         "User-Agent": "CraftApps-Upstream-Syncer",
         "Accept": "application/vnd.github.v3+json"
@@ -80,13 +107,30 @@ def fetch_latest_release(app_name):
     url = f"https://api.github.com/repos/{repo}/releases/latest"
     req = urllib.request.Request(url, headers=get_headers())
     try:
-        with urllib.request.urlopen(req) as resp:
+        with get_opener().open(req) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except Exception as e:
         print(f"[{app_name}] Failed to fetch release metadata: {e}")
         return None
 
+def find_repo_artifact(app_name):
+    """Find latest successful workflow build artifact for apps without official release zips."""
+    owner_repo = os.environ.get("GITHUB_REPOSITORY", "GhostMitra/craftapps")
+    url = f"https://api.github.com/repos/{owner_repo}/actions/artifacts?name=app-{app_name}&per_page=5"
+    req = urllib.request.Request(url, headers=get_headers())
+    try:
+        with get_opener().open(req) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            for art in data.get("artifacts", []):
+                if not art.get("expired", False) and art.get("archive_download_url"):
+                    return art
+    except Exception as e:
+        print(f"[{app_name}] Failed to query workflow artifacts: {e}")
+    return None
+
 def find_web_asset(release_data, app_name):
+    if not release_data:
+        return None
     assets = release_data.get("assets", [])
     for asset in assets:
         name = asset.get("name", "")
@@ -173,7 +217,7 @@ def download_and_extract_app(app_name, download_url, target_dir):
 
     try:
         req = urllib.request.Request(download_url, headers=get_headers())
-        with urllib.request.urlopen(req) as response, open(tmp_zip_path, 'wb') as out_file:
+        with get_opener().open(req) as response, open(tmp_zip_path, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
 
         print(f"[{app_name}] Extracting archive to temporary directory...")
@@ -271,29 +315,36 @@ def main():
 
         current_version = versions.get(app, "none")
         release_data = fetch_latest_release(app)
-        if not release_data:
-            continue
-
-        latest_tag = release_data.get("tag_name")
-        if not latest_tag:
-            continue
+        latest_tag = release_data.get("tag_name") if release_data else None
 
         asset = find_web_asset(release_data, app)
-        if not asset:
-            print(f"[{app}] No web release asset found for tag {latest_tag}")
-            continue
+        download_url = None
+        target_version = latest_tag or "latest"
+
+        if asset:
+            download_url = asset["browser_download_url"]
+        else:
+            print(f"[{app}] No web release asset in official release. Checking GitHub Actions build artifacts...")
+            art = find_repo_artifact(app)
+            if art:
+                download_url = art["archive_download_url"]
+                target_version = f"artifact-{art['id']}"
+                print(f"[{app}] Found build artifact #{art['id']}")
+            else:
+                print(f"[{app}] No web release asset or build artifact found")
+                continue
 
         # If dist folder doesn't exist yet, we must download even if version matched
-        needs_download = (not app_has_index) if fill_missing else ((latest_tag != current_version) or force or (not app_has_index))
+        needs_download = (not app_has_index) if fill_missing else ((target_version != current_version) or force or (not app_has_index))
 
         if needs_download:
-            print(f"[{app}] Updating to {latest_tag}...")
+            print(f"[{app}] Updating to {target_version}...")
             if not check_only:
-                download_and_extract_app(app, asset["browser_download_url"], app_dist_dir)
-                versions[app] = latest_tag
-                updated_apps.append(f"{app} ({latest_tag})")
+                download_and_extract_app(app, download_url, app_dist_dir)
+                versions[app] = target_version
+                updated_apps.append(f"{app} ({target_version})")
         else:
-            print(f"[{app}] Up to date: {latest_tag}")
+            print(f"[{app}] Up to date: {target_version}")
 
     if updated_apps and not check_only:
         save_versions(versions)

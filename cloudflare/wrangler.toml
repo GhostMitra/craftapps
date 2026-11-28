@@ -23,6 +23,7 @@ routes = [
   { pattern = "figcraft.debarghaya.in", custom_domain = true },
   { pattern = "solidcraft.debarghaya.in", custom_domain = true },
   { pattern = "fieldcraft.debarghaya.in", custom_domain = true },
+  { pattern = "feildcraft.debarghaya.in", custom_domain = true },
   { pattern = "materialcraft.debarghaya.in", custom_domain = true },
   { pattern = "texturecraft.debarghaya.in", custom_domain = true },
   { pattern = "craft-anything.debarghaya.in", custom_domain = true },

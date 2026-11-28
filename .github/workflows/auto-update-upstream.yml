@@ -36,12 +36,21 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Restore Previous Successful Web Builds
+        uses: actions/cache/restore@v4
+        id: dist-cache
+        with:
+          path: dist
+          key: craftapps-dist-${{ github.run_id }}
+          restore-keys: |
+            craftapps-dist-
+
       - name: Sync from Upstream Repositories
         id: sync
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ARGS=""
+          ARGS="--fill-missing"
           if [ "${{ inputs.force }}" = "true" ]; then
             ARGS="--force"
           fi
@@ -68,6 +77,13 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAFTAPPS }}
           projectId: craftapps
           channelId: live
+
+      - name: Save Persistent Distribution Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: dist
+          key: craftapps-dist-${{ github.run_id }}
 
       - name: Report Sync Status
         run: |
